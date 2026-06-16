@@ -8,7 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     /* ============================================================
-       ALL CSS – NO EXTERNAL FILE NEEDED
+       RESET & BASE
        ============================================================ */
     * {
       margin: 0;
@@ -42,7 +42,9 @@
       min-height: 100vh;
     }
 
-    /* ===== SIDEBAR ===== */
+    /* ============================================================
+       SIDEBAR
+       ============================================================ */
     .sidebar {
       width: 260px;
       background: white;
@@ -56,40 +58,54 @@
       transition: transform var(--transition);
       z-index: 1000;
     }
+
     .sidebar-header {
-      padding: 24px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px 16px;
       border-bottom: 1px solid #eee;
     }
-    .logo {
+
+    .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--deep-indigo);
+      justify-content: center;
+      text-decoration: none;
+      width: 100%;
     }
-    .logo i {
-      font-size: 1.8rem;
-      color: var(--muted-eucalyptus);
+
+    .logo-img {
+      height: 50px;
+      width: auto;
+      display: block;
+      max-width: 100%;
+      object-fit: contain;
     }
+
     .nav {
       flex: 1;
       padding: 20px 0;
     }
+
     .nav ul {
       list-style: none;
     }
+
     .nav li {
       margin: 4px 12px;
       border-radius: 8px;
       transition: background var(--transition);
     }
+
     .nav li.active {
       background: var(--deep-indigo);
     }
+
     .nav li.active a {
       color: white;
     }
+
     .nav li a {
       display: flex;
       align-items: center;
@@ -101,9 +117,11 @@
       border-radius: 8px;
       transition: background var(--transition);
     }
+
     .nav li a:hover:not(.active a) {
       background: var(--dusty-rose);
     }
+
     .nav li a .badge {
       margin-left: auto;
       background: var(--brick-dust);
@@ -112,10 +130,12 @@
       padding: 2px 8px;
       border-radius: 20px;
     }
+
     .sidebar-footer {
       padding: 20px;
       border-top: 1px solid #eee;
     }
+
     .sidebar-footer a {
       display: flex;
       align-items: center;
@@ -125,14 +145,18 @@
       font-weight: 500;
     }
 
-    /* ===== MAIN CONTENT ===== */
+    /* ============================================================
+       MAIN CONTENT
+       ============================================================ */
     .main-content {
       margin-left: 260px;
       flex: 1;
       padding: 24px 32px 32px;
     }
 
-    /* ===== TOP HEADER ===== */
+    /* ============================================================
+       TOP HEADER
+       ============================================================ */
     .top-header {
       display: flex;
       align-items: center;
@@ -143,16 +167,19 @@
       flex-wrap: wrap;
       gap: 12px;
     }
+
     .hamburger {
       display: none;
       font-size: 1.5rem;
       cursor: pointer;
       color: var(--deep-indigo);
     }
+
     .page-title h1 {
       font-size: 1.8rem;
       font-weight: 600;
     }
+
     .user-profile {
       display: flex;
       align-items: center;
@@ -160,7 +187,7 @@
       flex-wrap: wrap;
     }
 
-    /* Role toggle - now 3 buttons */
+    /* Role toggle - only SUMC and Peer */
     .role-toggle {
       display: flex;
       background: var(--soft-porcelain);
@@ -168,26 +195,30 @@
       padding: 3px;
       border: 1px solid #ddd8d0;
     }
+
     .role-btn {
       background: transparent;
       border: none;
-      padding: 6px 14px;
+      padding: 6px 16px;
       border-radius: 30px;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
       color: var(--text-light);
       transition: all 0.2s ease;
       white-space: nowrap;
     }
+
     .role-btn.active {
       background: var(--deep-indigo);
       color: white;
       box-shadow: 0 2px 8px rgba(42,42,114,0.2);
     }
+
     .role-btn:hover:not(.active) {
       background: var(--dusty-rose);
     }
+
     .role-label {
       font-size: 0.85rem;
       font-weight: 600;
@@ -197,18 +228,22 @@
       border-radius: 30px;
       border: 1px solid #ddd8d0;
     }
+
     .user-profile img {
       border-radius: 50%;
       border: 2px solid var(--deep-indigo);
     }
 
-    /* ===== STATS CARDS ===== */
+    /* ============================================================
+       STATS CARDS
+       ============================================================ */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 20px;
       margin-bottom: 30px;
     }
+
     .stat-card {
       background: white;
       padding: 20px;
@@ -219,9 +254,11 @@
       gap: 16px;
       transition: transform 0.2s;
     }
+
     .stat-card:hover {
       transform: translateY(-4px);
     }
+
     .stat-icon {
       width: 50px;
       height: 50px;
@@ -234,70 +271,84 @@
       font-size: 1.4rem;
       flex-shrink: 0;
     }
+
     .stat-card.high-risk .stat-icon {
       background: var(--brick-dust);
     }
-    .stat-card.dean .stat-icon {
-      background: var(--wisteria);
-    }
+
     .stat-info h3 {
       font-size: 0.9rem;
       font-weight: 400;
       color: var(--text-light);
       margin-bottom: 4px;
     }
+
     .stat-number {
       font-size: 1.8rem;
       font-weight: 700;
       color: var(--deep-indigo);
     }
+
     .stat-card.high-risk .stat-number {
       color: var(--brick-dust);
     }
-    .stat-card.dean .stat-number {
-      color: var(--deep-indigo);
-    }
 
-    /* ===== CHART + QUICK ACTIONS ===== */
+    /* ============================================================
+       CHART + QUICK ACTIONS
+       ============================================================ */
     .chart-section {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 24px;
       margin-bottom: 30px;
     }
+
     .chart-container {
       background: white;
       padding: 20px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
+
     .chart-container h2 {
       font-size: 1.1rem;
       margin-bottom: 12px;
     }
+
     .chart-container canvas {
       width: 100% !important;
       height: auto !important;
       max-height: 220px;
     }
+
+    /* ===== QUICK ACTIONS - SPACED OUT ===== */
     .quick-actions {
       background: white;
-      padding: 20px;
+      padding: 24px 20px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
+
     .quick-actions h2 {
       font-size: 1.1rem;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+      color: var(--dark-charcoal);
     }
+
+    .quick-actions .sumc-only,
+    .quick-actions .peer-only {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
     .btn-primary,
-    .btn-secondary,
-    .btn-dean {
+    .btn-secondary {
       border: none;
-      padding: 12px 16px;
+      padding: 14px 18px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
@@ -305,49 +356,61 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
-      transition: background var(--transition);
+      transition: all 0.2s ease;
+      width: 100%;
+      font-size: 0.95rem;
     }
+
     .btn-primary {
       background: var(--deep-indigo);
       color: white;
     }
     .btn-primary:hover {
       background: #1f1f5a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(42, 42, 114, 0.3);
     }
+
     .btn-secondary {
       background: var(--muted-eucalyptus);
       color: white;
     }
     .btn-secondary:hover {
       background: #3a7a5a;
-    }
-    .btn-dean {
-      background: var(--wisteria);
-      color: white;
-    }
-    .btn-dean:hover {
-      background: #a08bb5;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74, 139, 107, 0.3);
     }
 
-    /* ===== ALERTS TABLE ===== */
+    .btn-primary i,
+    .btn-secondary i {
+      font-size: 1rem;
+    }
+
+    /* ============================================================
+       ALERTS TABLE
+       ============================================================ */
     .alerts-table-section {
       background: white;
       padding: 20px;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
     }
+
     .alerts-table-section h2 {
       font-size: 1.1rem;
       margin-bottom: 16px;
     }
+
     .table-responsive {
       overflow-x: auto;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: 0.95rem;
     }
+
     th {
       text-align: left;
       padding: 12px 8px;
@@ -355,10 +418,12 @@
       color: var(--text-light);
       font-weight: 600;
     }
+
     td {
       padding: 12px 8px;
       border-bottom: 1px solid #eee;
     }
+
     .risk-high {
       background: var(--brick-dust);
       color: white;
@@ -367,6 +432,7 @@
       font-size: 0.8rem;
       font-weight: 600;
     }
+
     .risk-medium {
       background: var(--burnt-ochre);
       color: white;
@@ -375,6 +441,7 @@
       font-size: 0.8rem;
       font-weight: 600;
     }
+
     .risk-low {
       background: var(--faded-sage);
       color: var(--dark-charcoal);
@@ -383,6 +450,7 @@
       font-size: 0.8rem;
       font-weight: 600;
     }
+
     .status-pending {
       background: var(--burnt-ochre);
       color: white;
@@ -390,6 +458,7 @@
       border-radius: 30px;
       font-size: 0.8rem;
     }
+
     .status-review {
       background: var(--wisteria);
       color: white;
@@ -397,6 +466,7 @@
       border-radius: 30px;
       font-size: 0.8rem;
     }
+
     .status-resolved {
       background: var(--faded-sage);
       color: var(--dark-charcoal);
@@ -404,6 +474,7 @@
       border-radius: 30px;
       font-size: 0.8rem;
     }
+
     .btn-sm {
       background: var(--deep-indigo);
       color: white;
@@ -413,36 +484,35 @@
       cursor: pointer;
     }
 
-    /* ===== DEAN-ONLY DEPARTMENT STATS ===== */
-    .dean-stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-      margin-bottom: 30px;
+    /* ============================================================
+       RECENT ACTIVITY (for SUMC/Peer)
+       ============================================================ */
+    .activity-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #eee;
+      padding: 8px 0;
     }
-    .dean-stat-card {
-      background: white;
-      padding: 16px 20px;
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      border-left: 4px solid var(--wisteria);
+
+    .activity-item:last-child {
+      border-bottom: none;
     }
-    .dean-stat-card h4 {
-      font-size: 0.8rem;
-      color: var(--text-light);
-      margin-bottom: 4px;
+
+    .activity-item .time {
+      font-weight: 600;
     }
-    .dean-stat-card .value {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--deep-indigo);
+
+    .activity-item .time.high-risk {
+      color: var(--brick-dust);
     }
-    .dean-stat-card .trend {
-      font-size: 0.8rem;
+
+    .activity-item .time.success {
       color: var(--muted-eucalyptus);
     }
 
-    /* ===== FOOTER ===== */
+    /* ============================================================
+       FOOTER
+       ============================================================ */
     footer {
       margin-top: 30px;
       text-align: center;
@@ -452,15 +522,15 @@
       padding-top: 20px;
     }
 
-    /* ===== RESPONSIVE ===== */
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
     @media (max-width: 992px) {
       .chart-section {
         grid-template-columns: 1fr;
       }
-      .dean-stats {
-        grid-template-columns: 1fr 1fr;
-      }
     }
+
     @media (max-width: 768px) {
       .sidebar {
         transform: translateX(-100%);
@@ -494,59 +564,40 @@
         order: 1;
       }
       .role-btn {
-        font-size: 0.65rem;
-        padding: 4px 10px;
+        font-size: 0.7rem;
+        padding: 4px 12px;
       }
-      .dean-stats {
-        grid-template-columns: 1fr;
+      .quick-actions {
+        padding: 16px;
+      }
+      .btn-primary,
+      .btn-secondary {
+        padding: 12px 14px;
+        font-size: 0.9rem;
       }
     }
+
     @media (max-width: 480px) {
       .stats-grid {
         grid-template-columns: 1fr;
       }
     }
-    /* ===== LOGO STYLES ===== */
-.brand {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  width: 100%;
-}
-
-.logo-img {
-  height: 50px;
-  width: auto;
-  display: block;
-  max-width: 100%;
-  object-fit: contain;
-}
-
-.sidebar-header {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px 16px;
-  border-bottom: 1px solid #eee;
-}
   </style>
 </head>
 <body>
 
-  <!-- ===== SIDEBAR ===== -->
+  <!-- ============================================================
+       SIDEBAR
+       ============================================================ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <a href="../../user/landing page.html#home" class="brand">
-      <img src="../../Logo.png" alt="MindTrackSU Logo" class="logo-img" />
+        <img src="../../Logo.png" alt="MindTrackSU Logo" class="logo-img" />
       </a>
     </div>
     <nav class="nav">
       <ul>
         <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <!-- Dean-only -->
-        <li class="dean-only" style="display:none;"><a href="#"><i class="fas fa-chart-pie"></i> Wellness Trends</a></li>
-        <li class="dean-only" style="display:none;"><a href="#"><i class="fas fa-file-alt"></i> Generate Reports</a></li>
         <!-- SUMC-only -->
         <li class="sumc-only"><a href="#"><i class="fas fa-exclamation-triangle"></i> High-Risk Alerts <span class="badge">12</span></a></li>
         <li class="sumc-only"><a href="#"><i class="fas fa-calendar-check"></i> Schedule Sessions</a></li>
@@ -560,14 +611,16 @@
       </ul>
     </nav>
     <div class="sidebar-footer">
-      <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      <a href="../../user/login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </aside>
 
-  <!-- ===== MAIN CONTENT ===== -->
+  <!-- ============================================================
+       MAIN CONTENT
+       ============================================================ -->
   <main class="main-content">
 
-    <!-- TOP HEADER -->
+    <!-- ===== TOP HEADER ===== -->
     <header class="top-header">
       <div class="hamburger" id="hamburger">
         <i class="fas fa-bars"></i>
@@ -577,48 +630,13 @@
       </div>
       <div class="user-profile">
         <div class="role-toggle">
-          <button class="role-btn active" data-role="dean">Dean of Students</button>
-          <button class="role-btn" data-role="sumc">SUMC Counsellor</button>
+          <button class="role-btn active" data-role="sumc">SUMC Counsellor</button>
           <button class="role-btn" data-role="peer">Peer Counsellor</button>
         </div>
-        <span class="role-label" id="roleLabel">Dean of Students</span>
+        <span class="role-label" id="roleLabel">SUMC Counsellor</span>
         <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=2A2A72&color=fff&size=40" alt="Avatar" />
       </div>
     </header>
-
-    <!-- ===== DEAN-ONLY DEPARTMENT STATS ===== -->
-    <div class="dean-stats dean-only" id="deanStats">
-      <div class="dean-stat-card">
-        <h4>School of Business</h4>
-        <div class="value">4.8 <span class="trend">↑ 0.3</span></div>
-        <small>Avg Stress Level</small>
-      </div>
-      <div class="dean-stat-card">
-        <h4>School of Computing</h4>
-        <div class="value">5.2 <span class="trend">↑ 0.7</span></div>
-        <small>Avg Stress Level</small>
-      </div>
-      <div class="dean-stat-card">
-        <h4>School of Law</h4>
-        <div class="value">3.9 <span class="trend">↓ 0.2</span></div>
-        <small>Avg Stress Level</small>
-      </div>
-      <div class="dean-stat-card">
-        <h4>School of Humanities</h4>
-        <div class="value">4.1 <span class="trend">↑ 0.1</span></div>
-        <small>Avg Stress Level</small>
-      </div>
-      <div class="dean-stat-card">
-        <h4>School of Health Sciences</h4>
-        <div class="value">4.5 <span class="trend">↑ 0.4</span></div>
-        <small>Avg Stress Level</small>
-      </div>
-      <div class="dean-stat-card" style="border-left-color: var(--brick-dust);">
-        <h4>High-Risk Assessments (This Week)</h4>
-        <div class="value">47</div>
-        <small>↑ 12 from last week</small>
-      </div>
-    </div>
 
     <!-- ===== STATS CARDS ===== -->
     <section class="stats-grid">
@@ -628,22 +646,6 @@
         <div class="stat-info">
           <h3>Total Assessments</h3>
           <p class="stat-number">1,284</p>
-        </div>
-      </div>
-
-      <!-- Dean stats -->
-      <div class="stat-card dean dean-only" style="display:none;">
-        <div class="stat-icon"><i class="fas fa-university"></i></div>
-        <div class="stat-info">
-          <h3>Departments</h3>
-          <p class="stat-number">6</p>
-        </div>
-      </div>
-      <div class="stat-card dean dean-only" style="display:none;">
-        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
-        <div class="stat-info">
-          <h3>Overall Wellness</h3>
-          <p class="stat-number">78%</p>
         </div>
       </div>
 
@@ -696,42 +698,32 @@
 
     <!-- ===== CHART + QUICK ACTIONS ===== -->
     <section class="chart-section">
-      <!-- Chart - DEAN ONLY -->
-      <div class="chart-container dean-only" id="chartContainer">
-        <h2><i class="fas fa-chart-line" style="color:var(--wisteria);"></i> Wellness Trends by Department</h2>
-        <canvas id="trendChart"></canvas>
-      </div>
-      <!-- For SUMC/Peer - show a different card -->
-      <div class="chart-container sumc-only peer-only" style="display:none;">
+      <!-- Recent Activity (same for both roles) -->
+      <div class="chart-container">
         <h2><i class="fas fa-bell" style="color:var(--deep-indigo);"></i> Recent Activity</h2>
         <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0;">
-          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+          <div class="activity-item">
             <span>New high-risk alert</span>
-            <span style="color:var(--brick-dust);font-weight:600;">Just now</span>
+            <span class="time high-risk">Just now</span>
           </div>
-          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+          <div class="activity-item">
             <span>Referral accepted</span>
-            <span style="color:var(--muted-eucalyptus);font-weight:600;">15 min ago</span>
+            <span class="time success">15 min ago</span>
           </div>
-          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+          <div class="activity-item">
             <span>Follow-up recorded</span>
-            <span style="color:var(--muted-eucalyptus);font-weight:600;">1 hour ago</span>
+            <span class="time success">1 hour ago</span>
           </div>
-          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+          <div class="activity-item">
             <span>Assessment completed</span>
-            <span style="color:var(--text-light);font-weight:600;">2 hours ago</span>
+            <span class="time" style="color:var(--text-light);">2 hours ago</span>
           </div>
         </div>
       </div>
 
+      <!-- ===== QUICK ACTIONS - SPACED OUT ===== -->
       <div class="quick-actions">
         <h2>Quick Actions</h2>
-        <!-- Dean actions -->
-        <div class="dean-only" style="display:none;">
-          <button class="btn-dean"><i class="fas fa-chart-pie"></i> View Full Trends</button>
-          <button class="btn-dean"><i class="fas fa-file-alt"></i> Generate Report</button>
-          <button class="btn-secondary"><i class="fas fa-download"></i> Export Data</button>
-        </div>
         <!-- SUMC actions -->
         <div class="sumc-only">
           <button class="btn-primary"><i class="fas fa-eye"></i> View All High-Risk Alerts</button>
@@ -749,32 +741,6 @@
 
     <!-- ===== ALERTS TABLE ===== -->
     <section class="alerts-table-section">
-      <!-- Dean: Shows aggregate summary, not individual alerts -->
-      <div class="dean-only" style="display:none;">
-        <h2><i class="fas fa-chart-simple" style="color:var(--wisteria);"></i> Wellness Summary</h2>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:12px 0;">
-          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
-            <div style="font-size:0.8rem;color:var(--text-light);">Average Stress</div>
-            <div style="font-size:2rem;font-weight:700;color:var(--deep-indigo);">4.7</div>
-            <div style="font-size:0.8rem;color:var(--muted-eucalyptus);">↑ 0.4 from last month</div>
-          </div>
-          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
-            <div style="font-size:0.8rem;color:var(--text-light);">Students Assessed</div>
-            <div style="font-size:2rem;font-weight:700;color:var(--deep-indigo);">1,284</div>
-            <div style="font-size:0.8rem;color:var(--muted-eucalyptus);">↑ 23% from last month</div>
-          </div>
-          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
-            <div style="font-size:0.8rem;color:var(--text-light);">High-Risk %</div>
-            <div style="font-size:2rem;font-weight:700;color:var(--brick-dust);">8.2%</div>
-            <div style="font-size:0.8rem;color:var(--burnt-ochre);">↑ 1.2% from last month</div>
-          </div>
-        </div>
-        <p style="color:var(--text-light);font-size:0.9rem;padding:8px 0;border-top:1px solid #eee;">
-          <i class="fas fa-info-circle" style="color:var(--deep-indigo);"></i> 
-          All data is de-identified and aggregated. No individual student data is displayed.
-        </p>
-      </div>
-
       <!-- SUMC: High-Risk Alerts Table -->
       <div class="sumc-only">
         <h2><i class="fas fa-exclamation-triangle" style="color:var(--brick-dust);"></i> Recent High-Risk Alerts</h2>
@@ -815,10 +781,13 @@
     </footer>
   </main>
 
+  <!-- ============================================================
+       JAVASCRIPT
+       ============================================================ -->
   <script>
-    // =====================================================
-    // 1. ROLE TOGGLE (Dean / SUMC / Peer)
-    // =====================================================
+    // ============================================================
+    // 1. ROLE TOGGLE (SUMC / Peer)
+    // ============================================================
     const roleBtns = document.querySelectorAll('.role-btn');
     const roleLabel = document.getElementById('roleLabel');
 
@@ -829,14 +798,12 @@
 
       // Update label
       const labels = {
-        dean: 'Dean of Students',
         sumc: 'SUMC Counsellor',
         peer: 'Peer Counsellor'
       };
       roleLabel.textContent = labels[role];
 
-      // Show/hide all role-specific blocks
-      document.querySelectorAll('.dean-only').forEach(el => el.style.display = role === 'dean' ? '' : 'none');
+      // Show/hide role-specific content
       document.querySelectorAll('.sumc-only').forEach(el => el.style.display = role === 'sumc' ? '' : 'none');
       document.querySelectorAll('.peer-only').forEach(el => el.style.display = role === 'peer' ? '' : 'none');
     }
@@ -847,12 +814,12 @@
       });
     });
 
-    // Default to Dean
-    setRole('dean');
+    // Default to SUMC
+    setRole('sumc');
 
-    // =====================================================
+    // ============================================================
     // 2. SIDEBAR TOGGLE (mobile)
-    // =====================================================
+    // ============================================================
     const hamburger = document.getElementById('hamburger');
     const sidebar = document.getElementById('sidebar');
 
@@ -864,60 +831,6 @@
       const isClickInside = sidebar.contains(event.target) || hamburger.contains(event.target);
       if (!isClickInside && window.innerWidth <= 768) {
         sidebar.classList.remove('open');
-      }
-    });
-
-    // =====================================================
-    // 3. CHART.JS (Dean-only trend chart)
-    // =====================================================
-    const ctx = document.getElementById('trendChart').getContext('2d');
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-        datasets: [
-          {
-            label: 'Business School',
-            data: [4.2, 4.5, 4.8, 4.3, 5.0, 4.6, 4.8],
-            borderColor: '#2A2A72',
-            backgroundColor: 'rgba(42,42,114,0.05)',
-            tension: 0.3,
-            fill: false,
-          },
-          {
-            label: 'Computing',
-            data: [4.8, 5.0, 5.3, 5.1, 5.6, 4.9, 5.2],
-            borderColor: '#4A8B6B',
-            backgroundColor: 'rgba(74,139,107,0.05)',
-            tension: 0.3,
-            fill: false,
-          },
-          {
-            label: 'Law',
-            data: [3.8, 3.9, 4.0, 3.7, 4.2, 3.6, 3.9],
-            borderColor: '#B8A9C9',
-            backgroundColor: 'rgba(184,169,201,0.05)',
-            tension: 0.3,
-            fill: false,
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { usePointStyle: true, boxWidth: 10 }
-          }
-        },
-        scales: {
-          y: { 
-            beginAtZero: true, 
-            max: 7,
-            grid: { color: '#e0ddd8' } 
-          }
-        }
       }
     });
   </script>
