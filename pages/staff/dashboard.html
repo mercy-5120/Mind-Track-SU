@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MindTrackSU – Staff Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ============================================================
+       ALL CSS – NO EXTERNAL FILE NEEDED
+       ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --deep-indigo: #2A2A72;
+      --muted-eucalyptus: #4A8B6B;
+      --soft-porcelain: #F9F6F0;
+      --dark-charcoal: #2D2D34;
+      --dusty-rose: #D4B8B4;
+      --faded-sage: #B5C9B7;
+      --burnt-ochre: #C87A3E;
+      --brick-dust: #B34B4B;
+      --wisteria: #B8A9C9;
+      --bg-body: var(--soft-porcelain);
+      --text-primary: var(--dark-charcoal);
+      --text-light: #555;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 12px;
+      --transition: 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      transition: transform var(--transition);
+      z-index: 1000;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .logo i {
+      font-size: 1.8rem;
+      color: var(--muted-eucalyptus);
+    }
+    .nav {
+      flex: 1;
+      padding: 20px 0;
+    }
+    .nav ul {
+      list-style: none;
+    }
+    .nav li {
+      margin: 4px 12px;
+      border-radius: 8px;
+      transition: background var(--transition);
+    }
+    .nav li.active {
+      background: var(--deep-indigo);
+    }
+    .nav li.active a {
+      color: white;
+    }
+    .nav li a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: background var(--transition);
+    }
+    .nav li a:hover:not(.active a) {
+      background: var(--dusty-rose);
+    }
+    .nav li a .badge {
+      margin-left: auto;
+      background: var(--brick-dust);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 24px 32px 32px;
+    }
+
+    /* ===== TOP HEADER ===== */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0ddd8;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .hamburger {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--deep-indigo);
+    }
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Role toggle - now 3 buttons */
+    .role-toggle {
+      display: flex;
+      background: var(--soft-porcelain);
+      border-radius: 30px;
+      padding: 3px;
+      border: 1px solid #ddd8d0;
+    }
+    .role-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .role-btn.active {
+      background: var(--deep-indigo);
+      color: white;
+      box-shadow: 0 2px 8px rgba(42,42,114,0.2);
+    }
+    .role-btn:hover:not(.active) {
+      background: var(--dusty-rose);
+    }
+    .role-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--deep-indigo);
+      background: var(--soft-porcelain);
+      padding: 4px 14px;
+      border-radius: 30px;
+      border: 1px solid #ddd8d0;
+    }
+    .user-profile img {
+      border-radius: 50%;
+      border: 2px solid var(--deep-indigo);
+    }
+
+    /* ===== STATS CARDS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--deep-indigo);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .stat-card.high-risk .stat-icon {
+      background: var(--brick-dust);
+    }
+    .stat-card.dean .stat-icon {
+      background: var(--wisteria);
+    }
+    .stat-info h3 {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .stat-card.high-risk .stat-number {
+      color: var(--brick-dust);
+    }
+    .stat-card.dean .stat-number {
+      color: var(--deep-indigo);
+    }
+
+    /* ===== CHART + QUICK ACTIONS ===== */
+    .chart-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .chart-container h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+    .chart-container canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 220px;
+    }
+    .quick-actions {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .quick-actions h2 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+    .btn-primary,
+    .btn-secondary,
+    .btn-dean {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background var(--transition);
+    }
+    .btn-primary {
+      background: var(--deep-indigo);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1f1f5a;
+    }
+    .btn-secondary {
+      background: var(--muted-eucalyptus);
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #3a7a5a;
+    }
+    .btn-dean {
+      background: var(--wisteria);
+      color: white;
+    }
+    .btn-dean:hover {
+      background: #a08bb5;
+    }
+
+    /* ===== ALERTS TABLE ===== */
+    .alerts-table-section {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .alerts-table-section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+    }
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th {
+      text-align: left;
+      padding: 12px 8px;
+      background: var(--soft-porcelain);
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .risk-high {
+      background: var(--brick-dust);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .risk-medium {
+      background: var(--burnt-ochre);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .risk-low {
+      background: var(--faded-sage);
+      color: var(--dark-charcoal);
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: var(--burnt-ochre);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .status-review {
+      background: var(--wisteria);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .status-resolved {
+      background: var(--faded-sage);
+      color: var(--dark-charcoal);
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .btn-sm {
+      background: var(--deep-indigo);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ===== DEAN-ONLY DEPARTMENT STATS ===== */
+    .dean-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .dean-stat-card {
+      background: white;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--wisteria);
+    }
+    .dean-stat-card h4 {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .dean-stat-card .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .dean-stat-card .trend {
+      font-size: 0.8rem;
+      color: var(--muted-eucalyptus);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.85rem;
+      border-top: 1px solid #e0ddd8;
+      padding-top: 20px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+      .chart-section {
+        grid-template-columns: 1fr;
+      }
+      .dean-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+      .hamburger {
+        display: block;
+      }
+      .top-header {
+        flex-direction: row;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .user-profile {
+        gap: 8px;
+      }
+      .role-toggle {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+      }
+      .role-label {
+        order: 1;
+      }
+      .role-btn {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+      }
+      .dean-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    /* ===== LOGO STYLES ===== */
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  width: 100%;
+}
+
+.logo-img {
+  height: 50px;
+  width: auto;
+  display: block;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 16px;
+  border-bottom: 1px solid #eee;
+}
+  </style>
+</head>
+<body>
+
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="../../user/landing page.html#home" class="brand">
+      <img src="../../Logo.png" alt="MindTrackSU Logo" class="logo-img" />
+      </a>
+    </div>
+    <nav class="nav">
+      <ul>
+        <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <!-- Dean-only -->
+        <li class="dean-only" style="display:none;"><a href="#"><i class="fas fa-chart-pie"></i> Wellness Trends</a></li>
+        <li class="dean-only" style="display:none;"><a href="#"><i class="fas fa-file-alt"></i> Generate Reports</a></li>
+        <!-- SUMC-only -->
+        <li class="sumc-only"><a href="#"><i class="fas fa-exclamation-triangle"></i> High-Risk Alerts <span class="badge">12</span></a></li>
+        <li class="sumc-only"><a href="#"><i class="fas fa-calendar-check"></i> Schedule Sessions</a></li>
+        <!-- Peer-only -->
+        <li class="peer-only" style="display:none;"><a href="#"><i class="fas fa-bell"></i> My Assigned Alerts <span class="badge">5</span></a></li>
+        <li class="peer-only" style="display:none;"><a href="#"><i class="fas fa-pen"></i> Follow-up Notes</a></li>
+        <!-- Common -->
+        <li><a href="#"><i class="fas fa-user-md"></i> Referrals</a></li>
+        <li><a href="#"><i class="fas fa-book"></i> Resources</a></li>
+        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="#"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    </div>
+  </aside>
+
+  <!-- ===== MAIN CONTENT ===== -->
+  <main class="main-content">
+
+    <!-- TOP HEADER -->
+    <header class="top-header">
+      <div class="hamburger" id="hamburger">
+        <i class="fas fa-bars"></i>
+      </div>
+      <div class="page-title">
+        <h1>Dashboard</h1>
+      </div>
+      <div class="user-profile">
+        <div class="role-toggle">
+          <button class="role-btn active" data-role="dean">Dean of Students</button>
+          <button class="role-btn" data-role="sumc">SUMC Counsellor</button>
+          <button class="role-btn" data-role="peer">Peer Counsellor</button>
+        </div>
+        <span class="role-label" id="roleLabel">Dean of Students</span>
+        <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=2A2A72&color=fff&size=40" alt="Avatar" />
+      </div>
+    </header>
+
+    <!-- ===== DEAN-ONLY DEPARTMENT STATS ===== -->
+    <div class="dean-stats dean-only" id="deanStats">
+      <div class="dean-stat-card">
+        <h4>School of Business</h4>
+        <div class="value">4.8 <span class="trend">↑ 0.3</span></div>
+        <small>Avg Stress Level</small>
+      </div>
+      <div class="dean-stat-card">
+        <h4>School of Computing</h4>
+        <div class="value">5.2 <span class="trend">↑ 0.7</span></div>
+        <small>Avg Stress Level</small>
+      </div>
+      <div class="dean-stat-card">
+        <h4>School of Law</h4>
+        <div class="value">3.9 <span class="trend">↓ 0.2</span></div>
+        <small>Avg Stress Level</small>
+      </div>
+      <div class="dean-stat-card">
+        <h4>School of Humanities</h4>
+        <div class="value">4.1 <span class="trend">↑ 0.1</span></div>
+        <small>Avg Stress Level</small>
+      </div>
+      <div class="dean-stat-card">
+        <h4>School of Health Sciences</h4>
+        <div class="value">4.5 <span class="trend">↑ 0.4</span></div>
+        <small>Avg Stress Level</small>
+      </div>
+      <div class="dean-stat-card" style="border-left-color: var(--brick-dust);">
+        <h4>High-Risk Assessments (This Week)</h4>
+        <div class="value">47</div>
+        <small>↑ 12 from last week</small>
+      </div>
+    </div>
+
+    <!-- ===== STATS CARDS ===== -->
+    <section class="stats-grid">
+      <!-- Total Assessments - visible to all -->
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+        <div class="stat-info">
+          <h3>Total Assessments</h3>
+          <p class="stat-number">1,284</p>
+        </div>
+      </div>
+
+      <!-- Dean stats -->
+      <div class="stat-card dean dean-only" style="display:none;">
+        <div class="stat-icon"><i class="fas fa-university"></i></div>
+        <div class="stat-info">
+          <h3>Departments</h3>
+          <p class="stat-number">6</p>
+        </div>
+      </div>
+      <div class="stat-card dean dean-only" style="display:none;">
+        <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+        <div class="stat-info">
+          <h3>Overall Wellness</h3>
+          <p class="stat-number">78%</p>
+        </div>
+      </div>
+
+      <!-- SUMC stats -->
+      <div class="stat-card high-risk sumc-only">
+        <div class="stat-icon"><i class="fas fa-heartbeat"></i></div>
+        <div class="stat-info">
+          <h3>High-Risk Alerts</h3>
+          <p class="stat-number">23</p>
+        </div>
+      </div>
+      <div class="stat-card sumc-only">
+        <div class="stat-icon"><i class="fas fa-phone-alt"></i></div>
+        <div class="stat-info">
+          <h3>Active Referrals</h3>
+          <p class="stat-number">14</p>
+        </div>
+      </div>
+      <div class="stat-card sumc-only">
+        <div class="stat-icon"><i class="fas fa-calendar-plus"></i></div>
+        <div class="stat-info">
+          <h3>Sessions to Schedule</h3>
+          <p class="stat-number">8</p>
+        </div>
+      </div>
+
+      <!-- Peer stats -->
+      <div class="stat-card peer-only" style="display:none;">
+        <div class="stat-icon"><i class="fas fa-bell"></i></div>
+        <div class="stat-info">
+          <h3>My Pending Alerts</h3>
+          <p class="stat-number">5</p>
+        </div>
+      </div>
+      <div class="stat-card peer-only" style="display:none;">
+        <div class="stat-icon"><i class="fas fa-phone-alt"></i></div>
+        <div class="stat-info">
+          <h3>My Active Referrals</h3>
+          <p class="stat-number">3</p>
+        </div>
+      </div>
+      <div class="stat-card peer-only" style="display:none;">
+        <div class="stat-icon"><i class="fas fa-pen"></i></div>
+        <div class="stat-info">
+          <h3>Follow-ups Due</h3>
+          <p class="stat-number">2</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CHART + QUICK ACTIONS ===== -->
+    <section class="chart-section">
+      <!-- Chart - DEAN ONLY -->
+      <div class="chart-container dean-only" id="chartContainer">
+        <h2><i class="fas fa-chart-line" style="color:var(--wisteria);"></i> Wellness Trends by Department</h2>
+        <canvas id="trendChart"></canvas>
+      </div>
+      <!-- For SUMC/Peer - show a different card -->
+      <div class="chart-container sumc-only peer-only" style="display:none;">
+        <h2><i class="fas fa-bell" style="color:var(--deep-indigo);"></i> Recent Activity</h2>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0;">
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+            <span>New high-risk alert</span>
+            <span style="color:var(--brick-dust);font-weight:600;">Just now</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+            <span>Referral accepted</span>
+            <span style="color:var(--muted-eucalyptus);font-weight:600;">15 min ago</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #eee;padding:8px 0;">
+            <span>Follow-up recorded</span>
+            <span style="color:var(--muted-eucalyptus);font-weight:600;">1 hour ago</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:8px 0;">
+            <span>Assessment completed</span>
+            <span style="color:var(--text-light);font-weight:600;">2 hours ago</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <h2>Quick Actions</h2>
+        <!-- Dean actions -->
+        <div class="dean-only" style="display:none;">
+          <button class="btn-dean"><i class="fas fa-chart-pie"></i> View Full Trends</button>
+          <button class="btn-dean"><i class="fas fa-file-alt"></i> Generate Report</button>
+          <button class="btn-secondary"><i class="fas fa-download"></i> Export Data</button>
+        </div>
+        <!-- SUMC actions -->
+        <div class="sumc-only">
+          <button class="btn-primary"><i class="fas fa-eye"></i> View All High-Risk Alerts</button>
+          <button class="btn-secondary"><i class="fas fa-calendar-check"></i> Schedule Session</button>
+          <button class="btn-secondary"><i class="fas fa-user-md"></i> Review Referrals</button>
+        </div>
+        <!-- Peer actions -->
+        <div class="peer-only" style="display:none;">
+          <button class="btn-primary"><i class="fas fa-bell"></i> View My Alerts</button>
+          <button class="btn-secondary"><i class="fas fa-pen"></i> Record Follow-up</button>
+          <button class="btn-secondary"><i class="fas fa-user-md"></i> View My Referrals</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ALERTS TABLE ===== -->
+    <section class="alerts-table-section">
+      <!-- Dean: Shows aggregate summary, not individual alerts -->
+      <div class="dean-only" style="display:none;">
+        <h2><i class="fas fa-chart-simple" style="color:var(--wisteria);"></i> Wellness Summary</h2>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:12px 0;">
+          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);">Average Stress</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--deep-indigo);">4.7</div>
+            <div style="font-size:0.8rem;color:var(--muted-eucalyptus);">↑ 0.4 from last month</div>
+          </div>
+          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);">Students Assessed</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--deep-indigo);">1,284</div>
+            <div style="font-size:0.8rem;color:var(--muted-eucalyptus);">↑ 23% from last month</div>
+          </div>
+          <div style="background:var(--soft-porcelain);padding:16px;border-radius:8px;text-align:center;">
+            <div style="font-size:0.8rem;color:var(--text-light);">High-Risk %</div>
+            <div style="font-size:2rem;font-weight:700;color:var(--brick-dust);">8.2%</div>
+            <div style="font-size:0.8rem;color:var(--burnt-ochre);">↑ 1.2% from last month</div>
+          </div>
+        </div>
+        <p style="color:var(--text-light);font-size:0.9rem;padding:8px 0;border-top:1px solid #eee;">
+          <i class="fas fa-info-circle" style="color:var(--deep-indigo);"></i> 
+          All data is de-identified and aggregated. No individual student data is displayed.
+        </p>
+      </div>
+
+      <!-- SUMC: High-Risk Alerts Table -->
+      <div class="sumc-only">
+        <h2><i class="fas fa-exclamation-triangle" style="color:var(--brick-dust);"></i> Recent High-Risk Alerts</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>#A-1042</td><td>•••••7890</td><td><span class="risk-high">High</span></td><td>Depression</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
+              <tr><td>#A-1038</td><td>•••••4512</td><td><span class="risk-high">High</span></td><td>Anxiety</td><td>2026-06-15</td><td><span class="status-review">Under Review</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
+              <tr><td>#A-1025</td><td>•••••3321</td><td><span class="risk-high">High</span></td><td>Burnout</td><td>2026-06-14</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Peer: Assigned Alerts Table -->
+      <div class="peer-only" style="display:none;">
+        <h2><i class="fas fa-bell" style="color:var(--burnt-ochre);"></i> My Assigned Alerts</h2>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>#A-1040</td><td>•••••1123</td><td><span class="risk-medium">Medium</span></td><td>Anxiety</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
+              <tr><td>#A-1035</td><td>•••••8876</td><td><span class="risk-medium">Medium</span></td><td>Academic Burnout</td><td>2026-06-15</td><td><span class="status-resolved">Resolved</span></td><td><button class="btn-sm"><i class="fas fa-eye"></i></button></td></tr>
+              <tr><td>#A-1028</td><td>•••••5544</td><td><span class="risk-low">Low</span></td><td>Sleep Quality</td><td>2026-06-13</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <p>&copy; 2026 MindTrackSU – Strathmore University</p>
+    </footer>
+  </main>
+
+  <script>
+    // =====================================================
+    // 1. ROLE TOGGLE (Dean / SUMC / Peer)
+    // =====================================================
+    const roleBtns = document.querySelectorAll('.role-btn');
+    const roleLabel = document.getElementById('roleLabel');
+
+    function setRole(role) {
+      // Update toggle buttons
+      roleBtns.forEach(btn => btn.classList.remove('active'));
+      document.querySelector(`.role-btn[data-role="${role}"]`).classList.add('active');
+
+      // Update label
+      const labels = {
+        dean: 'Dean of Students',
+        sumc: 'SUMC Counsellor',
+        peer: 'Peer Counsellor'
+      };
+      roleLabel.textContent = labels[role];
+
+      // Show/hide all role-specific blocks
+      document.querySelectorAll('.dean-only').forEach(el => el.style.display = role === 'dean' ? '' : 'none');
+      document.querySelectorAll('.sumc-only').forEach(el => el.style.display = role === 'sumc' ? '' : 'none');
+      document.querySelectorAll('.peer-only').forEach(el => el.style.display = role === 'peer' ? '' : 'none');
+    }
+
+    roleBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        setRole(this.dataset.role);
+      });
+    });
+
+    // Default to Dean
+    setRole('dean');
+
+    // =====================================================
+    // 2. SIDEBAR TOGGLE (mobile)
+    // =====================================================
+    const hamburger = document.getElementById('hamburger');
+    const sidebar = document.getElementById('sidebar');
+
+    hamburger.addEventListener('click', function() {
+      sidebar.classList.toggle('open');
+    });
+
+    document.addEventListener('click', function(event) {
+      const isClickInside = sidebar.contains(event.target) || hamburger.contains(event.target);
+      if (!isClickInside && window.innerWidth <= 768) {
+        sidebar.classList.remove('open');
+      }
+    });
+
+    // =====================================================
+    // 3. CHART.JS (Dean-only trend chart)
+    // =====================================================
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        datasets: [
+          {
+            label: 'Business School',
+            data: [4.2, 4.5, 4.8, 4.3, 5.0, 4.6, 4.8],
+            borderColor: '#2A2A72',
+            backgroundColor: 'rgba(42,42,114,0.05)',
+            tension: 0.3,
+            fill: false,
+          },
+          {
+            label: 'Computing',
+            data: [4.8, 5.0, 5.3, 5.1, 5.6, 4.9, 5.2],
+            borderColor: '#4A8B6B',
+            backgroundColor: 'rgba(74,139,107,0.05)',
+            tension: 0.3,
+            fill: false,
+          },
+          {
+            label: 'Law',
+            data: [3.8, 3.9, 4.0, 3.7, 4.2, 3.6, 3.9],
+            borderColor: '#B8A9C9',
+            backgroundColor: 'rgba(184,169,201,0.05)',
+            tension: 0.3,
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: { usePointStyle: true, boxWidth: 10 }
+          }
+        },
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            max: 7,
+            grid: { color: '#e0ddd8' } 
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
