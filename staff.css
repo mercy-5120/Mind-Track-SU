@@ -1,0 +1,501 @@
+
+    /* ============================================================
+       ALL CSS – NO EXTERNAL FILE NEEDED
+       ============================================================ */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --deep-indigo: #2A2A72;
+      --muted-eucalyptus: #4A8B6B;
+      --soft-porcelain: #F9F6F0;
+      --dark-charcoal: #2D2D34;
+      --dusty-rose: #D4B8B4;
+      --faded-sage: #B5C9B7;
+      --burnt-ochre: #C87A3E;
+      --brick-dust: #B34B4B;
+      --wisteria: #B8A9C9;
+      --bg-body: var(--soft-porcelain);
+      --text-primary: var(--dark-charcoal);
+      --text-light: #555;
+      --shadow: 0 4px 12px rgba(0,0,0,0.05);
+      --radius: 12px;
+      --transition: 0.3s ease;
+    }
+
+    body {
+      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+      background: var(--bg-body);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      background: white;
+      box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      transition: transform var(--transition);
+      z-index: 1000;
+    }
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid #eee;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .logo i {
+      font-size: 1.8rem;
+      color: var(--muted-eucalyptus);
+    }
+    .nav {
+      flex: 1;
+      padding: 20px 0;
+    }
+    .nav ul {
+      list-style: none;
+    }
+    .nav li {
+      margin: 4px 12px;
+      border-radius: 8px;
+      transition: background var(--transition);
+    }
+    .nav li.active {
+      background: var(--deep-indigo);
+    }
+    .nav li.active a {
+      color: white;
+    }
+    .nav li a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+      border-radius: 8px;
+      transition: background var(--transition);
+    }
+    .nav li a:hover:not(.active a) {
+      background: var(--dusty-rose);
+    }
+    .nav li a .badge {
+      margin-left: auto;
+      background: var(--brick-dust);
+      color: white;
+      font-size: 0.7rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid #eee;
+    }
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    /* ===== MAIN CONTENT ===== */
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 24px 32px 32px;
+    }
+
+    /* ===== TOP HEADER ===== */
+    .top-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #e0ddd8;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .hamburger {
+      display: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--deep-indigo);
+    }
+    .page-title h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+    .user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Role toggle - now 3 buttons */
+    .role-toggle {
+      display: flex;
+      background: var(--soft-porcelain);
+      border-radius: 30px;
+      padding: 3px;
+      border: 1px solid #ddd8d0;
+    }
+    .role-btn {
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-light);
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .role-btn.active {
+      background: var(--deep-indigo);
+      color: white;
+      box-shadow: 0 2px 8px rgba(42,42,114,0.2);
+    }
+    .role-btn:hover:not(.active) {
+      background: var(--dusty-rose);
+    }
+    .role-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--deep-indigo);
+      background: var(--soft-porcelain);
+      padding: 4px 14px;
+      border-radius: 30px;
+      border: 1px solid #ddd8d0;
+    }
+    .user-profile img {
+      border-radius: 50%;
+      border: 2px solid var(--deep-indigo);
+    }
+
+    /* ===== STATS CARDS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+    .stat-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--deep-indigo);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      flex-shrink: 0;
+    }
+    .stat-card.high-risk .stat-icon {
+      background: var(--brick-dust);
+    }
+    .stat-card.dean .stat-icon {
+      background: var(--wisteria);
+    }
+    .stat-info h3 {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .stat-card.high-risk .stat-number {
+      color: var(--brick-dust);
+    }
+    .stat-card.dean .stat-number {
+      color: var(--deep-indigo);
+    }
+
+    /* ===== CHART + QUICK ACTIONS ===== */
+    .chart-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .chart-container {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .chart-container h2 {
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+    }
+    .chart-container canvas {
+      width: 100% !important;
+      height: auto !important;
+      max-height: 220px;
+    }
+    .quick-actions {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .quick-actions h2 {
+      font-size: 1.1rem;
+      margin-bottom: 6px;
+    }
+    .btn-primary,
+    .btn-secondary,
+    .btn-dean {
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background var(--transition);
+    }
+    .btn-primary {
+      background: var(--deep-indigo);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: #1f1f5a;
+    }
+    .btn-secondary {
+      background: var(--muted-eucalyptus);
+      color: white;
+    }
+    .btn-secondary:hover {
+      background: #3a7a5a;
+    }
+    .btn-dean {
+      background: var(--wisteria);
+      color: white;
+    }
+    .btn-dean:hover {
+      background: #a08bb5;
+    }
+
+    /* ===== ALERTS TABLE ===== */
+    .alerts-table-section {
+      background: white;
+      padding: 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .alerts-table-section h2 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+    }
+    .table-responsive {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    th {
+      text-align: left;
+      padding: 12px 8px;
+      background: var(--soft-porcelain);
+      color: var(--text-light);
+      font-weight: 600;
+    }
+    td {
+      padding: 12px 8px;
+      border-bottom: 1px solid #eee;
+    }
+    .risk-high {
+      background: var(--brick-dust);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .risk-medium {
+      background: var(--burnt-ochre);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .risk-low {
+      background: var(--faded-sage);
+      color: var(--dark-charcoal);
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .status-pending {
+      background: var(--burnt-ochre);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .status-review {
+      background: var(--wisteria);
+      color: white;
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .status-resolved {
+      background: var(--faded-sage);
+      color: var(--dark-charcoal);
+      padding: 2px 12px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+    }
+    .btn-sm {
+      background: var(--deep-indigo);
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ===== DEAN-ONLY DEPARTMENT STATS ===== */
+    .dean-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .dean-stat-card {
+      background: white;
+      padding: 16px 20px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--wisteria);
+    }
+    .dean-stat-card h4 {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-bottom: 4px;
+    }
+    .dean-stat-card .value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--deep-indigo);
+    }
+    .dean-stat-card .trend {
+      font-size: 0.8rem;
+      color: var(--muted-eucalyptus);
+    }
+
+    /* ===== FOOTER ===== */
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      color: var(--text-light);
+      font-size: 0.85rem;
+      border-top: 1px solid #e0ddd8;
+      padding-top: 20px;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 992px) {
+      .chart-section {
+        grid-template-columns: 1fr;
+      }
+      .dean-stats {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+      .hamburger {
+        display: block;
+      }
+      .top-header {
+        flex-direction: row;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      .user-profile {
+        gap: 8px;
+      }
+      .role-toggle {
+        order: 2;
+        width: 100%;
+        justify-content: center;
+      }
+      .role-label {
+        order: 1;
+      }
+      .role-btn {
+        font-size: 0.65rem;
+        padding: 4px 10px;
+      }
+      .dean-stats {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+ 
