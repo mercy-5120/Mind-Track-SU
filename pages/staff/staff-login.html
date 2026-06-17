@@ -10,10 +10,39 @@
     <!-- HEADER SECTION -->
     <header class="header">
       <div class="container">
-        <a class="brand" href="landing page.html">
+        <a class="brand" href="../user/landing page.html#home">
           <img src="../../Logo.png" alt="MindTrackSU Logo" class="logo" />
         </a>
+
+        <nav class="nav" aria-label="Primary navigation">
+          <a href="../user/landing page.html#home">Home</a>
+          <a href="../user/landing page.html#about">About</a>
+          <a href="../user/landing page.html#support">Resources</a>
+          <a href="../user/login.html">Login</a>
+        </nav>
+
+        <button
+          class="menu-toggle"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+          type="button"
+        >
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+          <span class="menu-line"></span>
+        </button>
       </div>
+
+      <nav
+        id="mobile-nav"
+        class="mobile-nav hidden"
+        aria-label="Mobile navigation"
+      >
+        <a href="../user/landing page.html#home">Home</a>
+        <a href="../user/landing page.html#about">About</a>
+        <a href="../user/landing page.html#support">Resources</a>
+        <a href="../user/login.html">Login</a>
+      </nav>
     </header>
 
     <!-- STAFF LOGIN SECTION -->
@@ -21,7 +50,6 @@
       <div class="auth-container">
         <div class="auth-card">
           <div class="auth-header">
-            <!-- Logo added here -->
             <img src="../../Logo.png" alt="MindTrackSU Logo" class="auth-logo" />
             <h1>Staff Login</h1>
             <p>Access your staff dashboard</p>
@@ -50,7 +78,7 @@
               />
             </div>
 
-            <a href="forgot-password.html" class="forgot-link"
+            <a href="../user/forgot-password.html" class="forgot-link"
               >Forgot password?</a
             >
 
@@ -64,9 +92,9 @@
           </div>
 
           <div class="auth-links">
-            <p>
+            <p>gi
               Are you a student?
-              <a href="/pages/user/login.html" class="link-primary">Student login</a>
+              <a href="../user/login.html" class="link-primary">Student login</a>
             </p>
           </div>
         </div>
