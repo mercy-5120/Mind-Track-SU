@@ -221,6 +221,7 @@
       align-items: center;
       gap: 16px;
       transition: transform 0.2s;
+      cursor: pointer;
     }
 
     .stat-card:hover {
@@ -325,6 +326,7 @@
       transition: all 0.2s ease;
       width: 100%;
       font-size: 0.95rem;
+      text-decoration: none;
     }
 
     .btn-primary {
@@ -448,6 +450,12 @@
       padding: 6px 10px;
       border-radius: 6px;
       cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-sm:hover {
+      background: #1f1f5a;
     }
 
     /* ============================================================
@@ -545,22 +553,34 @@
        ============================================================ -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <a href="../../user/landing page.html#home" class="brand">
-        <img src="../../Logo.png" alt="MindTrackSU Logo" class="logo-img" />
+      <a href="SUMCDashboard.html" class="brand">
+        <img src="../Logo.png" alt="MindTrackSU Logo" class="logo-img" />
       </a>
     </div>
     <nav class="nav">
       <ul>
-        <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <li><a href="#"><i class="fas fa-exclamation-triangle"></i> High-Risk Alerts <span class="badge">12</span></a></li>
-        <li><a href="#"><i class="fas fa-calendar-check"></i> Schedule Sessions</a></li>
-        <li><a href="#"><i class="fas fa-user-md"></i> Referrals</a></li>
-        <li><a href="#"><i class="fas fa-book"></i> Resources</a></li>
-        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+        <!-- Dashboard - Current Page -->
+        <li class="active"><a href="SUMCDashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        
+        <!-- High-Risk Alerts - Would link to a page you create -->
+        <li><a href="SUMCHighRiskAlerts.html"><i class="fas fa-exclamation-triangle"></i> High-Risk Alerts <span class="badge">12</span></a></li>
+        
+        <!-- Schedule Sessions - Would link to a page you create -->
+        <li><a href="SUMCScheduleSessions.html"><i class="fas fa-calendar-check"></i> Schedule Sessions</a></li>
+        
+        <!-- Referrals - Would link to a page you create -->
+        <li><a href="SUMReferrals.html"><i class="fas fa-user-md"></i> Referrals</a></li>
+        
+        <!-- Resources - Would link to a page you create -->
+        <li><a href="SUMResources.html"><i class="fas fa-book"></i> Resources</a></li>
+        
+        <!-- Settings - Would link to a page you create -->
+        <li><a href="SUMSettings.html"><i class="fas fa-cog"></i> Settings</a></li>
       </ul>
     </nav>
     <div class="sidebar-footer">
-      <a href="../../user/login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
+      <!-- Logout - Goes to staff-login.html -->
+      <a href="staff-login.html"><i class="fas fa-sign-out-alt"></i> Logout</a>
     </div>
   </aside>
 
@@ -583,30 +603,37 @@
       </div>
     </header>
 
-    <!-- ===== STATS CARDS ===== -->
+    <!-- ===== STATS CARDS - All Clickable ===== -->
     <section class="stats-grid">
-      <div class="stat-card">
+      <!-- Total Assessments - stays on dashboard -->
+      <div class="stat-card" onclick="window.location.href='SUMCDashboard.html'">
         <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-info">
           <h3>Total Assessments</h3>
           <p class="stat-number">1,284</p>
         </div>
       </div>
-      <div class="stat-card high-risk">
+      
+      <!-- High-Risk Alerts Card -->
+      <div class="stat-card high-risk" onclick="window.location.href='SUMCHighRiskAlerts.html'">
         <div class="stat-icon"><i class="fas fa-heartbeat"></i></div>
         <div class="stat-info">
           <h3>High-Risk Alerts</h3>
           <p class="stat-number">23</p>
         </div>
       </div>
-      <div class="stat-card">
+      
+      <!-- Active Referrals Card -->
+      <div class="stat-card" onclick="window.location.href='SUMReferrals.html'">
         <div class="stat-icon"><i class="fas fa-phone-alt"></i></div>
         <div class="stat-info">
           <h3>Active Referrals</h3>
           <p class="stat-number">14</p>
         </div>
       </div>
-      <div class="stat-card">
+      
+      <!-- Sessions to Schedule Card -->
+      <div class="stat-card" onclick="window.location.href='SUMCScheduleSessions.html'">
         <div class="stat-icon"><i class="fas fa-calendar-plus"></i></div>
         <div class="stat-info">
           <h3>Sessions to Schedule</h3>
@@ -639,12 +666,13 @@
         </div>
       </div>
 
+      <!-- ===== QUICK ACTIONS - All Clickable ===== -->
       <div class="quick-actions">
         <h2>Quick Actions</h2>
         <div class="sumc-only">
-          <button class="btn-primary"><i class="fas fa-eye"></i> View All High-Risk Alerts</button>
-          <button class="btn-secondary"><i class="fas fa-calendar-check"></i> Schedule Session</button>
-          <button class="btn-secondary"><i class="fas fa-user-md"></i> Review Referrals</button>
+          <a href="SUMCHighRiskAlerts.html" class="btn-primary"><i class="fas fa-eye"></i> View All High-Risk Alerts</a>
+          <a href="SUMCScheduleSessions.html" class="btn-secondary"><i class="fas fa-calendar-check"></i> Schedule Session</a>
+          <a href="SUMReferrals.html" class="btn-secondary"><i class="fas fa-user-md"></i> Review Referrals</a>
         </div>
       </div>
     </section>
@@ -658,9 +686,33 @@
             <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
           </thead>
           <tbody>
-            <tr><td>#A-1042</td><td>•••••7890</td><td><span class="risk-high">High</span></td><td>Depression</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
-            <tr><td>#A-1038</td><td>•••••4512</td><td><span class="risk-high">High</span></td><td>Anxiety</td><td>2026-06-15</td><td><span class="status-review">Under Review</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
-            <tr><td>#A-1025</td><td>•••••3321</td><td><span class="risk-high">High</span></td><td>Burnout</td><td>2026-06-14</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
+            <tr>
+              <td>#A-1042</td>
+              <td>•••••7890</td>
+              <td><span class="risk-high">High</span></td>
+              <td>Depression</td>
+              <td>2026-06-16</td>
+              <td><span class="status-pending">Pending</span></td>
+              <td><a href="SUMAlertDetails.html?id=A-1042" class="btn-sm"><i class="fas fa-chevron-right"></i></a></td>
+            </tr>
+            <tr>
+              <td>#A-1038</td>
+              <td>•••••4512</td>
+              <td><span class="risk-high">High</span></td>
+              <td>Anxiety</td>
+              <td>2026-06-15</td>
+              <td><span class="status-review">Under Review</span></td>
+              <td><a href="SUMAlertDetails.html?id=A-1038" class="btn-sm"><i class="fas fa-chevron-right"></i></a></td>
+            </tr>
+            <tr>
+              <td>#A-1025</td>
+              <td>•••••3321</td>
+              <td><span class="risk-high">High</span></td>
+              <td>Burnout</td>
+              <td>2026-06-14</td>
+              <td><span class="status-pending">Pending</span></td>
+              <td><a href="SUMAlertDetails.html?id=A-1025" class="btn-sm"><i class="fas fa-chevron-right"></i></a></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -691,6 +743,28 @@
         sidebar.classList.remove('open');
       }
     });
+
+    // ============================================================
+    // Highlight current page in sidebar
+    // ============================================================
+    function setActiveNavItem() {
+      const currentPage = window.location.pathname.split('/').pop();
+      const navLinks = document.querySelectorAll('.nav li');
+      
+      navLinks.forEach(li => {
+        const link = li.querySelector('a');
+        if (link) {
+          const href = link.getAttribute('href');
+          if (href === currentPage) {
+            li.classList.add('active');
+          } else {
+            li.classList.remove('active');
+          }
+        }
+      });
+    }
+    
+    document.addEventListener('DOMContentLoaded', setActiveNavItem);
   </script>
 </body>
 </html>
