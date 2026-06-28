@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MindTrackSU – Staff Dashboard</title>
+  <title>MindTrackSU – Peer Counsellor Dashboard</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
@@ -187,38 +187,6 @@
       flex-wrap: wrap;
     }
 
-    /* Role toggle - only SUMC and Peer */
-    .role-toggle {
-      display: flex;
-      background: var(--soft-porcelain);
-      border-radius: 30px;
-      padding: 3px;
-      border: 1px solid #ddd8d0;
-    }
-
-    .role-btn {
-      background: transparent;
-      border: none;
-      padding: 6px 16px;
-      border-radius: 30px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      color: var(--text-light);
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-
-    .role-btn.active {
-      background: var(--deep-indigo);
-      color: white;
-      box-shadow: 0 2px 8px rgba(42,42,114,0.2);
-    }
-
-    .role-btn:hover:not(.active) {
-      background: var(--dusty-rose);
-    }
-
     .role-label {
       font-size: 0.85rem;
       font-weight: 600;
@@ -272,10 +240,6 @@
       flex-shrink: 0;
     }
 
-    .stat-card.high-risk .stat-icon {
-      background: var(--brick-dust);
-    }
-
     .stat-info h3 {
       font-size: 0.9rem;
       font-weight: 400;
@@ -287,10 +251,6 @@
       font-size: 1.8rem;
       font-weight: 700;
       color: var(--deep-indigo);
-    }
-
-    .stat-card.high-risk .stat-number {
-      color: var(--brick-dust);
     }
 
     /* ============================================================
@@ -315,13 +275,6 @@
       margin-bottom: 12px;
     }
 
-    .chart-container canvas {
-      width: 100% !important;
-      height: auto !important;
-      max-height: 220px;
-    }
-
-    /* ===== QUICK ACTIONS - SPACED OUT ===== */
     .quick-actions {
       background: white;
       padding: 24px 20px;
@@ -338,7 +291,6 @@
       color: var(--dark-charcoal);
     }
 
-    .quick-actions .sumc-only,
     .quick-actions .peer-only {
       display: flex;
       flex-direction: column;
@@ -459,14 +411,6 @@
       font-size: 0.8rem;
     }
 
-    .status-review {
-      background: var(--wisteria);
-      color: white;
-      padding: 2px 12px;
-      border-radius: 30px;
-      font-size: 0.8rem;
-    }
-
     .status-resolved {
       background: var(--faded-sage);
       color: var(--dark-charcoal);
@@ -485,7 +429,7 @@
     }
 
     /* ============================================================
-       RECENT ACTIVITY (for SUMC/Peer)
+       RECENT ACTIVITY
        ============================================================ */
     .activity-item {
       display: flex;
@@ -555,20 +499,8 @@
       .user-profile {
         gap: 8px;
       }
-      .role-toggle {
-        order: 2;
-        width: 100%;
-        justify-content: center;
-      }
       .role-label {
         order: 1;
-      }
-      .role-btn {
-        font-size: 0.7rem;
-        padding: 4px 12px;
-      }
-      .quick-actions {
-        padding: 16px;
       }
       .btn-primary,
       .btn-secondary {
@@ -598,13 +530,8 @@
     <nav class="nav">
       <ul>
         <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
-        <!-- SUMC-only -->
-        <li class="sumc-only"><a href="#"><i class="fas fa-exclamation-triangle"></i> High-Risk Alerts <span class="badge">12</span></a></li>
-        <li class="sumc-only"><a href="#"><i class="fas fa-calendar-check"></i> Schedule Sessions</a></li>
-        <!-- Peer-only -->
-        <li class="peer-only" style="display:none;"><a href="#"><i class="fas fa-bell"></i> My Assigned Alerts <span class="badge">5</span></a></li>
-        <li class="peer-only" style="display:none;"><a href="#"><i class="fas fa-pen"></i> Follow-up Notes</a></li>
-        <!-- Common -->
+        <li><a href="#"><i class="fas fa-bell"></i> My Assigned Alerts <span class="badge">5</span></a></li>
+        <li><a href="#"><i class="fas fa-pen"></i> Follow-up Notes</a></li>
         <li><a href="#"><i class="fas fa-user-md"></i> Referrals</a></li>
         <li><a href="#"><i class="fas fa-book"></i> Resources</a></li>
         <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
@@ -626,21 +553,16 @@
         <i class="fas fa-bars"></i>
       </div>
       <div class="page-title">
-        <h1>Dashboard</h1>
+        <h1>Peer Counsellor Dashboard</h1>
       </div>
       <div class="user-profile">
-        <div class="role-toggle">
-          <button class="role-btn active" data-role="sumc">SUMC Counsellor</button>
-          <button class="role-btn" data-role="peer">Peer Counsellor</button>
-        </div>
-        <span class="role-label" id="roleLabel">SUMC Counsellor</span>
-        <img src="https://ui-avatars.com/api/?name=Jane+Doe&background=2A2A72&color=fff&size=40" alt="Avatar" />
+        <span class="role-label">Peer Counsellor</span>
+        <img src="https://ui-avatars.com/api/?name=John+Smith&background=2A2A72&color=fff&size=40" alt="Avatar" />
       </div>
     </header>
 
     <!-- ===== STATS CARDS ===== -->
     <section class="stats-grid">
-      <!-- Total Assessments - visible to all -->
       <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
         <div class="stat-info">
@@ -648,46 +570,21 @@
           <p class="stat-number">1,284</p>
         </div>
       </div>
-
-      <!-- SUMC stats -->
-      <div class="stat-card high-risk sumc-only">
-        <div class="stat-icon"><i class="fas fa-heartbeat"></i></div>
-        <div class="stat-info">
-          <h3>High-Risk Alerts</h3>
-          <p class="stat-number">23</p>
-        </div>
-      </div>
-      <div class="stat-card sumc-only">
-        <div class="stat-icon"><i class="fas fa-phone-alt"></i></div>
-        <div class="stat-info">
-          <h3>Active Referrals</h3>
-          <p class="stat-number">14</p>
-        </div>
-      </div>
-      <div class="stat-card sumc-only">
-        <div class="stat-icon"><i class="fas fa-calendar-plus"></i></div>
-        <div class="stat-info">
-          <h3>Sessions to Schedule</h3>
-          <p class="stat-number">8</p>
-        </div>
-      </div>
-
-      <!-- Peer stats -->
-      <div class="stat-card peer-only" style="display:none;">
+      <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-bell"></i></div>
         <div class="stat-info">
           <h3>My Pending Alerts</h3>
           <p class="stat-number">5</p>
         </div>
       </div>
-      <div class="stat-card peer-only" style="display:none;">
+      <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-phone-alt"></i></div>
         <div class="stat-info">
           <h3>My Active Referrals</h3>
           <p class="stat-number">3</p>
         </div>
       </div>
-      <div class="stat-card peer-only" style="display:none;">
+      <div class="stat-card">
         <div class="stat-icon"><i class="fas fa-pen"></i></div>
         <div class="stat-info">
           <h3>Follow-ups Due</h3>
@@ -698,12 +595,11 @@
 
     <!-- ===== CHART + QUICK ACTIONS ===== -->
     <section class="chart-section">
-      <!-- Recent Activity (same for both roles) -->
       <div class="chart-container">
         <h2><i class="fas fa-bell" style="color:var(--deep-indigo);"></i> Recent Activity</h2>
         <div style="display:flex;flex-direction:column;gap:12px;padding:8px 0;">
           <div class="activity-item">
-            <span>New high-risk alert</span>
+            <span>New alert assigned to you</span>
             <span class="time high-risk">Just now</span>
           </div>
           <div class="activity-item">
@@ -721,17 +617,9 @@
         </div>
       </div>
 
-      <!-- ===== QUICK ACTIONS - SPACED OUT ===== -->
       <div class="quick-actions">
         <h2>Quick Actions</h2>
-        <!-- SUMC actions -->
-        <div class="sumc-only">
-          <button class="btn-primary"><i class="fas fa-eye"></i> View All High-Risk Alerts</button>
-          <button class="btn-secondary"><i class="fas fa-calendar-check"></i> Schedule Session</button>
-          <button class="btn-secondary"><i class="fas fa-user-md"></i> Review Referrals</button>
-        </div>
-        <!-- Peer actions -->
-        <div class="peer-only" style="display:none;">
+        <div class="peer-only">
           <button class="btn-primary"><i class="fas fa-bell"></i> View My Alerts</button>
           <button class="btn-secondary"><i class="fas fa-pen"></i> Record Follow-up</button>
           <button class="btn-secondary"><i class="fas fa-user-md"></i> View My Referrals</button>
@@ -741,38 +629,18 @@
 
     <!-- ===== ALERTS TABLE ===== -->
     <section class="alerts-table-section">
-      <!-- SUMC: High-Risk Alerts Table -->
-      <div class="sumc-only">
-        <h2><i class="fas fa-exclamation-triangle" style="color:var(--brick-dust);"></i> Recent High-Risk Alerts</h2>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>#A-1042</td><td>•••••7890</td><td><span class="risk-high">High</span></td><td>Depression</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
-              <tr><td>#A-1038</td><td>•••••4512</td><td><span class="risk-high">High</span></td><td>Anxiety</td><td>2026-06-15</td><td><span class="status-review">Under Review</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
-              <tr><td>#A-1025</td><td>•••••3321</td><td><span class="risk-high">High</span></td><td>Burnout</td><td>2026-06-14</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-chevron-right"></i></button></td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Peer: Assigned Alerts Table -->
-      <div class="peer-only" style="display:none;">
-        <h2><i class="fas fa-bell" style="color:var(--burnt-ochre);"></i> My Assigned Alerts</h2>
-        <div class="table-responsive">
-          <table>
-            <thead>
-              <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-              <tr><td>#A-1040</td><td>•••••1123</td><td><span class="risk-medium">Medium</span></td><td>Anxiety</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
-              <tr><td>#A-1035</td><td>•••••8876</td><td><span class="risk-medium">Medium</span></td><td>Academic Burnout</td><td>2026-06-15</td><td><span class="status-resolved">Resolved</span></td><td><button class="btn-sm"><i class="fas fa-eye"></i></button></td></tr>
-              <tr><td>#A-1028</td><td>•••••5544</td><td><span class="risk-low">Low</span></td><td>Sleep Quality</td><td>2026-06-13</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
-            </tbody>
-          </table>
-        </div>
+      <h2><i class="fas fa-bell" style="color:var(--burnt-ochre);"></i> My Assigned Alerts</h2>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr><th>Alert ID</th><th>Student (Anon)</th><th>Risk Level</th><th>Category</th><th>Date</th><th>Status</th><th>Action</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>#A-1040</td><td>•••••1123</td><td><span class="risk-medium">Medium</span></td><td>Anxiety</td><td>2026-06-16</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
+            <tr><td>#A-1035</td><td>•••••8876</td><td><span class="risk-medium">Medium</span></td><td>Academic Burnout</td><td>2026-06-15</td><td><span class="status-resolved">Resolved</span></td><td><button class="btn-sm"><i class="fas fa-eye"></i></button></td></tr>
+            <tr><td>#A-1028</td><td>•••••5544</td><td><span class="risk-low">Low</span></td><td>Sleep Quality</td><td>2026-06-13</td><td><span class="status-pending">Pending</span></td><td><button class="btn-sm"><i class="fas fa-pen"></i></button></td></tr>
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -786,39 +654,7 @@
        ============================================================ -->
   <script>
     // ============================================================
-    // 1. ROLE TOGGLE (SUMC / Peer)
-    // ============================================================
-    const roleBtns = document.querySelectorAll('.role-btn');
-    const roleLabel = document.getElementById('roleLabel');
-
-    function setRole(role) {
-      // Update toggle buttons
-      roleBtns.forEach(btn => btn.classList.remove('active'));
-      document.querySelector(`.role-btn[data-role="${role}"]`).classList.add('active');
-
-      // Update label
-      const labels = {
-        sumc: 'SUMC Counsellor',
-        peer: 'Peer Counsellor'
-      };
-      roleLabel.textContent = labels[role];
-
-      // Show/hide role-specific content
-      document.querySelectorAll('.sumc-only').forEach(el => el.style.display = role === 'sumc' ? '' : 'none');
-      document.querySelectorAll('.peer-only').forEach(el => el.style.display = role === 'peer' ? '' : 'none');
-    }
-
-    roleBtns.forEach(btn => {
-      btn.addEventListener('click', function(e) {
-        setRole(this.dataset.role);
-      });
-    });
-
-    // Default to SUMC
-    setRole('sumc');
-
-    // ============================================================
-    // 2. SIDEBAR TOGGLE (mobile)
+    // SIDEBAR TOGGLE (mobile)
     // ============================================================
     const hamburger = document.getElementById('hamburger');
     const sidebar = document.getElementById('sidebar');
