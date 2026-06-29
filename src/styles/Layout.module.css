@@ -1,0 +1,81 @@
+@import './variables.css';
+
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+}
+
+.mainContent {
+  margin-left: 260px;
+  flex: 1;
+  padding: 24px 32px 32px;
+}
+
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e0ddd8;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hamburger {
+  display: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--deep-indigo);
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.pageTitle h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.userProfile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.roleLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--deep-indigo);
+  background: var(--soft-porcelain);
+  padding: 4px 14px;
+  border-radius: 30px;
+  border: 1px solid #ddd8d0;
+}
+
+.userProfile img {
+  border-radius: 50%;
+  border: 2px solid var(--deep-indigo);
+  height: 40px;
+  width: 40px;
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    margin-left: 0;
+    padding: 16px;
+  }
+
+  .hamburger {
+    display: block;
+  }
+
+  .topHeader {
+    flex-direction: row;
+  }
+
+  .userProfile {
+    gap: 8px;
+  }
+}
