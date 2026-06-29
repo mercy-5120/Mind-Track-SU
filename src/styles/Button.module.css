@@ -1,0 +1,111 @@
+@import './variables.css';
+
+.btnPrimary,
+.btnSecondary {
+  border: none;
+  padding: 14px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all 0.2s ease;
+  width: 100%;
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.btnPrimary {
+  background: var(--deep-indigo);
+  color: white;
+}
+
+.btnPrimary:hover {
+  background: #1f1f5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(42, 42, 114, 0.3);
+}
+
+.btnSecondary {
+  background: var(--muted-eucalyptus);
+  color: white;
+}
+
+.btnSecondary:hover {
+  background: #3a7a5a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(74, 139, 107, 0.3);
+}
+
+.btnPrimary i,
+.btnSecondary i {
+  font-size: 1rem;
+}
+
+.btnSm {
+  background: var(--deep-indigo);
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btnSm:hover {
+  background: #1f1f5a;
+}
+
+.riskHigh {
+  background: var(--brick-dust);
+  color: white;
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.riskMedium {
+  background: var(--burnt-ochre);
+  color: white;
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.riskLow {
+  background: var(--faded-sage);
+  color: var(--dark-charcoal);
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.statusPending {
+  background: var(--burnt-ochre);
+  color: white;
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+}
+
+.statusReview {
+  background: var(--wisteria);
+  color: white;
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+}
+
+.statusResolved {
+  background: var(--faded-sage);
+  color: var(--dark-charcoal);
+  padding: 2px 12px;
+  border-radius: 30px;
+  font-size: 0.8rem;
+}
