@@ -8,6 +8,9 @@ export default function Layout({ children, title, role = 'SUMC Counsellor' }) {
   const closeSidebar = () => setSidebarOpen(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  const storedName = sessionStorage.getItem('staffName') || 'Staff Member';
+  const avatarName = storedName.split(' ').slice(0, 2).join(' ');
+
   return (
     <div className={styles.layoutContainer}>
       <Sidebar open={sidebarOpen} onClose={closeSidebar} />
@@ -23,7 +26,7 @@ export default function Layout({ children, title, role = 'SUMC Counsellor' }) {
           <div className={styles.userProfile}>
             <span className={styles.roleLabel}>{role}</span>
             <img
-              src={`https://ui-avatars.com/api/?name=Jane+Doe&background=2A2A72&color=fff&size=40`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=2A2A72&color=fff&size=40`}
               alt="Avatar"
             />
           </div>

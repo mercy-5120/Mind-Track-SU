@@ -5,8 +5,10 @@ import styles from '../styles/Sidebar.module.css';
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
 
+  const role = sessionStorage.getItem('staffRole') || 'sumc_counsellor';
+  const dashboardHref = role === 'peer_counsellor' ? '/staff/peer-dashboard' : '/staff/dashboard';
   const navItems = [
-    { href: '/staff/dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
+    { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
     { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: '12' },
     { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
     { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
@@ -19,7 +21,7 @@ export default function Sidebar({ open, onClose }) {
   return (
     <aside className={`${styles.sidebar} ${open ? styles.open : ''}`}>
       <div className={styles.sidebarHeader}>
-        <Link to="/staff/dashboard" className={styles.brand}>
+        <Link to={dashboardHref} className={styles.brand}>
           <img src="/Logo.png" alt="MindTrackSU Logo" className={styles.logoImg} />
         </Link>
       </div>
