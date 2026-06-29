@@ -1,0 +1,17 @@
+:root {
+  --deep-indigo: #2A2A72;
+  --muted-eucalyptus: #4A8B6B;
+  --soft-porcelain: #F9F6F0;
+  --dark-charcoal: #2D2D34;
+  --dusty-rose: #D4B8B4;
+  --faded-sage: #B5C9B7;
+  --burnt-ochre: #C87A3E;
+  --brick-dust: #B34B4B;
+  --wisteria: #B8A9C9;
+  --bg-body: var(--soft-porcelain);
+  --text-primary: var(--dark-charcoal);
+  --text-light: #555;
+  --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --radius: 12px;
+  --transition: 0.3s ease;
+}
