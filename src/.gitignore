@@ -27,8 +27,7 @@ dist/
 *.temp
 .cache/
 
-# Old HTML pages (reference only)
-pages/
+
 
 # Testing
 coverage/
