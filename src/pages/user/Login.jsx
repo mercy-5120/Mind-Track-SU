@@ -4,6 +4,8 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
 
+console.log("[Login] component loaded");
+
 export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -11,6 +13,7 @@ export default function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("[Login] submit clicked", { email, password });
     navigate("/assessment-intro");
   };
 
