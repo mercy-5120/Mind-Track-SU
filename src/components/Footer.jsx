@@ -120,6 +120,17 @@ export default function Footer() {
             >
               Create Account
             </Link>
+            <Link
+              to="/staff/login"
+              style={{
+                display: "block",
+                color: "#ffffff",
+                textDecoration: "none",
+                fontSize: "0.9rem",
+              }}
+            >
+              Staff Login
+            </Link>
             <a
               href="tel:1199"
               style={{
