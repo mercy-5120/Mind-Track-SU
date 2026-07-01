@@ -61,7 +61,7 @@ export default function Login() {
             </p>
             <p>
               Are you a member of staff?{" "}
-              <Link to="/staff-login" className="link-primary">
+              <Link to="/staff/login" className="link-primary">
                 Staff login
               </Link>
             </p>
