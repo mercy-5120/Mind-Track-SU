@@ -14,8 +14,8 @@ USE mindtracksu;
 -- =====================================================
 CREATE TABLE students (
     student_id INT PRIMARY KEY AUTO_INCREMENT,
-    username VARCHAR(50) UNIQUE,
-    password_hash VARCHAR(255),
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     registration_number VARCHAR(20),
     department VARCHAR(100),
     year_of_study INT,
