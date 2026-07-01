@@ -1,12 +1,17 @@
 import React from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link } from "react-router-dom";
+import logo from "../Logo.png";
 
 export default function Header() {
   return (
     <header
       style={{
-        background: "var(--surface)",
+        background: "rgba(255,255,255,0.9)",
         borderBottom: "1px solid rgba(45,45,52,0.08)",
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        backdropFilter: "blur(10px)",
       }}
     >
       <div
@@ -21,13 +26,21 @@ export default function Header() {
         <Link
           to="/"
           style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
             fontSize: "1.15rem",
             fontWeight: 700,
             color: "var(--primary)",
             textDecoration: "none",
           }}
         >
-          MindTrackSU
+          <img
+            src={logo}
+            alt="MindTrackSU logo"
+            style={{ width: "40px", height: "40px" }}
+          />
+          <span>MindTrackSU</span>
         </Link>
         <nav
           style={{
@@ -37,46 +50,46 @@ export default function Header() {
             flexWrap: "wrap",
           }}
         >
-          <NavLink
+          <Link
             to="/"
-            style={({ isActive }) => ({
-              color: isActive ? "var(--primary)" : "var(--warm-gray)",
+            style={{
+              color: "var(--warm-gray)",
               textDecoration: "none",
               fontWeight: 600,
-            })}
+            }}
           >
             Home
-          </NavLink>
-          <NavLink
-            to="/assessment-intro"
-            style={({ isActive }) => ({
-              color: isActive ? "var(--primary)" : "var(--warm-gray)",
+          </Link>
+          <a
+            href="#about"
+            style={{
+              color: "var(--warm-gray)",
               textDecoration: "none",
               fontWeight: 600,
-            })}
+            }}
           >
-            Assessment
-          </NavLink>
-          <NavLink
+            About
+          </a>
+          <Link
             to="/resources"
-            style={({ isActive }) => ({
-              color: isActive ? "var(--primary)" : "var(--warm-gray)",
+            style={{
+              color: "var(--warm-gray)",
               textDecoration: "none",
               fontWeight: 600,
-            })}
+            }}
           >
             Resources
-          </NavLink>
-          <NavLink
-            to="/login"
-            style={({ isActive }) => ({
-              color: isActive ? "var(--primary)" : "var(--warm-gray)",
+          </Link>
+          <Link
+            to="/create-account"
+            style={{
+              color: "var(--warm-gray)",
               textDecoration: "none",
               fontWeight: 600,
-            })}
+            }}
           >
-            Login
-          </NavLink>
+            Create Account
+          </Link>
         </nav>
       </div>
     </header>
