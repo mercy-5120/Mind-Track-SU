@@ -5,7 +5,7 @@
 -- =====================================================
 
 -- Create database
-CREATE DATABASE mindtracksu;
+CREATE DATABASE IF NOT EXISTS mindtracksu;
 USE mindtracksu;
 
 -- =====================================================
@@ -137,6 +137,16 @@ CREATE TABLE staff_accounts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- TABLE: staff_database_registry
+-- =====================================================
+CREATE TABLE staff_database_registry (
+    staff_id INT PRIMARY KEY,
+    database_name VARCHAR(64) UNIQUE NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (staff_id) REFERENCES staff_accounts(staff_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- TABLE: staff_alerts
 -- =====================================================
 CREATE TABLE staff_alerts (
@@ -260,6 +270,11 @@ INSERT INTO resources (resource_id, resource_name, category, description, contac
 INSERT INTO staff_accounts (staff_id, email, name, role, assigned_group) VALUES
 (1, 'sumc@strathmore.ac.ke', 'Jane Doe', 'sumc_counsellor', 'SUMC'),
 (2, 'peer@strathmore.ac.ke', 'Alex Kim', 'peer_counsellor', 'Peer Support');
+
+-- Staff database mapping
+INSERT INTO staff_database_registry (staff_id, database_name) VALUES
+(1, 'mindtracksu_staff_1'),
+(2, 'mindtracksu_staff_2');
 
 -- Staff Alerts
 INSERT INTO staff_alerts (alert_id, assessment_id, category, risk_level, alert_status, assigned_staff_id, student_name, student_identifier, created_at) VALUES
