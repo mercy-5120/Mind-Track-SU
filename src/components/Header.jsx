@@ -90,6 +90,16 @@ export default function Header() {
           >
             Create Account
           </Link>
+          <Link
+            to="/staff/login"
+            style={{
+              color: "var(--primary)",
+              textDecoration: "none",
+              fontWeight: 700,
+            }}
+          >
+            Staff Login
+          </Link>
         </nav>
       </div>
     </header>
