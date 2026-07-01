@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import styles from '../styles/Sidebar.module.css';
+import StaffBrand from './StaffBrand';
 
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
@@ -22,7 +23,7 @@ export default function Sidebar({ open, onClose }) {
     <aside className={`${styles.sidebar} ${open ? styles.open : ''}`}>
       <div className={styles.sidebarHeader}>
         <Link to={dashboardHref} className={styles.brand}>
-          <img src="/Logo.png" alt="MindTrackSU Logo" className={styles.logoImg} />
+          <StaffBrand compact showLabel={false} align="center" />
         </Link>
       </div>
 

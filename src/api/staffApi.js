@@ -1,8 +1,8 @@
 const API_BASE = 'http://localhost:3001/api/staff';
 
 const mockStaffAccounts = [
-  { staff_id: 1, email: 'sumc@strathmore.ac.ke', name: 'Jane Doe', role: 'sumc_counsellor' },
-  { staff_id: 2, email: 'peer@strathmore.ac.ke', name: 'Alex Kim', role: 'peer_counsellor' },
+  { staff_id: 1, email: 'sumc@strathmore.edu', name: 'Jane Doe', role: 'sumc_counsellor' },
+  { staff_id: 2, email: 'peer@strathmore.edu', name: 'Alex Kim', role: 'peer_counsellor' },
 ];
 
 const mockAlerts = [
