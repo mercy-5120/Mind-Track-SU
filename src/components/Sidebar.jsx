@@ -6,16 +6,23 @@ import StaffBrand from './StaffBrand';
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
 
-  const role = sessionStorage.getItem('staffRole') || 'sumc_counsellor';
-  const dashboardHref = role === 'peer_counsellor' ? '/staff/peer-dashboard' : '/staff/dashboard';
-  const navItems = [
-    { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
-    { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: '12' },
-    { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
-    { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
-    { href: '/staff/resources', label: 'Resources', icon: 'fas fa-book', badge: null },
-    { href: '/staff/settings', label: 'Settings', icon: 'fas fa-cog', badge: null },
-  ];
+  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase();
+  const isDeanView = role === 'dean' || location.pathname === '/staff/dean-dashboard';
+  const dashboardHref = role === 'peer_counsellor'
+    ? '/staff/peer-dashboard'
+    : role === 'dean' || location.pathname === '/staff/dean-dashboard'
+      ? '/staff/dean-dashboard'
+      : '/staff/dashboard';
+  const navItems = isDeanView
+    ? [{ href: dashboardHref, label: 'Dean Dashboard', icon: 'fas fa-chart-line', badge: null }]
+    : [
+        { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
+        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: '12' },
+        { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
+        { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
+        { href: '/staff/resources', label: 'Resources', icon: 'fas fa-book', badge: null },
+        { href: '/staff/settings', label: 'Settings', icon: 'fas fa-cog', badge: null },
+      ];
 
   const isActive = (path) => location.pathname === path;
 

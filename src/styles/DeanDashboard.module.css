@@ -1,0 +1,292 @@
+@import './variables.css';
+
+.dashboardPage {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.heroCard,
+.metricCard,
+.chartCard,
+.panelCard {
+  background: white;
+  border: 1px solid #ece8e2;
+  border-radius: 18px;
+  box-shadow: 0 8px 24px rgba(42, 42, 114, 0.06);
+}
+
+.heroCard {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  gap: 16px;
+}
+
+.heroCard h2 {
+  font-size: 1.45rem;
+  color: var(--deep-indigo);
+  margin-bottom: 6px;
+}
+
+.heroCard p {
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.heroBadge {
+  background: var(--soft-porcelain);
+  color: var(--deep-indigo);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.metricsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.metricCard {
+  padding: 18px;
+}
+
+.metricHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.metricIcon {
+  font-size: 1.2rem;
+}
+
+.trend {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.trendUp {
+  color: #2e8b57;
+}
+
+.trendDown {
+  color: #c2410c;
+}
+
+.metricCard h3 {
+  font-size: 1.4rem;
+  color: var(--deep-indigo);
+  margin: 0 0 4px;
+}
+
+.metricCard p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.92rem;
+}
+
+.chartGrid,
+.bottomGrid {
+  display: grid;
+  grid-template-columns: 1.3fr 0.9fr;
+  gap: 16px;
+}
+
+.chartCard,
+.panelCard {
+  padding: 20px;
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cardEyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--deep-indigo);
+}
+
+.toggleGroup {
+  display: flex;
+  gap: 8px;
+}
+
+.toggleButton,
+.secondaryButton,
+.primaryButton,
+.linkButton {
+  border: none;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toggleButton {
+  background: var(--soft-porcelain);
+  color: var(--deep-indigo);
+}
+
+.toggleActive,
+.primaryButton {
+  background: var(--deep-indigo);
+  color: white;
+}
+
+.secondaryButton,
+.linkButton {
+  background: #f5f1eb;
+  color: var(--text-primary);
+}
+
+.selectInput {
+  border: 1px solid #ddd8d0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  background: white;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.dataTable th,
+.dataTable td {
+  text-align: left;
+  padding: 10px 8px;
+  border-bottom: 1px solid #f0ece7;
+}
+
+.alertList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alertItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f7f4;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.alertTitle {
+  margin: 0 0 2px;
+  font-weight: 700;
+  color: var(--deep-indigo);
+}
+
+.alertMeta {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.statusBadge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.statusPending {
+  background: #fff3cd;
+  color: #8a5b00;
+}
+
+.statusInProgress {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.statusResolved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.reportGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.previewBox {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #f8f7f4;
+  color: var(--text-primary);
+  min-height: 48px;
+}
+
+.buttonRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.loadingState {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  font-size: 1rem;
+  color: var(--deep-indigo);
+}
+
+@media (max-width: 900px) {
+  .metricsGrid,
+  .chartGrid,
+  .bottomGrid,
+  .reportGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .heroCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -16,6 +16,7 @@ import ForgotPassword from "./pages/user/ForgotPassword";
 import StaffLogin from "./pages/staff/StaffLogin";
 import SUMCDashboard from "./pages/staff/SUMCDashboard";
 import PeerDashboard from "./pages/staff/PeerDashboard";
+import DeanDashboard from "./pages/staff/DeanDashboard";
 import "./styles/globals.css";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/staff/login" element={<StaffLogin />} />
           <Route path="/staff/dashboard" element={<SUMCDashboard />} />
           <Route path="/staff/peer-dashboard" element={<PeerDashboard />} />
+          <Route path="/staff/dean-dashboard" element={<DeanDashboard />} />
           <Route path="/assessment-intro" element={<AssessmentIntro />} />
           <Route path="/assessment" element={<AssessmentQuestions />} />
           <Route path="/completion" element={<AssessmentCompletion />} />
