@@ -3,18 +3,24 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
+import { loginStudent } from "../../utils/studentSession";
 
 console.log("[Login] component loaded");
 
 export default function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("[Login] submit clicked", { email, password });
-    navigate("/assessment-intro");
+    try {
+      loginStudent(username, password);
+      navigate("/assessment-intro");
+    } catch (err) {
+      setError(err.message || "Unable to sign in right now.");
+    }
   };
 
   return (
@@ -28,12 +34,12 @@ export default function Login() {
           </div>
           <form className="auth-form" onSubmit={handleSubmit}>
             <Input
-              label="Email Address"
-              id="email"
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Username"
+              id="username"
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
             />
             <Input
@@ -56,6 +62,11 @@ export default function Login() {
             >
               Forgot password?
             </Link>
+            {error ? (
+              <p style={{ color: "var(--brick-dust)", fontSize: "0.9rem" }}>
+                {error}
+              </p>
+            ) : null}
             <Button type="submit" full>
               Log In
             </Button>
@@ -68,6 +79,12 @@ export default function Login() {
               Don't have an account?{" "}
               <Link to="/create-account" className="link-primary">
                 Sign up here
+              </Link>
+            </p>
+            <p>
+              Do you want to continue anonymously?{" "}
+              <Link to="/assessment-intro" className="link-primary">
+                Continue anonymously
               </Link>
             </p>
             <p>

@@ -49,18 +49,6 @@ export default function Header() {
       >
         Create Account
       </Link>
-      <Link
-        to="/staff/login"
-        style={{
-          ...navLinkStyle,
-          color: "var(--primary)",
-          fontWeight: 700,
-          whiteSpace: "nowrap",
-        }}
-        onClick={() => setMenuOpen(false)}
-      >
-        Staff Login
-      </Link>
     </>
   );
 

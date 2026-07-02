@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
+import { registerStudent } from "../../utils/studentSession";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
@@ -14,7 +15,17 @@ export default function CreateAccount() {
       alert("Passwords do not match.");
       return;
     }
-    navigate("/assessment-intro");
+
+    try {
+      registerStudent({
+        username: form.username,
+        password: form.password,
+        displayName: form.username,
+      });
+      navigate("/assessment-intro");
+    } catch (error) {
+      alert(error.message || "Unable to create your account.");
+    }
   };
 
   return (
@@ -58,7 +69,7 @@ export default function CreateAccount() {
               required
             />
             <p style={{ color: "var(--warm-gray)", fontSize: "0.9rem" }}>
-              Use at least 6 characters and keep it private.
+              This creates a normal student account so you can keep your own assessment history and return later.
             </p>
             <Button type="submit" full>
               Create Account
@@ -76,7 +87,13 @@ export default function CreateAccount() {
             </p>
             <p style={{ marginTop: "8px" }}>
               <Link to="/assessment-intro" className="link-primary">
-                Continue as guest
+                Continue anonymously
+              </Link>
+            </p>
+            <p style={{ marginTop: "8px" }}>
+              Are you a member of staff?{" "}
+              <Link to="/staff/login" className="link-primary">
+                Staff login
               </Link>
             </p>
           </div>

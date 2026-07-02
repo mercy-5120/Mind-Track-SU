@@ -25,17 +25,50 @@ CREATE TABLE students (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
+-- TABLE: anonymous_students
+-- Anonymous identity records for students who prefer privacy
+-- =====================================================
+CREATE TABLE anonymous_students (
+    anonymous_student_id INT PRIMARY KEY AUTO_INCREMENT,
+    anonymous_code VARCHAR(50) UNIQUE NOT NULL,
+    session_token VARCHAR(255) UNIQUE,
+    department VARCHAR(255),
+    year_of_study INT,
+    consent_to_follow_up TINYINT DEFAULT 0,
+    consent_timestamp DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    last_seen_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_active TINYINT DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
 -- TABLE: anonymous_sessions
 -- =====================================================
 CREATE TABLE anonymous_sessions (
     session_token VARCHAR(255) PRIMARY KEY,
+    anonymous_student_id INT,
     username VARCHAR(255),
     password_hash VARCHAR(255),
     assessment_started TINYINT DEFAULT 0,
     assessment_completed TINYINT DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     expires_at DATETIME,
-    last_activity DATETIME DEFAULT CURRENT_TIMESTAMP
+    last_activity DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (anonymous_student_id) REFERENCES anonymous_students(anonymous_student_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLE: anonymous_followup_contacts
+-- Optional contact details collected only with consent
+-- =====================================================
+CREATE TABLE anonymous_followup_contacts (
+    contact_id INT PRIMARY KEY AUTO_INCREMENT,
+    anonymous_student_id INT NOT NULL,
+    contact_type ENUM('email', 'phone', 'whatsapp', 'other') NOT NULL,
+    contact_value VARCHAR(255) NOT NULL,
+    consented_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_active TINYINT DEFAULT 1,
+    FOREIGN KEY (anonymous_student_id) REFERENCES anonymous_students(anonymous_student_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -56,6 +89,7 @@ CREATE TABLE assessment_questions (
 CREATE TABLE assessments (
     assessment_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT,
+    anonymous_student_id INT,
     anonymous_session_token VARCHAR(255),
     assessment_status ENUM('started', 'completed') DEFAULT 'started',
     assessment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -68,6 +102,7 @@ CREATE TABLE assessments (
     overall_risk_level ENUM('low', 'moderate', 'high') DEFAULT 'low',
     crisis_contact_provided TINYINT DEFAULT 0,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE SET NULL,
+    FOREIGN KEY (anonymous_student_id) REFERENCES anonymous_students(anonymous_student_id) ON DELETE SET NULL,
     FOREIGN KEY (anonymous_session_token) REFERENCES anonymous_sessions(session_token) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -124,16 +159,61 @@ CREATE TABLE resources (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
--- TABLE: staff_accounts (fixed table name)
+-- TABLE: staff_accounts
+-- Shared login and account metadata for all staff roles
 -- =====================================================
 CREATE TABLE staff_accounts (
     staff_id INT PRIMARY KEY AUTO_INCREMENT,
     email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
     name VARCHAR(255) NOT NULL,
     role VARCHAR(255) NOT NULL,
     assigned_group VARCHAR(255),
+    department VARCHAR(255),
+    is_active TINYINT DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_login DATETIME
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLE: sumc_staff
+-- SUMC counsellor-specific features and responsibilities
+-- =====================================================
+CREATE TABLE sumc_staff (
+    staff_id INT PRIMARY KEY,
+    specialization VARCHAR(255),
+    caseload_capacity INT DEFAULT 20,
+    availability_status ENUM('available', 'busy', 'offline') DEFAULT 'available',
+    office_location VARCHAR(255),
+    FOREIGN KEY (staff_id) REFERENCES staff_accounts(staff_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLE: peer_staff
+-- Peer counsellor-specific features and responsibilities
+-- =====================================================
+CREATE TABLE peer_staff (
+    staff_id INT PRIMARY KEY,
+    peer_training_level VARCHAR(100),
+    supervision_status ENUM('supervised', 'independent', 'pending') DEFAULT 'pending',
+    availability_status ENUM('available', 'busy', 'offline') DEFAULT 'available',
+    support_zone VARCHAR(255),
+    supervisor_staff_id INT,
+    FOREIGN KEY (staff_id) REFERENCES staff_accounts(staff_id) ON DELETE CASCADE,
+    FOREIGN KEY (supervisor_staff_id) REFERENCES staff_accounts(staff_id) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =====================================================
+-- TABLE: dean_staff
+-- Dean dashboard-specific features and responsibilities
+-- =====================================================
+CREATE TABLE dean_staff (
+    staff_id INT PRIMARY KEY,
+    office_name VARCHAR(255),
+    reporting_unit VARCHAR(255),
+    access_level ENUM('standard', 'admin') DEFAULT 'standard',
+    review_frequency VARCHAR(255),
+    FOREIGN KEY (staff_id) REFERENCES staff_accounts(staff_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =====================================================
@@ -266,15 +346,33 @@ INSERT INTO resources (resource_id, resource_name, category, description, contac
 (3, 'Mindful Wellness Workshops', 'wellness_workshop', 'Student-led sessions on resilience and balance.', 'SUMC student wellness desk', 'Various campus locations', 'Weekly calendar', 1),
 (4, 'Crisis Helpline 1199', 'crisis', 'Immediate mental health crisis support.', '1199 (toll free)', 'Phone', '24/7', 1);
 
+-- Anonymous student example
+INSERT INTO anonymous_students (anonymous_student_id, anonymous_code, department, year_of_study, consent_to_follow_up) VALUES
+(1, 'ANON-1001', 'Computer Science', 2, 0);
+
 -- Staff Accounts
-INSERT INTO staff_accounts (staff_id, email, name, role, assigned_group) VALUES
-(1, 'sumc@strathmore.ac.ke', 'Jane Doe', 'sumc_counsellor', 'SUMC'),
-(2, 'peer@strathmore.ac.ke', 'Alex Kim', 'peer_counsellor', 'Peer Support');
+INSERT INTO staff_accounts (staff_id, email, password_hash, name, role, assigned_group, department, is_active) VALUES
+(1, 'sumc@strathmore.ac.ke', 'hashed_password_placeholder', 'Jane Doe', 'sumc_counsellor', 'SUMC', 'Student Wellness', 1),
+(2, 'peer@strathmore.ac.ke', 'hashed_password_placeholder', 'Alex Kim', 'peer_counsellor', 'Peer Support', 'Student Affairs', 1),
+(3, 'dean@strathmore.ac.ke', 'hashed_password_placeholder', 'Dr. Sarah Mwangi', 'dean', 'Dean of Students', 'Student Affairs', 1);
+
+-- SUMC counsellor profile
+INSERT INTO sumc_staff (staff_id, specialization, caseload_capacity, availability_status, office_location) VALUES
+(1, 'Student wellbeing and counselling', 20, 'available', 'SUMC, Madaraka Campus');
+
+-- Peer counsellor profile
+INSERT INTO peer_staff (staff_id, peer_training_level, supervision_status, availability_status, support_zone, supervisor_staff_id) VALUES
+(2, 'Certified peer mentor', 'supervised', 'available', 'Student Affairs', 1);
+
+-- Dean profile
+INSERT INTO dean_staff (staff_id, office_name, reporting_unit, access_level, review_frequency) VALUES
+(3, 'Dean of Students Office', 'Student Affairs', 'admin', 'Weekly');
 
 -- Staff database mapping
 INSERT INTO staff_database_registry (staff_id, database_name) VALUES
 (1, 'mindtracksu_staff_1'),
-(2, 'mindtracksu_staff_2');
+(2, 'mindtracksu_staff_2'),
+(3, 'mindtracksu_staff_3');
 
 -- Staff Alerts
 INSERT INTO staff_alerts (alert_id, assessment_id, category, risk_level, alert_status, assigned_staff_id, student_name, student_identifier, created_at) VALUES

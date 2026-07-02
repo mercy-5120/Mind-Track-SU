@@ -90,14 +90,11 @@ export default function LandingPage() {
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
               <Link to="/assessment-intro">
                 <Button>
-                  Start Anonymous Assessment <FaArrowRight />
+                  Continue Anonymously <FaArrowRight />
                 </Button>
               </Link>
               <Link to="/create-account">
-                <Button variant="secondary">Create Anonymous Account</Button>
-              </Link>
-              <Link to="/staff/login">
-                <Button variant="secondary">Staff Login</Button>
+                <Button variant="secondary">Create Student Account</Button>
               </Link>
             </div>
             <div
@@ -159,9 +156,9 @@ export default function LandingPage() {
               <h2>Designed to support your calm, clarity, and next step.</h2>
               <p style={{ marginTop: "12px", color: "var(--warm-gray)" }}>
                 This space helps university students check in with their mental
-                wellness in a private, low-pressure way. It combines a short
-                anonymous assessment with thoughtful resources so support feels
-                approachable, not overwhelming.
+                wellness in a private, low-pressure way. Students can choose to
+                complete the assessment anonymously or create an account to keep
+                a personal history of their check-ins and scores.
               </p>
             </div>
             <img
