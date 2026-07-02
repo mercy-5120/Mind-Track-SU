@@ -1,23 +1,34 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { FaExclamationTriangle, FaHeart, FaLeaf, FaMoon } from "react-icons/fa";
 import Button from "../../components/Button";
+import { getAssessmentHistory, getCurrentStudent } from "../../utils/studentSession";
 
 export default function FeedbackScreen() {
-  const [feedback] = useState({
-    overallScore: 72,
-    categories: [
-      { name: "Anxiety", score: 65, level: "Moderate", icon: <FaHeart /> },
-      { name: "Depression", score: 55, level: "Low", icon: <FaLeaf /> },
-      {
-        name: "Burnout",
-        score: 85,
-        level: "High",
-        icon: <FaExclamationTriangle />,
-      },
-      { name: "Sleep", score: 70, level: "Moderate", icon: <FaMoon /> },
-    ],
-  });
+  const currentStudent = getCurrentStudent();
+  const history = getAssessmentHistory(currentStudent);
+  const latest = history[history.length - 1] || null;
+  const feedback = latest
+    ? {
+        overallScore: latest.overallScore,
+        categories: latest.categories.map((cat) => ({
+          ...cat,
+          icon:
+            cat.name === "Burnout" ? (
+              <FaExclamationTriangle />
+            ) : cat.name === "Sleep" ? (
+              <FaMoon />
+            ) : cat.name === "Depression" ? (
+              <FaLeaf />
+            ) : (
+              <FaHeart />
+            ),
+        })),
+      }
+    : {
+        overallScore: 0,
+        categories: [],
+      };
 
   const highRisk = feedback.categories.some((cat) => cat.level === "High");
 
@@ -27,7 +38,7 @@ export default function FeedbackScreen() {
         <div className="card">
           <h1 style={{ marginBottom: "8px" }}>Your Wellness Summary</h1>
           <p style={{ color: "var(--warm-gray)", marginBottom: "24px" }}>
-            Here is a calm overview of how your recent check-in reads.
+            Here is a calm overview of your recent check-in and your saved assessment history.
           </p>
 
           <div
@@ -138,6 +149,36 @@ export default function FeedbackScreen() {
               support person.
             </p>
           </div>
+
+          {history.length > 0 ? (
+            <div style={{ marginBottom: "24px" }}>
+              <h3 style={{ marginBottom: "10px" }}>Assessment history</h3>
+              <div style={{ display: "grid", gap: "10px" }}>
+                {history
+                  .slice()
+                  .reverse()
+                  .map((entry) => (
+                    <div
+                      key={entry.id}
+                      style={{
+                        padding: "12px 14px",
+                        borderRadius: "12px",
+                        background: "rgba(212,184,180,0.18)",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
+                        <strong>{new Date(entry.taken_at).toLocaleDateString()}</strong>
+                        <span>Score: {entry.overallScore}/100</span>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          ) : (
+            <p style={{ color: "var(--warm-gray)", marginBottom: "24px" }}>
+              Your assessment history will appear here after you complete a check-in.
+            </p>
+          )}
 
           <div style={{ marginBottom: "24px" }}>
             <h3 style={{ marginBottom: "10px" }}>Wellness tips</h3>

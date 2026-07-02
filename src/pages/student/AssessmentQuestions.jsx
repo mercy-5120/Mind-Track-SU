@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Button from "../../components/Button";
+import { getCurrentStudent, saveAssessmentResult } from "../../utils/studentSession";
 
 export default function AssessmentQuestion() {
   const navigate = useNavigate();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState(Array(10).fill(""));
+  const currentStudent = getCurrentStudent();
   const questions = [
     {
       id: 1,
@@ -75,6 +77,39 @@ export default function AssessmentQuestion() {
     setAnswers(nextAnswers);
   };
 
+  const calculateResult = (selectedAnswers) => {
+    const optionScores = {
+      "Not at all": 0,
+      "Several days": 1,
+      "More than half the days": 2,
+      "Nearly every day": 3,
+      "Prefer not to answer": 0,
+    };
+
+    const categoryIndexes = {
+      Anxiety: [0, 4],
+      Depression: [1, 5, 9],
+      Burnout: [2, 7],
+      Sleep: [3, 8],
+    };
+
+    const categories = Object.entries(categoryIndexes).map(([name, indexes]) => {
+      const total = indexes.reduce(
+        (sum, index) => sum + optionScores[selectedAnswers[index]] || 0,
+        0,
+      );
+      const score = Math.round((total / (indexes.length * 3)) * 100);
+      const level = score >= 70 ? "High" : score >= 40 ? "Moderate" : "Low";
+      return { name, score, level };
+    });
+
+    const overallScore = Math.round(
+      categories.reduce((sum, category) => sum + category.score, 0) / categories.length,
+    );
+
+    return { overallScore, categories, answers: selectedAnswers };
+  };
+
   const goNext = () => {
     if (!answers[currentQuestion]) {
       alert("Please select an option before continuing.");
@@ -83,7 +118,9 @@ export default function AssessmentQuestion() {
     if (currentQuestion < total - 1) {
       setCurrentQuestion(currentQuestion + 1);
     } else {
-      navigate("/completion");
+      const result = calculateResult(answers);
+      saveAssessmentResult(currentStudent, result);
+      navigate("/completion", { state: { result } });
     }
   };
 

@@ -1,18 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaLock, FaShieldAlt } from "react-icons/fa";
+import { FaShieldAlt } from "react-icons/fa";
 import Button from "../../components/Button";
 
 export default function AssessmentIntro() {
   const navigate = useNavigate();
-  const [password, setPassword] = useState("");
 
   const handleStart = (e) => {
     e.preventDefault();
-    if (!password.trim()) {
-      alert("Please enter a password to begin your anonymous assessment.");
-      return;
-    }
     navigate("/assessment");
   };
 
@@ -64,7 +59,7 @@ export default function AssessmentIntro() {
                 <FaShieldAlt
                   style={{ color: "var(--secondary)", marginRight: "8px" }}
                 />
-                Your responses stay anonymous
+                Your responses stay anonymous unless you choose to create an account
               </li>
             </ul>
           </div>
@@ -72,50 +67,13 @@ export default function AssessmentIntro() {
             onSubmit={handleStart}
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
           >
-            <label
-              htmlFor="assessment-password"
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "6px",
-                fontWeight: 600,
-              }}
-            >
-              Enter a password to begin
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  border: "1.5px solid var(--dusty-rose)",
-                  borderRadius: "12px",
-                  padding: "12px 16px",
-                  background: "var(--background)",
-                }}
-              >
-                <FaLock style={{ color: "var(--primary)" }} />
-                <input
-                  id="assessment-password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a private password"
-                  style={{
-                    border: "none",
-                    outline: "none",
-                    background: "transparent",
-                    flex: 1,
-                  }}
-                />
-              </div>
-            </label>
             <Button type="submit" full>
-              Start Assessment
+              Start Anonymous Assessment
             </Button>
           </form>
           <div style={{ textAlign: "center", marginTop: "16px" }}>
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/login")}
               style={{
                 background: "transparent",
                 border: "none",
@@ -123,7 +81,7 @@ export default function AssessmentIntro() {
                 cursor: "pointer",
               }}
             >
-              I'll do this later
+              Sign in to your student account
             </button>
           </div>
         </div>
