@@ -1,5 +1,16 @@
 const API_BASE = 'http://localhost:3001/api/staff';
 
+const getStaffIdQuery = () => {
+  const id = sessionStorage.getItem('staffId');
+  return id ? `${id}` : null;
+};
+
+const appendStaffId = (path) => {
+  const staffId = getStaffIdQuery();
+  if (!staffId) return path;
+  return `${path}${path.includes('?') ? '&' : '?'}staffId=${encodeURIComponent(staffId)}`;
+};
+
 const mockStaffAccounts = [
   { staff_id: 1, email: 'sumc@strathmore.edu', name: 'Jane Doe', role: 'sumc_counsellor' },
   { staff_id: 2, email: 'peer@strathmore.edu', name: 'Alex Kim', role: 'peer_counsellor' },
@@ -38,7 +49,7 @@ const happyFetch = async (url, options) => {
 
 const fetchJson = async (path, fallback) => {
   try {
-    return await happyFetch(`${API_BASE}${path}`);
+    return await happyFetch(`${API_BASE}${appendStaffId(path)}`);
   } catch (error) {
     console.warn('Staff API fallback active:', error.message);
     return fallback;
@@ -58,7 +69,7 @@ export async function getAlert(id) {
 
 export async function updateAlertStatus(id, status) {
   try {
-    return await happyFetch(`${API_BASE}/alerts/${id}/status`, {
+    return await happyFetch(`${API_BASE}${appendStaffId(`/alerts/${id}/status`)}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
@@ -99,7 +110,7 @@ export async function createFollowUp(alertIdOrPayload, staffId, notes) {
     : { alertId: alertIdOrPayload, staffId, notes };
 
   try {
-    return await happyFetch(`${API_BASE}/followups`, {
+    return await happyFetch(`${API_BASE}${appendStaffId('/followups')}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -121,7 +132,7 @@ export async function createFollowUp(alertIdOrPayload, staffId, notes) {
 
 export async function createReferral(payload) {
   try {
-    return await happyFetch(`${API_BASE}/referrals`, {
+    return await happyFetch(`${API_BASE}${appendStaffId('/referrals')}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),

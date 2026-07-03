@@ -71,9 +71,11 @@ export default function SUMCDashboard() {
         <div className={styles.quickActions}>
           <h2>Quick Actions</h2>
           <div className={styles.sumcOnly}>
-            <button className={buttonStyles.btnPrimary} onClick={() => navigate('/staff/high-risk-alerts')}><i className="fas fa-eye"></i> View All High-Risk Alerts</button>
+            <button className={buttonStyles.btnPrimary} onClick={() => navigate('/staff/high-risk-alerts')}><i className="fas fa-eye"></i> View High-Risk Alerts</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/create-referral')}><i className="fas fa-plus"></i> Create Referral</button>
             <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/schedule-sessions')}><i className="fas fa-calendar-check"></i> Schedule Session</button>
-            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/referrals')}><i className="fas fa-user-md"></i> Review Referrals</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/add-resources')}><i className="fas fa-book-plus"></i> Add Resource</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/follow-up-notes')}><i className="fas fa-sticky-note"></i> Follow-up Notes</button>
           </div>
         </div>
       </section>
