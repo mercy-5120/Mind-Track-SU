@@ -5,26 +5,37 @@ import StaffBrand from './StaffBrand';
 
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
-
   const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase();
-  const dashboardHref = role === 'peer_counsellor'
-    ? '/staff/peer-dashboard'
-    : role === 'dean'
-      ? '/staff/dean-dashboard'
-      : '/staff/dashboard';
 
-  // Role-based navigation
+  const dashboardHref = role === 'peer_counsellor'
+    ? '/staff/peer/dashboard'
+    : role === 'dean'
+      ? '/staff/dean/dashboard'
+      : '/staff/sumc/dashboard';
+
   const navItems = role === 'dean'
     ? [
-        { href: dashboardHref, label: 'Dean Dashboard', icon: 'fas fa-chart-line', badge: null },
+        { href: '/staff/dean/dashboard', label: 'Dean Dashboard', icon: 'fas fa-chart-line' },
       ]
-    : [
-        { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
-        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: null },
-        { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
-        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
-        { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
-        { href: '/staff/follow-up-notes', label: 'Notes', icon: 'fas fa-sticky-note', badge: null },
+    : role === 'peer_counsellor'
+      ? [
+        { href: '/staff/peer/dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt' },
+        { href: '/staff/peer/referrals', label: 'Referrals', icon: 'fas fa-user-md' },
+        { href: '/staff/peer/resources', label: 'Resources', icon: 'fas fa-book' },
+        { href: '/staff/peer/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check' },
+        { href: '/staff/peer/follow-up-notes', label: 'Follow-Up Notes', icon: 'fas fa-sticky-note' },
+        { href: '/staff/peer/settings', label: 'Settings', icon: 'fas fa-cog' },
+      ]
+      : [
+        { href: '/staff/sumc/dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt' },
+        { href: '/staff/sumc/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
+        { href: '/staff/sumc/create-referral', label: 'Create Referral', icon: 'fas fa-plus' },
+        { href: '/staff/sumc/referrals', label: 'Referrals', icon: 'fas fa-user-md' },
+        { href: '/staff/sumc/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check' },
+        { href: '/staff/sumc/resources', label: 'Resources', icon: 'fas fa-book' },
+        { href: '/staff/sumc/add-resources', label: 'Add Resources', icon: 'fas fa-book-medical' },
+        { href: '/staff/sumc/follow-up-notes', label: 'Follow-Up Notes', icon: 'fas fa-sticky-note' },
+        { href: '/staff/sumc/settings', label: 'Settings', icon: 'fas fa-cog' },
       ];
 
   const isActive = (path) => location.pathname === path;
@@ -44,7 +55,6 @@ export default function Sidebar({ open, onClose }) {
               <Link to={item.href} onClick={onClose}>
                 <i className={item.icon}></i>
                 {item.label}
-                {item.badge && <span className={styles.badge}>{item.badge}</span>}
               </Link>
             </li>
           ))}

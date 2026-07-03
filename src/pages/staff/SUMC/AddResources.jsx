@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
 
 export default function AddResources() {
   const navigate = useNavigate();

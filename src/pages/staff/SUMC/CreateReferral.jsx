@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
+import { createReferral } from '../../../api/staffApi';
 
 export default function CreateReferral() {
   const navigate = useNavigate();
@@ -48,28 +49,20 @@ export default function CreateReferral() {
     setSubmitting(true);
 
     try {
-      // Create referral object
-      const referral = {
-        referral_id: Date.now(),
-        alert_id: parseInt(formData.alertId),
-        referred_to: formData.referredTo,
-        reason: formData.reason,
-        priority: formData.priority,
+      await createReferral({
+        alertId: parseInt(formData.alertId, 10),
+        studentId: formData.studentId,
+        referredTo: formData.referredTo,
         notes: formData.notes,
-        referral_status: 'pending',
-        created_at: new Date().toISOString(),
-        created_by: sessionStorage.getItem('staffName') || 'Staff'
-      };
-
-      // Store in localStorage
-      const existingReferrals = JSON.parse(localStorage.getItem('referrals') || '[]');
-      existingReferrals.push(referral);
-      localStorage.setItem('referrals', JSON.stringify(existingReferrals));
+        referralStatus: 'pending',
+        studentName: formData.studentId,
+        priority: formData.priority,
+      });
 
       alert('Referral created successfully!');
-      navigate('/staff/referrals');
+      navigate('/staff/sumc/referrals');
     } catch (error) {
-      alert('Error creating referral: ' + error.message);
+      alert('Error creating referral: ' + (error.message || 'Unknown error'));
     } finally {
       setSubmitting(false);
     }
@@ -236,7 +229,7 @@ export default function CreateReferral() {
                 <button
                   type="button"
                   className={buttonStyles.btnSecondary}
-                  onClick={() => navigate('/staff/referrals')}
+                  onClick={() => navigate('/staff/sumc/referrals')}
                 >
                   Cancel
                 </button>
