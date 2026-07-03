@@ -170,7 +170,7 @@ export default function StaffLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const staff = await loginStaff(formData.email);
+      const staff = await loginStaff(formData.email, formData.password);
       const role = staff?.role || (formData.email.toLowerCase().includes('peer') ? 'peer_counsellor' : 'sumc_counsellor');
       const id = staff?.staff_id ?? (role === 'peer_counsellor' ? 2 : 1);
       const name = staff?.name ?? (role === 'peer_counsellor' ? 'Alex Kim' : 'Jane Doe');
@@ -188,6 +188,11 @@ export default function StaffLogin() {
         navigate('/staff/sumc/dashboard');
       }
     } catch (error) {
+      if (error.status === 401 || error.status === 404) {
+        setErrorMessage(error.message || 'Invalid email or password.');
+        return;
+      }
+
       const role = formData.email.toLowerCase().includes('peer') ? 'peer_counsellor' : 'sumc_counsellor';
       const id = role === 'peer_counsellor' ? 2 : 1;
       const name = role === 'peer_counsellor' ? 'Alex Kim' : 'Jane Doe';

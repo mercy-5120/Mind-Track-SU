@@ -1,6 +1,7 @@
 const STUDENT_STORAGE_KEY = "mindtracksu_students";
 const CURRENT_STUDENT_KEY = "mindtracksu_current_student";
 const ASSESSMENT_HISTORY_KEY = "mindtracksu_assessment_history";
+const CRISIS_ALERTS_KEY = "mindtracksu_crisis_alerts";
 
 const readStorage = (key, fallback) => {
   if (typeof window === "undefined") return fallback;
@@ -54,24 +55,31 @@ export const getStoredStudents = () => {
   return students;
 };
 
-export const registerStudent = ({ username, password, displayName }) => {
+export const registerStudent = ({ username, password, displayName, studentId, department, yearOfStudy }) => {
   const students = getStoredStudents();
   const normalizedUsername = username.trim().toLowerCase();
   const existingStudent = students.find(
     (student) => student.username.toLowerCase() === normalizedUsername,
+  );
+  const existingStudentId = students.find(
+    (student) => student.student_id === studentId?.trim(),
   );
 
   if (existingStudent) {
     throw new Error("That username is already in use.");
   }
 
+  if (studentId && existingStudentId) {
+    throw new Error("That student ID is already registered.");
+  }
+
   const student = {
-    student_id: createStudentId(),
+    student_id: studentId?.trim() || createStudentId(),
     username: username.trim(),
     password_hash: hashPassword(password),
     display_name: displayName?.trim() || username.trim(),
-    department: "",
-    year_of_study: null,
+    department: department?.trim() || "",
+    year_of_study: yearOfStudy ? Number(yearOfStudy) : null,
     anonymous_account: 0,
     is_active: 1,
     created_at: new Date().toISOString(),
@@ -87,7 +95,9 @@ export const loginStudent = (username, password) => {
   const students = getStoredStudents();
   const normalizedUsername = username.trim().toLowerCase();
   const student = students.find(
-    (candidate) => candidate.username.toLowerCase() === normalizedUsername,
+    (candidate) =>
+      candidate.username.toLowerCase() === normalizedUsername ||
+      candidate.student_id?.toLowerCase() === normalizedUsername,
   );
 
   if (!student || student.password_hash !== hashPassword(password)) {
@@ -133,6 +143,35 @@ export const saveAssessmentResult = (student, result) => {
   const nextHistory = [...history, entry];
   writeStorage(ASSESSMENT_HISTORY_KEY, nextHistory);
   return entry;
+};
+
+export const saveCrisisAlert = (student, contactInfo) => {
+  const alerts = readStorage(CRISIS_ALERTS_KEY, []);
+  const entry = {
+    alert_id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    created_at: new Date().toISOString(),
+    contact_info: contactInfo.trim(),
+    student_id: student?.student_id ?? null,
+    student_identifier: student
+      ? `${student.display_name || student.username}`
+      : `Anonymous ••••• ${contactInfo.slice(-4)}`,
+    status: "crisis_contacted",
+    category: "crisis",
+    risk_level: "high",
+    alert_status: "new",
+    description: "Student requested crisis counselor contact",
+  };
+
+  const nextAlerts = [...alerts, entry];
+  writeStorage(CRISIS_ALERTS_KEY, nextAlerts);
+  return entry;
+};
+
+export const getCrisisAlerts = (student) => {
+  const alerts = readStorage(CRISIS_ALERTS_KEY, []);
+  if (!Array.isArray(alerts)) return [];
+  if (!student) return alerts.filter((alert) => alert.student_id === null);
+  return alerts.filter((alert) => alert.student_id === student.student_id);
 };
 
 export const getAssessmentHistory = (student) => {

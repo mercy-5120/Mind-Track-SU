@@ -15,6 +15,9 @@ import CrisisPrompt from "./pages/student/CrisisPrompt";
 import CreateAccount from "./pages/user/CreateAccount";
 import Login from "./pages/user/Login";
 import ForgotPassword from "./pages/user/ForgotPassword";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentProfile from "./pages/student/StudentProfile";
+import StudentHistory from "./pages/student/StudentHistory";
 //STAFF PAGES
 import StaffLogin from "./pages/staff/StaffLogin";
 import SUMCDashboard from "./pages/staff/SUMC/SUMCDashboard";
@@ -106,6 +109,9 @@ function App() {
           <Route path="/feedback" element={<FeedbackScreen />} />
           <Route path="/resources" element={<ResourceDirectory />} />
           <Route path="/crisis" element={<CrisisPrompt />} />
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/profile" element={<StudentProfile />} />
+          <Route path="/student/history" element={<StudentHistory />} />
           <Route path="/create-account" element={<CreateAccount />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

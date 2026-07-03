@@ -110,14 +110,25 @@ const guessRoleFromEmail = (email) => {
   return 'sumc_counsellor';
 };
 
-export async function loginStaff(email) {
+export async function loginStaff(email, password) {
   try {
-    const response = await fetch(`${API_BASE}/login?email=${encodeURIComponent(email)}`);
+    const response = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
     if (!response.ok) {
-      throw new Error(`login failed: ${response.status}`);
+      const error = new Error(`login failed: ${response.status}`);
+      error.status = response.status;
+      throw error;
     }
+
     return await response.json();
   } catch (error) {
+    if (error.status === 401 || error.status === 404) {
+      throw error;
+    }
     console.warn('Staff login backend unavailable:', error.message);
     const role = guessRoleFromEmail(email);
     return {
