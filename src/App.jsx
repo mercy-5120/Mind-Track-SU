@@ -18,7 +18,7 @@ import SUMCDashboard from "./pages/staff/SUMCDashboard";
 import PeerDashboard from "./pages/staff/PeerDashboard";
 import DeanDashboard from "./pages/staff/DeanDashboard";
 import HighRiskAlerts from "./pages/staff/HighRiskAlerts";
-import Referrals from "./pages/staff/Referrals";
+import Referrals from "./pages/staff/PeerCounsellors/Referrals";
 import Resources from "./pages/staff/Resources";
 import ScheduleSessions from "./pages/staff/ScheduleSessions";
 import Settings from "./pages/staff/Settings";
@@ -53,7 +53,10 @@ function App() {
           <Route path="/staff/create-referral" element={<CreateReferral />} />
           <Route path="/staff/resources" element={<Resources />} />
           <Route path="/staff/add-resources" element={<AddResources />} />
-          <Route path="/staff/schedule-sessions" element={<ScheduleSessions />} />
+          <Route
+            path="/staff/schedule-sessions"
+            element={<ScheduleSessions />}
+          />
           <Route path="/staff/follow-up-notes" element={<FollowUpNotes />} />
           <Route path="/staff/settings" element={<Settings />} />
           <Route path="/staff/alert-details" element={<AlertDetails />} />
@@ -67,7 +70,10 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-and-conditions"element={<TermsandConditions />}/>
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsandConditions />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
+import Layout from '../../../components/Layout';
 import styles from '../../styles/Dashboard.module.css';
 import buttonStyles from '../../styles/Button.module.css';
-import { getAlerts, getReferrals, getResources } from '../../api/staffApi';
+import { getAlerts, getReferrals, getResources } from '../../../api/staffApi';
 
 export default function PeerDashboard() {
   const navigate = useNavigate();
