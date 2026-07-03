@@ -5,10 +5,10 @@ import buttonStyles from '../../styles/Button.module.css';
 
 export default function Settings() {
   const [formData, setFormData] = useState({
-    fullName: 'Jane Doe',
-    email: 'jane.doe@strathmore.ac.ke',
+    fullName: sessionStorage.getItem('staffName') || 'Staff Member',
+    email: sessionStorage.getItem('staffEmail') || 'staff@example.com',
     phone: '+254 712 345 678',
-    department: 'Student Mental Health',
+    department: sessionStorage.getItem('staffRole') === 'peer_counsellor' ? 'Peer Support' : 'Student Mental Health',
     notifications: true,
   });
   const [message, setMessage] = useState('');
@@ -19,6 +19,8 @@ export default function Settings() {
   };
 
   const handleSave = () => {
+    sessionStorage.setItem('staffName', formData.fullName);
+    sessionStorage.setItem('staffEmail', formData.email);
     setMessage('Settings saved locally for this session.');
   };
 

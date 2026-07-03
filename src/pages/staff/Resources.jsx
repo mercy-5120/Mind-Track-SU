@@ -25,8 +25,8 @@ export default function Resources() {
             <tbody>
               {resources.map((resource) => (
                 <tr key={resource.resource_id}>
-                  <td>{resource.title}</td>
-                  <td>{resource.resource_type}</td>
+                  <td>{resource.resource_name || resource.title || 'Untitled resource'}</td>
+                  <td>{resource.category || resource.resource_type || 'Other'}</td>
                   <td>{resource.created_at?.slice(0, 10) || '—'}</td>
                   <td><button style={{ background: 'var(--deep-indigo)', color: 'white', border: 'none', padding: '6px 10px', borderRadius: '6px', cursor: 'pointer' }}>View</button></td>
                 </tr>
