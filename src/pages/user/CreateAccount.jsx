@@ -34,9 +34,9 @@ export default function CreateAccount() {
         <div className="auth-card">
           <div className="auth-header">
             <img src={logo} alt="MindTrackSU logo" className="auth-logo" />
-            <h1>Create Your Anonymous Account</h1>
+            <h1>Create Your Account</h1>
             <p>
-              Choose a username and password to return to your private
+              Choose a username and password to return to your 
               check-ins.
             </p>
           </div>
@@ -69,7 +69,8 @@ export default function CreateAccount() {
               required
             />
             <p style={{ color: "var(--warm-gray)", fontSize: "0.9rem" }}>
-              This creates a normal student account so you can keep your own assessment history and return later.
+              This creates a normal student account so you can keep your own
+              assessment history and return later.
             </p>
             <Button type="submit" full>
               Create Account

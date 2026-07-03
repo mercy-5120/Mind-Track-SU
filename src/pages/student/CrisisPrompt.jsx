@@ -58,7 +58,8 @@ export default function CrisisPrompt() {
               borderRadius: "12px",
             }}
           >
-            <p
+            <a
+              href="tel:1199"
               style={{
                 fontWeight: 600,
                 color: "var(--brick-dust)",
@@ -66,10 +67,11 @@ export default function CrisisPrompt() {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
+                textDecoration: "none",
               }}
             >
               <FaPhoneAlt /> Call 1199 for immediate support
-            </p>
+            </a>
           </div>
           <p
             style={{

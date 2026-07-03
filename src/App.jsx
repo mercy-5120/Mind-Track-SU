@@ -18,6 +18,11 @@ import SUMCDashboard from "./pages/staff/SUMCDashboard";
 import PeerDashboard from "./pages/staff/PeerDashboard";
 import DeanDashboard from "./pages/staff/DeanDashboard";
 import "./styles/globals.css";
+import PrivacyPolicy from "./pages/user/PrivacyPolicy";
+import TermsandConditions from "./pages/user/TermsandConditions";
+
+// Add these routes:
+
 
 function App() {
   const location = useLocation();
@@ -46,6 +51,8 @@ function App() {
           <Route path="/create-account" element={<CreateAccount />} />
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms-and-conditions"element={<TermsandConditions />}/>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>

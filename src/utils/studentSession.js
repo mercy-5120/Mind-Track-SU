@@ -123,7 +123,8 @@ export const saveAssessmentResult = (student, result) => {
   const entry = {
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     student_id: student?.student_id ?? null,
-    student_name: student?.display_name || student?.username || "Anonymous student",
+    student_name:
+      student?.display_name || student?.username || "Anonymous student",
     mode: student ? "student" : "anonymous",
     taken_at: new Date().toISOString(),
     ...result,

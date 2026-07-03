@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Button from "../../components/Button";
-import { getCurrentStudent, saveAssessmentResult } from "../../utils/studentSession";
+import {
+  getCurrentStudent,
+  saveAssessmentResult,
+} from "../../utils/studentSession";
 
 export default function AssessmentQuestion() {
   const navigate = useNavigate();
@@ -93,18 +96,21 @@ export default function AssessmentQuestion() {
       Sleep: [3, 8],
     };
 
-    const categories = Object.entries(categoryIndexes).map(([name, indexes]) => {
-      const total = indexes.reduce(
-        (sum, index) => sum + optionScores[selectedAnswers[index]] || 0,
-        0,
-      );
-      const score = Math.round((total / (indexes.length * 3)) * 100);
-      const level = score >= 70 ? "High" : score >= 40 ? "Moderate" : "Low";
-      return { name, score, level };
-    });
+    const categories = Object.entries(categoryIndexes).map(
+      ([name, indexes]) => {
+        const total = indexes.reduce(
+          (sum, index) => sum + optionScores[selectedAnswers[index]] || 0,
+          0,
+        );
+        const score = Math.round((total / (indexes.length * 3)) * 100);
+        const level = score >= 70 ? "High" : score >= 40 ? "Moderate" : "Low";
+        return { name, score, level };
+      },
+    );
 
     const overallScore = Math.round(
-      categories.reduce((sum, category) => sum + category.score, 0) / categories.length,
+      categories.reduce((sum, category) => sum + category.score, 0) /
+        categories.length,
     );
 
     return { overallScore, categories, answers: selectedAnswers };

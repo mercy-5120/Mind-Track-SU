@@ -126,6 +126,7 @@ export default function Footer() {
                 display: "block",
                 color: "#ffffff",
                 textDecoration: "none",
+                marginBottom: "8px",
                 fontSize: "0.9rem",
               }}
             >
@@ -154,29 +155,35 @@ export default function Footer() {
             >
               Legal
             </h3>
-            <a
-              href="#privacy"
+            <Link
+              to="/privacy-policy"
               style={{
                 display: "block",
                 color: "#ffffff",
                 textDecoration: "none",
                 marginBottom: "8px",
                 fontSize: "0.9rem",
+                transition: "opacity 0.2s",
               }}
+              onMouseEnter={(e) => (e.target.style.opacity = "0.7")}
+              onMouseLeave={(e) => (e.target.style.opacity = "1")}
             >
               Privacy Policy
-            </a>
-            <a
-              href="#terms"
+            </Link>
+            <Link
+              to="/terms-and-conditions"
               style={{
                 display: "block",
                 color: "#ffffff",
                 textDecoration: "none",
                 fontSize: "0.9rem",
+                transition: "opacity 0.2s",
               }}
+              onMouseEnter={(e) => (e.target.style.opacity = "0.7")}
+              onMouseLeave={(e) => (e.target.style.opacity = "1")}
             >
-              Terms of Service
-            </a>
+              Terms & Conditions
+            </Link>
           </div>
         </div>
         <div
@@ -189,7 +196,7 @@ export default function Footer() {
           }}
         >
           <p>
-            &copy; 2024 MindTrackSU. All rights reserved. Your privacy is our
+            &copy; 2026 MindTrackSU. All rights reserved. Your privacy is our
             priority.
           </p>
         </div>

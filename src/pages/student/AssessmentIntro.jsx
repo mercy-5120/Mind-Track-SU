@@ -59,7 +59,8 @@ export default function AssessmentIntro() {
                 <FaShieldAlt
                   style={{ color: "var(--secondary)", marginRight: "8px" }}
                 />
-                Your responses stay anonymous unless you choose to create an account
+                Your responses stay anonymous unless you choose to create an
+                account
               </li>
             </ul>
           </div>
@@ -68,7 +69,7 @@ export default function AssessmentIntro() {
             style={{ display: "flex", flexDirection: "column", gap: "16px" }}
           >
             <Button type="submit" full>
-              Start Anonymous Assessment
+              Start Assessment
             </Button>
           </form>
           <div style={{ textAlign: "center", marginTop: "16px" }}>
