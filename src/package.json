@@ -4,11 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 4173"
+    "dev": "cd src && vite --host 0.0.0.0 --port 3000",
+    "build": "cd src && vite build",
+    "preview": "cd src && vite preview --host 0.0.0.0 --port 4173",
+    "start": "node ./src/server/index.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^16.4.0",
     "express": "^5.2.1",
