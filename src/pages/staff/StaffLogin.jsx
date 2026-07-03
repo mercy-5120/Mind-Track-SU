@@ -182,6 +182,8 @@ export default function StaffLogin() {
 
       if (role === 'peer_counsellor') {
         navigate('/staff/peer-dashboard');
+      } else if (role === 'dean') {
+        navigate('/staff/dean-dashboard');
       } else {
         navigate('/staff/dashboard');
       }
