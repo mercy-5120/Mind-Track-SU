@@ -65,10 +65,10 @@ export default function LandingPage() {
               display: "grid",
               gap: "24px",
               background: "rgba(255,255,255,0.78)",
-              backdropFilter: "blur(14px)",
-              backgroundImage: `linear-gradient(120deg, rgba(255,255,255,0.88), rgba(255,255,255,0.62)), url(${landingBackground})`,
-              backgroundSize: "cover",
+              backdropFilter: "blur(10px)",
+              backgroundImage: `linear-gradient(120deg, rgba(255,255,255,0.60), rgba(255,255,255,0.40)), url(${landingBackground})`,
               backgroundPosition: "center",
+              backgroundSize: "cover",
               border: "1px solid rgba(255,255,255,0.5)",
             }}
           >
@@ -78,7 +78,7 @@ export default function LandingPage() {
               <p
                 style={{
                   marginTop: "16px",
-                  color: "var(--warm-gray)",
+                  color: "black",
                   fontSize: "1.05rem",
                 }}
               >
@@ -88,13 +88,13 @@ export default function LandingPage() {
               </p>
             </div>
             <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
+              <Link to="/create-account">
+                <Button variant="secondary">Create Account</Button>
+              </Link>
               <Link to="/assessment-intro">
                 <Button>
                   Continue Anonymously <FaArrowRight />
                 </Button>
-              </Link>
-              <Link to="/create-account">
-                <Button variant="secondary">Create Student Account</Button>
               </Link>
             </div>
             <div
@@ -128,7 +128,7 @@ export default function LandingPage() {
                       {feature.title}
                     </h3>
                     <p
-                      style={{ color: "var(--warm-gray)", fontSize: "0.95rem" }}
+                      style={{ color: "#161617", fontSize: "0.95rem" }}
                     >
                       {feature.text}
                     </p>

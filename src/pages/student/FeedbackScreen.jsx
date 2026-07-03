@@ -2,7 +2,10 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FaExclamationTriangle, FaHeart, FaLeaf, FaMoon } from "react-icons/fa";
 import Button from "../../components/Button";
-import { getAssessmentHistory, getCurrentStudent } from "../../utils/studentSession";
+import {
+  getAssessmentHistory,
+  getCurrentStudent,
+} from "../../utils/studentSession";
 
 export default function FeedbackScreen() {
   const currentStudent = getCurrentStudent();
@@ -38,7 +41,8 @@ export default function FeedbackScreen() {
         <div className="card">
           <h1 style={{ marginBottom: "8px" }}>Your Wellness Summary</h1>
           <p style={{ color: "var(--warm-gray)", marginBottom: "24px" }}>
-            Here is a calm overview of your recent check-in and your saved assessment history.
+            Here is a calm overview of your recent check-in and your saved
+            assessment history.
           </p>
 
           <div
@@ -166,8 +170,17 @@ export default function FeedbackScreen() {
                         background: "rgba(212,184,180,0.18)",
                       }}
                     >
-                      <div style={{ display: "flex", justifyContent: "space-between", gap: "12px", flexWrap: "wrap" }}>
-                        <strong>{new Date(entry.taken_at).toLocaleDateString()}</strong>
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: "12px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <strong>
+                          {new Date(entry.taken_at).toLocaleDateString()}
+                        </strong>
                         <span>Score: {entry.overallScore}/100</span>
                       </div>
                     </div>
@@ -176,7 +189,8 @@ export default function FeedbackScreen() {
             </div>
           ) : (
             <p style={{ color: "var(--warm-gray)", marginBottom: "24px" }}>
-              Your assessment history will appear here after you complete a check-in.
+              Your assessment history will appear here after you complete a
+              check-in.
             </p>
           )}
 

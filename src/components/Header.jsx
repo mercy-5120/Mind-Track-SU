@@ -27,6 +27,21 @@ export default function Header() {
     fontSize: "0.95rem",
   };
 
+  // Blue button style for Create Account
+  const createAccountButtonStyle = {
+    color: "white",
+    textDecoration: "none",
+    fontWeight: 600,
+    fontSize: "0.95rem",
+    background: "var(--primary)",
+    padding: "8px 20px",
+    borderRadius: "20px",
+    display: "inline-block",
+    textAlign: "center",
+    transition: "opacity 0.2s, transform 0.2s",
+    boxShadow: "0 2px 8px rgba(42,42,114,0.2)",
+  };
+
   const navLinks = (
     <>
       <Link to="/" style={navLinkStyle} onClick={() => setMenuOpen(false)}>
@@ -44,8 +59,16 @@ export default function Header() {
       </Link>
       <Link
         to="/create-account"
-        style={navLinkStyle}
+        style={createAccountButtonStyle}
         onClick={() => setMenuOpen(false)}
+        onMouseEnter={(e) => {
+          e.target.style.opacity = "0.85";
+          e.target.style.transform = "translateY(-1px)";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.opacity = "1";
+          e.target.style.transform = "translateY(0)";
+        }}
       >
         Create Account
       </Link>
@@ -87,12 +110,19 @@ export default function Header() {
             minWidth: 0,
           }}
         >
-          <img
-            src={logo}
-            alt="MindTrackSU logo"
-            style={{ width: "56px", height: "56px", flexShrink: 0 }}
-          />
-          <span style={{ whiteSpace: "nowrap" }}>MindTrackSU</span>
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <img
+              src={logo}
+              alt="MindTrackSU logo"
+              style={{
+                width: "80px",
+                height: "56px",
+                flexShrink: 0,
+                marginRight: "-10px",
+              }}
+            />
+            <span style={{ whiteSpace: "nowrap" }}>MindTrackSU</span>
+          </div>
         </Link>
 
         {isMobile ? (
@@ -107,8 +137,8 @@ export default function Header() {
               justifyContent: "center",
               gap: "4px",
               border: "1px solid rgba(45,45,52,0.15)",
-              borderRadius: "8px",
-              background: "white",
+              borderRadius: "20px",
+              background: "transparent",
               padding: "8px",
               cursor: "pointer",
             }}
