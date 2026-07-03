@@ -1,9 +1,13 @@
-import React from 'react';
-import styles from '../styles/Layout.module.css'; 
+import React, { useEffect, useState } from "react";
+import styles from "../styles/DeanLayout.module.css";
 
 export default function DeanLayout({ children, title }) {
-  const storedName = sessionStorage.getItem('staffName') || 'Dean';
-  const avatarName = storedName.split(' ').slice(0, 2).join(' ');
+  const [avatarName, setAvatarName] = useState("Dean");
+
+  useEffect(() => {
+    const storedName = sessionStorage.getItem("staffName") || "Dean";
+    setAvatarName(storedName.split(" ").slice(0, 2).join(" "));
+  }, []);
 
   return (
     <div className={styles.layoutContainer}>
@@ -12,10 +16,13 @@ export default function DeanLayout({ children, title }) {
           <div className={styles.pageTitle}>
             <h1>{title}</h1>
           </div>
+
           <div className={styles.userProfile}>
             <span className={styles.roleLabel}>Dean</span>
             <img
-              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(avatarName)}&background=2A2A72&color=fff&size=40`}
+              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+                avatarName,
+              )}&background=2A2A72&color=fff&size=40`}
               alt="Avatar"
             />
           </div>
@@ -24,7 +31,7 @@ export default function DeanLayout({ children, title }) {
         {children}
 
         <footer className={styles.footer}>
-          <p>&copy; 2026 MindTrackSU – Strathmore University</p>
+          <p>&copy; 2026 MindTrackSU - Strathmore University</p>
         </footer>
       </main>
     </div>
