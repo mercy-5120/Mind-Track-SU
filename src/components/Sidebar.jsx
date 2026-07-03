@@ -20,6 +20,8 @@ export default function Sidebar({ open, onClose }) {
       ]
     : [
         { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
+        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: null },
+        { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
         { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
         { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
         { href: '/staff/follow-up-notes', label: 'Notes', icon: 'fas fa-sticky-note', badge: null },
