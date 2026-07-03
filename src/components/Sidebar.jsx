@@ -14,48 +14,18 @@ export default function Sidebar({ open, onClose }) {
       : '/staff/dashboard';
 
   // Role-based navigation
-  const navItems =
-    role === "dean"
-      ? [
-          {
-            href: dashboardHref,
-            label: "Dean Dashboard",
-            icon: "fas fa-chart-line",
-            badge: null,
-          },
-        ]
-      : [
-          {
-            href: dashboardHref,
-            label: "Dashboard",
-            icon: "fas fa-tachometer-alt",
-            badge: null,
-          },
-          {
-            href: "/staff/high-risk-alerts",
-            label: "High-Risk Alerts",
-            icon: "fas fa-exclamation-triangle",
-            badge: null,
-          },
-          {
-            href: "/staff/referrals",
-            label: "Referrals",
-            icon: "fas fa-user-md",
-            badge: null,
-          },
-          {
-            href: "/staff/follow-up-notes",
-            label: "Notes",
-            icon: "fas fa-sticky-note",
-            badge: null,
-          },
-          {
-            href: "/staff/schedule-sessions",
-            label: "Schedule Sessions",
-            icon: "fas fa-calendar-check",
-            badge: null,
-          }
-        ];
+  const navItems = role === 'dean'
+    ? [
+        { href: dashboardHref, label: 'Dean Dashboard', icon: 'fas fa-chart-line', badge: null },
+      ]
+    : [
+        { href: dashboardHref, label: 'Dashboard', icon: 'fas fa-tachometer-alt', badge: null },
+        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle', badge: null },
+        { href: '/staff/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check', badge: null },
+        { href: '/staff/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
+        { href: '/staff/referrals', label: 'Referrals', icon: 'fas fa-user-md', badge: null },
+        { href: '/staff/follow-up-notes', label: 'Notes', icon: 'fas fa-sticky-note', badge: null },
+      ];
 
   const isActive = (path) => location.pathname === path;
 
