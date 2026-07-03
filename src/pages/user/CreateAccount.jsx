@@ -4,15 +4,21 @@ import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
 import { registerStudent } from "../../utils/studentSession";
+import "../../styles/globals.css";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    username: "",
+    password: "",
+    confirm: "",
+  });
+  const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (form.password !== form.confirm) {
-      alert("Passwords do not match.");
+      setError("Passwords do not match.");
       return;
     }
 
@@ -24,79 +30,107 @@ export default function CreateAccount() {
       });
       navigate("/assessment-intro");
     } catch (error) {
-      alert(error.message || "Unable to create your account.");
+      setError(error.message || "Unable to create your account.");
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <img src={logo} alt="MindTrackSU logo" className="auth-logo" />
-            <h1>Create Your Account</h1>
-            <p>
-              Choose a username and password to return to your 
-              check-ins.
+    <div className="login-page">
+      <div className="login-container">
+        <div className="login-card">
+          <div className="login-header">
+            <img src={logo} alt="MindTrackSU logo" className="logo" />
+            <h1 className="title">MindTrack SU</h1>
+            <p className="subtitle">
+              Create your account to track your wellness journey
             </p>
           </div>
-          <form className="auth-form" onSubmit={handleSubmit}>
-            <Input
-              label="Username"
-              id="username"
-              type="text"
-              placeholder="Choose a username"
-              value={form.username}
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
-              required
-            />
-            <Input
-              label="Password"
-              id="password"
-              type="password"
-              placeholder="Create a password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              required
-            />
-            <Input
-              label="Confirm Password"
-              id="confirm"
-              type="password"
-              placeholder="Confirm password"
-              value={form.confirm}
-              onChange={(e) => setForm({ ...form, confirm: e.target.value })}
-              required
-            />
-            <p style={{ color: "var(--warm-gray)", fontSize: "0.9rem" }}>
-              This creates a normal student account so you can keep your own
-              assessment history and return later.
-            </p>
-            <Button type="submit" full>
-              Create Account
-            </Button>
-          </form>
-          <div className="auth-divider">
-            <span>or</span>
-          </div>
-          <div className="auth-links">
-            <p>
-              Already have an account?{" "}
-              <Link to="/login" className="link-primary">
-                Log in here
-              </Link>
-            </p>
-            <p style={{ marginTop: "8px" }}>
-              <Link to="/assessment-intro" className="link-primary">
-                Continue anonymously
-              </Link>
-            </p>
-            <p style={{ marginTop: "8px" }}>
-              Are you a member of staff?{" "}
-              <Link to="/staff/login" className="link-primary">
-                Staff login
-              </Link>
-            </p>
+
+          <div className="sign-in-section">
+            <h2 className="section-title">Create Your Account</h2>
+
+            <form className="login-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="username" className="form-label">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  value={form.username}
+                  onChange={(e) =>
+                    setForm({ ...form, username: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="password" className="form-label">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Create a password"
+                  value={form.password}
+                  onChange={(e) =>
+                    setForm({ ...form, password: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="confirm" className="form-label">
+                  Confirm Password
+                </label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  placeholder="Confirm password"
+                  value={form.confirm}
+                  onChange={(e) =>
+                    setForm({ ...form, confirm: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <p className="form-note">
+                This creates a normal student account so you can keep your own
+                assessment history and return later.
+              </p>
+
+              {error && <p className="error-message">{error}</p>}
+
+              <Button type="submit" full className="sign-in-button">
+                Create Account
+              </Button>
+            </form>
+
+            <div className="divider">
+              <span>or</span>
+            </div>
+
+            <div className="footer-links">
+              <p>
+                Already have an account?{" "}
+                <Link to="/login" className="link-primary">
+                  Log in here
+                </Link>
+              </p>
+              <p style={{ marginTop: "8px" }}>
+                Are you a member of staff?{" "}
+                <Link to="/staff/login" className="link-primary">
+                  Staff login
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
       </div>

@@ -1,11 +1,41 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from "react-icons/fa";
 import Button from "../../components/Button";
 
 export default function CrisisPrompt() {
+  const navigate = useNavigate();
   const [showForm, setShowForm] = useState(false);
   const [contact, setContact] = useState("");
+
+  const handleSubmit = () => {
+    if (contact.trim()) {
+      // Store crisis alert data
+      const crisisData = {
+        alert_id: Date.now(),
+        timestamp: new Date().toISOString(),
+        contact_info: contact,
+        status: 'crisis_contacted',
+        category: 'crisis',
+        risk_level: 'high',
+        alert_status: 'new',
+        student_identifier: '•••••' + contact.slice(-4),
+        created_at: new Date().toISOString(),
+        description: 'Student requested crisis counselor contact'
+      };
+
+      // Get existing crisis alerts
+      const existingAlerts = JSON.parse(sessionStorage.getItem('crisisAlerts') || '[]');
+      existingAlerts.push(crisisData);
+      sessionStorage.setItem('crisisAlerts', JSON.stringify(existingAlerts));
+      
+      alert("A counsellor will contact you within 24 hours");
+      setContact("");
+      setShowForm(false);
+    } else {
+      alert("Please enter your contact information");
+    }
+  };
 
   return (
     <div className="auth-page">
@@ -42,9 +72,7 @@ export default function CrisisPrompt() {
               />
               <Button
                 full
-                onClick={() =>
-                  alert("A counsellor will contact you within 24 hours")
-                }
+                onClick={handleSubmit}
               >
                 Submit
               </Button>

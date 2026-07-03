@@ -4,6 +4,7 @@ npm-debug.log
 yarn-error.log
 *.log
 
+.gitignore
 
 # Production builds
 build/
@@ -32,3 +33,7 @@ dist/
 # Testing
 coverage/
 .nyc_output/
+
+
+
+.env
