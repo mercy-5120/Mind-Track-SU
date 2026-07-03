@@ -1,13 +1,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import DeanLayout from '../../components/DeanLayout';
-import MetricsCards from '../../components/dean/MetricsCards';
-import WellnessChart from '../../components/dean/WellnessChart';
-import CategoryChart from '../../components/dean/CategoryChart';
-import DepartmentBreakdown from '../../components/dean/DepartmentBreakdown';
-import AlertSummary from '../../components/dean/AlertSummary';
-import ReportGenerator from '../../components/dean/ReportGenerator';
-import { getAlerts, getReferrals, getResources } from '../../api/staffApi';
-import styles from '../../styles/DeanDashboard.module.css';
+import DeanLayout from '../../../components/DeanLayout';
+import MetricsCards from '../../../components/dean/MetricsCards';
+import WellnessChart from '../../../components/dean/WellnessChart';
+import CategoryChart from '../../../components/dean/CategoryChart';
+import DepartmentBreakdown from '../../../components/dean/DepartmentBreakdown';
+import AlertSummary from '../../../components/dean/AlertSummary';
+import ReportGenerator from '../../../components/dean/ReportGenerator';
+import { getAlerts, getReferrals, getResources } from '../../../api/staffApi';
+import styles from '../../../styles/DeanDashboard.module.css';
 
 const defaultDepartments = [
   { name: 'Engineering', averageScore: 82, highRisk: 8 },

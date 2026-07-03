@@ -181,11 +181,11 @@ export default function StaffLogin() {
       sessionStorage.setItem('staffId', id);
 
       if (role === 'peer_counsellor') {
-        navigate('/staff/peer-dashboard');
+        navigate('/staff/peer/dashboard');
       } else if (role === 'dean') {
-        navigate('/staff/dean-dashboard');
+        navigate('/staff/dean/dashboard');
       } else {
-        navigate('/staff/dashboard');
+        navigate('/staff/sumc/dashboard');
       }
     } catch (error) {
       const role = formData.email.toLowerCase().includes('peer') ? 'peer_counsellor' : 'sumc_counsellor';
@@ -197,7 +197,7 @@ export default function StaffLogin() {
       sessionStorage.setItem('staffEmail', formData.email);
       sessionStorage.setItem('staffName', name);
       sessionStorage.setItem('staffId', id);
-      navigate(role === 'peer_counsellor' ? '/staff/peer-dashboard' : '/staff/dashboard');
+      navigate(role === 'peer_counsellor' ? '/staff/peer/dashboard' : '/staff/sumc/dashboard');
     }
   };
 

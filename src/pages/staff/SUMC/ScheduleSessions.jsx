@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
-import { getAlerts } from '../../api/staffApi';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
+import { getAlerts } from '../../../api/staffApi';
 
 export default function ScheduleSessions() {
   const [sessions, setSessions] = useState([]);

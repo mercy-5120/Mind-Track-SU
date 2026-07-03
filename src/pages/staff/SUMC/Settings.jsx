@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
 
 export default function Settings() {
   const [formData, setFormData] = useState({

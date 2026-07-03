@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
-import { getAlert, updateAlertStatus } from '../../api/staffApi';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
+import { getAlert, updateAlertStatus } from '../../../api/staffApi';
 
 export default function AlertDetails() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const alertId = searchParams.get('id');
   const [alert, setAlert] = useState(null);
+  const role = sessionStorage.getItem('staffRole');
+  const backUrl = role === 'peer_counsellor' ? '/staff/peer/high-risk-alerts' : '/staff/sumc/high-risk-alerts';
 
   useEffect(() => {
     const loadAlert = async () => {
@@ -34,7 +36,7 @@ export default function AlertDetails() {
       <section className={styles.alertsTableSection} style={{ maxWidth: '800px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
           <h2><i className="fas fa-info-circle" style={{ marginRight: '8px' }}></i>Alert #{alert.alert_id}</h2>
-          <button onClick={() => navigate('/staff/high-risk-alerts')} style={{ background: 'var(--muted-eucalyptus)', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer' }}>Back to Alerts</button>
+          <button onClick={() => navigate(backUrl)} style={{ background: 'var(--muted-eucalyptus)', color: 'white', border: 'none', padding: '10px 16px', borderRadius: '6px', cursor: 'pointer' }}>Back to Alerts</button>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px' }}>
