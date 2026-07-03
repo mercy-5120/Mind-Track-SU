@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import { getResources } from '../../api/staffApi';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import { getResources } from '../../../api/staffApi';
 
 export default function Resources() {
   const [resources, setResources] = useState([]);

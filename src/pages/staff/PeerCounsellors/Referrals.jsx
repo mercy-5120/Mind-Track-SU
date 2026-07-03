@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../../../components/Layout";
-import styles from "../../styles/Dashboard.module.css";
-import buttonStyles from "../../styles/Button.module.css";
+import styles from "../../../styles/Dashboard.module.css";
+import buttonStyles from "../../../styles/Button.module.css";
 import { getReferrals } from "../../../api/staffApi";
 
 export default function Referrals() {
@@ -28,7 +28,7 @@ export default function Referrals() {
   );
 
   const handleCreateClick = () => {
-    navigate("/staff/create-referral");
+    navigate("/staff/sumc/create-referral");
   };
 
   return (

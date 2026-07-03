@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
-import { getAlerts, updateAlertStatus } from '../../api/staffApi';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
+import { getAlerts, updateAlertStatus } from '../../../api/staffApi';
 
 export default function HighRiskAlerts() {
   const navigate = useNavigate();
@@ -82,7 +82,7 @@ export default function HighRiskAlerts() {
                         </>
                       ) : (
                         <>
-                          <button className={buttonStyles.btnSm} onClick={() => navigate(`/staff/alert-details?id=${alert.alert_id}`)}><i className="fas fa-chevron-right"></i></button>
+                          <button className={buttonStyles.btnSm} onClick={() => navigate(`/staff/peer/alert-details?id=${alert.alert_id}`)}><i className="fas fa-chevron-right"></i></button>
                           <button className={buttonStyles.btnSm} onClick={() => handleStatusChange(alert.alert_id, 'acknowledged')}>Ack</button>
                           <button className={buttonStyles.btnSm} onClick={() => handleStatusChange(alert.alert_id, 'resolved')}>Resolve</button>
                         </>

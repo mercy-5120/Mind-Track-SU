@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Layout from '../../components/Layout';
-import styles from '../../styles/Dashboard.module.css';
-import buttonStyles from '../../styles/Button.module.css';
-import { getAlerts } from '../../api/staffApi';
+import Layout from '../../../components/Layout';
+import styles from '../../../styles/Dashboard.module.css';
+import buttonStyles from '../../../styles/Button.module.css';
+import { getAlerts } from '../../../api/staffApi';
 
 export default function SUMCDashboard() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function SUMCDashboard() {
   ];
 
   const handleStatClick = (index) => {
-    const routes = ['/staff/dashboard', '/staff/high-risk-alerts', '/staff/referrals', '/staff/schedule-sessions'];
+    const routes = ['/staff/sumc/dashboard', '/staff/sumc/high-risk-alerts', '/staff/sumc/referrals', '/staff/sumc/schedule-sessions'];
     navigate(routes[index]);
   };
 
@@ -71,11 +71,11 @@ export default function SUMCDashboard() {
         <div className={styles.quickActions}>
           <h2>Quick Actions</h2>
           <div className={styles.sumcOnly}>
-            <button className={buttonStyles.btnPrimary} onClick={() => navigate('/staff/high-risk-alerts')}><i className="fas fa-eye"></i> View High-Risk Alerts</button>
-            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/create-referral')}><i className="fas fa-plus"></i> Create Referral</button>
-            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/schedule-sessions')}><i className="fas fa-calendar-check"></i> Schedule Session</button>
-            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/add-resources')}><i className="fas fa-book-plus"></i> Add Resource</button>
-            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/follow-up-notes')}><i className="fas fa-sticky-note"></i> Follow-up Notes</button>
+            <button className={buttonStyles.btnPrimary} onClick={() => navigate('/staff/sumc/high-risk-alerts')}><i className="fas fa-eye"></i> View High-Risk Alerts</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/sumc/create-referral')}><i className="fas fa-plus"></i> Create Referral</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/sumc/schedule-sessions')}><i className="fas fa-calendar-check"></i> Schedule Session</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/sumc/add-resources')}><i className="fas fa-book-plus"></i> Add Resource</button>
+            <button className={buttonStyles.btnSecondary} onClick={() => navigate('/staff/sumc/follow-up-notes')}><i className="fas fa-sticky-note"></i> Follow-up Notes</button>
           </div>
         </div>
       </section>
@@ -96,7 +96,7 @@ export default function SUMCDashboard() {
                   <td>{alert.category}</td>
                   <td>{alert.created_at?.slice(0, 10) || '—'}</td>
                   <td><span className={getStatusClass(alert.alert_status)}>{alert.alert_status}</span></td>
-                  <td><button className={buttonStyles.btnSm} onClick={() => navigate(`/staff/alert-details?id=${alert.alert_id}`)}><i className="fas fa-chevron-right"></i></button></td>
+                  <td><button className={buttonStyles.btnSm} onClick={() => navigate(`/staff/sumc/alert-details?id=${alert.alert_id}`)}><i className="fas fa-chevron-right"></i></button></td>
                 </tr>
               ))}
             </tbody>
