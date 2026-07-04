@@ -10,7 +10,7 @@ export default function FollowUpNotes() {
   const [alertId, setAlertId] = useState('');
   const [noteText, setNoteText] = useState('');
   const [showForm, setShowForm] = useState(false);
-  const role = sessionStorage.getItem('staffRole') || 'sumc_counsellor';
+  const role = sessionStorage.getItem('staffRole') || 'peer_counsellor';
 
   useEffect(() => {
     // Load notes from localStorage

@@ -15,7 +15,7 @@ export default function AddResources() {
     category: 'general'
   });
   const [showForm, setShowForm] = useState(false);
-  const role = sessionStorage.getItem('staffRole');
+  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase().trim();
 
   useEffect(() => {
     // Load resources from localStorage
@@ -25,8 +25,9 @@ export default function AddResources() {
 
   // Only SUMC can add resources
   if (role !== 'sumc_counsellor') {
+    const displayRole = role === 'peer_counsellor' ? 'Peer Counsellor' : 'SUMC Counsellor';
     return (
-      <Layout title="Manage Resources" role="Peer Counsellor">
+      <Layout title="Manage Resources" role={displayRole}>
         <div style={{
           background: '#fed7d7',
           border: '1px solid #fc8181',
