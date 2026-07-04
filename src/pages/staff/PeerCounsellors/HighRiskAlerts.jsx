@@ -54,7 +54,7 @@ export default function HighRiskAlerts() {
   );
 
   return (
-    <Layout title="High-Risk Alerts" role="SUMC Counsellor">
+    <Layout title="High-Risk Alerts" role="Peer Counsellor">
       <section className={styles.alertsTableSection}>
         <h2><i className="fas fa-exclamation-triangle" style={{ color: 'var(--brick-dust)', marginRight: '8px' }}></i>All High-Risk Alerts (including Crisis Contacts)</h2>
         <div className={styles.tableResponsive}>
