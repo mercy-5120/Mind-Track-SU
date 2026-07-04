@@ -171,7 +171,7 @@ export default function StaffLogin() {
     e.preventDefault();
     try {
       const staff = await loginStaff(formData.email, formData.password);
-      const role = staff?.role || (formData.email.toLowerCase().includes('peer') ? 'peer_counsellor' : 'sumc_counsellor');
+      const role = (staff?.role || (formData.email.toLowerCase().includes('peer') ? 'peer_counsellor' : 'sumc_counsellor')).toLowerCase();
       const id = staff?.staff_id ?? (role === 'peer_counsellor' ? 2 : 1);
       const name = staff?.name ?? (role === 'peer_counsellor' ? 'Alex Kim' : 'Jane Doe');
 

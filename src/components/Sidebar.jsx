@@ -5,7 +5,7 @@ import StaffBrand from './StaffBrand';
 
 export default function Sidebar({ open, onClose }) {
   const location = useLocation();
-  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase();
+  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor','peer_counsellor').toLowerCase().trim();
 
   const dashboardHref = role === 'peer_counsellor'
     ? '/staff/peer/dashboard'
@@ -21,21 +21,16 @@ export default function Sidebar({ open, onClose }) {
       ? [
         { href: '/staff/peer/dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt' },
         { href: '/staff/peer/referrals', label: 'Referrals', icon: 'fas fa-user-md' },
-        { href: '/staff/peer/resources', label: 'Resources', icon: 'fas fa-book' },
-        { href: '/staff/peer/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check' },
         { href: '/staff/peer/follow-up-notes', label: 'Follow-Up Notes', icon: 'fas fa-sticky-note' },
-        { href: '/staff/peer/settings', label: 'Settings', icon: 'fas fa-cog' },
+        { href: '/staff/peer/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
       ]
       : [
         { href: '/staff/sumc/dashboard', label: 'Dashboard', icon: 'fas fa-tachometer-alt' },
         { href: '/staff/sumc/high-risk-alerts', label: 'High-Risk Alerts', icon: 'fas fa-exclamation-triangle' },
         { href: '/staff/sumc/create-referral', label: 'Create Referral', icon: 'fas fa-plus' },
-        { href: '/staff/sumc/referrals', label: 'Referrals', icon: 'fas fa-user-md' },
         { href: '/staff/sumc/schedule-sessions', label: 'Schedule Sessions', icon: 'fas fa-calendar-check' },
         { href: '/staff/sumc/resources', label: 'Resources', icon: 'fas fa-book' },
         { href: '/staff/sumc/add-resources', label: 'Add Resources', icon: 'fas fa-book-medical' },
-        { href: '/staff/sumc/follow-up-notes', label: 'Follow-Up Notes', icon: 'fas fa-sticky-note' },
-        { href: '/staff/sumc/settings', label: 'Settings', icon: 'fas fa-cog' },
       ];
 
   const isActive = (path) => location.pathname === path;

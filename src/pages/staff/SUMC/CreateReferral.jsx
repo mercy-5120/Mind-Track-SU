@@ -16,12 +16,13 @@ export default function CreateReferral() {
     notes: ''
   });
   const [submitting, setSubmitting] = useState(false);
-  const role = sessionStorage.getItem('staffRole');
+  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase().trim();
 
   // Only SUMC can create referrals
   if (role !== 'sumc_counsellor') {
+    const displayRole = role === 'peer_counsellor' ? 'Peer Counsellor' : 'SUMC Counsellor';
     return (
-      <Layout title="Create Referral" role="SUMC Counsellor">
+      <Layout title="Create Referral" role={displayRole}>
         <div style={{
           background: '#fed7d7',
           border: '1px solid #fc8181',
