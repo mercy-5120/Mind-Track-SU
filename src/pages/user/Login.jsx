@@ -19,7 +19,7 @@ export default function Login() {
     e.preventDefault();
     try {
       loginStudent(username, password);
-      navigate("/assessment-intro");
+      navigate("/student/dashboard");
     } catch (err) {
       setError(err.message || "Unable to sign in right now.");
     }

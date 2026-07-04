@@ -1,0 +1,48 @@
+@import './variables.css';
+
+.layoutContainer {
+  display: flex;
+  min-height: 100vh;
+}
+
+.mainContent {
+  margin-left: 280px;
+  flex: 1;
+  padding: 28px 32px 32px;
+  background: var(--soft-porcelain);
+}
+
+.topHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #eef1f6;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--deep-indigo);
+  cursor: pointer;
+}
+
+.pageTitle h1 {
+  font-size: 1.9rem;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .mainContent {
+    margin-left: 0;
+    padding: 18px 16px 26px;
+  }
+
+  .hamburger {
+    display: block;
+  }
+}

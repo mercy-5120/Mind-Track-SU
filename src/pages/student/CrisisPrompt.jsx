@@ -2,34 +2,18 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaPhoneAlt } from "react-icons/fa";
 import Button from "../../components/Button";
+import { getCurrentStudent, saveCrisisAlert } from "../../utils/studentSession";
 
 export default function CrisisPrompt() {
   const navigate = useNavigate();
+  const currentStudent = getCurrentStudent();
   const [showForm, setShowForm] = useState(false);
   const [contact, setContact] = useState("");
 
   const handleSubmit = () => {
     if (contact.trim()) {
-      // Store crisis alert data
-      const crisisData = {
-        alert_id: Date.now(),
-        timestamp: new Date().toISOString(),
-        contact_info: contact,
-        status: 'crisis_contacted',
-        category: 'crisis',
-        risk_level: 'high',
-        alert_status: 'new',
-        student_identifier: '•••••' + contact.slice(-4),
-        created_at: new Date().toISOString(),
-        description: 'Student requested crisis counselor contact'
-      };
-
-      // Get existing crisis alerts
-      const existingAlerts = JSON.parse(sessionStorage.getItem('crisisAlerts') || '[]');
-      existingAlerts.push(crisisData);
-      sessionStorage.setItem('crisisAlerts', JSON.stringify(existingAlerts));
-      
-      alert("A counsellor will contact you within 24 hours");
+      saveCrisisAlert(currentStudent, contact);
+      alert("A counsellor will contact you within 24 hours.");
       setContact("");
       setShowForm(false);
     } else {

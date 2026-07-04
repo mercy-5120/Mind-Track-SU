@@ -12,11 +12,22 @@ export default function CreateAccount() {
     username: "",
     password: "",
     confirm: "",
+    displayName: "",
+    studentId: "",
+    department: "",
+    yearOfStudy: "",
   });
   const [error, setError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError("");
+
+    if (!form.studentId.trim() || !form.department.trim() || !form.yearOfStudy.trim()) {
+      setError("Please complete your student ID, department, and year of study.");
+      return;
+    }
+
     if (form.password !== form.confirm) {
       setError("Passwords do not match.");
       return;
@@ -26,9 +37,12 @@ export default function CreateAccount() {
       registerStudent({
         username: form.username,
         password: form.password,
-        displayName: form.username,
+        displayName: form.displayName || form.username,
+        studentId: form.studentId,
+        department: form.department,
+        yearOfStudy: form.yearOfStudy,
       });
-      navigate("/assessment-intro");
+      navigate("/student/dashboard");
     } catch (error) {
       setError(error.message || "Unable to create your account.");
     }
@@ -50,6 +64,75 @@ export default function CreateAccount() {
             <h2 className="section-title">Create Your Account</h2>
 
             <form className="login-form" onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label htmlFor="displayName" className="form-label">
+                  Full name
+                </label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="Enter your full name"
+                  value={form.displayName}
+                  onChange={(e) =>
+                    setForm({ ...form, displayName: e.target.value })
+                  }
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="studentId" className="form-label">
+                  Student ID
+                </label>
+                <Input
+                  id="studentId"
+                  type="text"
+                  placeholder="Enter your student registration number"
+                  value={form.studentId}
+                  onChange={(e) =>
+                    setForm({ ...form, studentId: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="department" className="form-label">
+                  Department
+                </label>
+                <Input
+                  id="department"
+                  type="text"
+                  placeholder="Enter your department"
+                  value={form.department}
+                  onChange={(e) =>
+                    setForm({ ...form, department: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="yearOfStudy" className="form-label">
+                  Year of study
+                </label>
+                <Input
+                  id="yearOfStudy"
+                  type="number"
+                  min="1"
+                  max="10"
+                  placeholder="Enter your year of study"
+                  value={form.yearOfStudy}
+                  onChange={(e) =>
+                    setForm({ ...form, yearOfStudy: e.target.value })
+                  }
+                  required
+                  className="form-input"
+                />
+              </div>
+
               <div className="form-group">
                 <label htmlFor="username" className="form-label">
                   Username

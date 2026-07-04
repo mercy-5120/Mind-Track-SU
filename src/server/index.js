@@ -1,4 +1,5 @@
 import express from "express";
+import bcrypt from "bcrypt";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -210,13 +211,22 @@ app.get("/api/staff/messages/:alertId", async (req, res) => {
   }
 });
 
-app.get("/api/staff/login", async (req, res) => {
+app.post("/api/staff/login", async (req, res) => {
   try {
-    const email = req.query.email;
-    const staff = await get("SELECT * FROM staff_accounts WHERE email = ?", [
-      email,
-    ]);
-    if (!staff) return res.status(404).json({ message: "Staff not found" });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required." });
+    }
+
+    const staff = await get("SELECT * FROM staff_accounts WHERE email = ?", [email]);
+    if (!staff) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
+
+    const isValid = await bcrypt.compare(password, staff.password_hash || "");
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid email or password." });
+    }
 
     const staffDatabaseName = await getStaffDatabaseName(staff.staff_id);
     res.json({ ...staff, staff_database_name: staffDatabaseName });
