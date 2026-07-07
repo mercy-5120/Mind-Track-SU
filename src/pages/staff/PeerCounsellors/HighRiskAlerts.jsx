@@ -11,6 +11,7 @@ import {
   FaPhoneAlt,
   FaTag,
   FaCalendarAlt,
+  FaEye,
 } from "react-icons/fa";
 import Layout from "../../../components/Layout";
 import styles from "../../../styles/Dashboard.module.css";
@@ -143,12 +144,34 @@ export default function HighRiskAlerts() {
                     </span>
                   </td>
                   <td>
-                    {alert.contact_info
-                      ? `${alert.contact_info.slice(0, 3)}***`
-                      : "—"}
+                    {alert.contact_info ? (
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        <FaPhoneAlt size={12} color="#2a2a72" />
+                        {alert.contact_info}
+                      </span>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td>
                     <div style={{ display: "flex", gap: "6px" }}>
+                      <button
+                        className={buttonStyles.btnSm}
+                        onClick={() =>
+                          navigate(
+                            `/staff/peer/alert-details?id=${alert.alert_id}`,
+                          )
+                        }
+                        title="View Details"
+                      >
+                        <FaEye size={14} />
+                      </button>
                       {alert.category === "crisis" ? (
                         <>
                           <button
@@ -178,17 +201,6 @@ export default function HighRiskAlerts() {
                         </>
                       ) : (
                         <>
-                          <button
-                            className={buttonStyles.btnSm}
-                            onClick={() =>
-                              navigate(
-                                `/staff/peer/alert-details?id=${alert.alert_id}`,
-                              )
-                            }
-                            title="View Details"
-                          >
-                            <FaChevronRight size={14} />
-                          </button>
                           <button
                             className={buttonStyles.btnSm}
                             onClick={() =>

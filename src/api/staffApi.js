@@ -141,15 +141,66 @@ export async function updateCrisisAlertStatus(alertId, status) {
 // =====================================================
 
 export async function getReferrals() {
-  return await fetchJson("/referrals", []);
+  try {
+    const response = await fetch(`${API_BASE}/referrals`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("[getReferrals] Data received:", data);
+    return data;
+  } catch (error) {
+    console.error("[getReferrals] Error:", error);
+    return [];
+  }
 }
 
 export async function updateReferral(id, status, notes) {
-  return await happyFetch(`${API_BASE}/referrals/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, notes }),
-  });
+  try {
+    console.log(
+      "[updateReferral] Updating referral:",
+      id,
+      "to status:",
+      status,
+    );
+
+    const response = await fetch(`${API_BASE}/referrals/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, notes }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update referral status");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[updateReferral] Error:", error);
+    throw error;
+  }
+}
+
+export async function createReferral(payload) {
+  try {
+    console.log("[createReferral] Creating referral:", payload);
+    const response = await fetch(`${API_BASE}/referrals`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to create referral");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[createReferral] Error:", error);
+    throw error;
+  }
 }
 
 // =====================================================
@@ -170,23 +221,22 @@ export async function createFollowUp(alertId, staffId, notes) {
 }
 
 // =====================================================
-// REFERRAL FUNCTIONS (continued)
-// =====================================================
-
-export async function createReferral(payload) {
-  return await happyFetch(`${API_BASE}${appendStaffId("/referrals")}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-}
-
-// =====================================================
 // RESOURCE FUNCTIONS
 // =====================================================
 
 export async function getResources() {
-  return await fetchJson("/resources", []);
+  try {
+    const response = await fetch(`${API_BASE}/resources`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("[getResources] Data received:", data);
+    return data;
+  } catch (error) {
+    console.error("[getResources] Error:", error);
+    return [];
+  }
 }
 
 export async function createResource(payload) {
@@ -273,9 +323,9 @@ export default {
   updateCrisisAlertStatus,
   getReferrals,
   updateReferral,
+  createReferral,
   getFollowups,
   createFollowUp,
-  createReferral,
   getResources,
   createResource,
   sendMessage,

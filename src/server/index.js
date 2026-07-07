@@ -138,6 +138,7 @@ app.put("/api/staff/alerts/:id/status", async (req, res) => {
   }
 });
 
+// Get Referrals
 app.get("/api/staff/referrals", async (req, res) => {
   try {
     const referrals = await all(
@@ -156,6 +157,7 @@ app.get("/api/staff/referrals", async (req, res) => {
   }
 });
 
+// Create Referral
 app.post("/api/staff/referrals", async (req, res) => {
   try {
     const {
@@ -184,16 +186,39 @@ app.post("/api/staff/referrals", async (req, res) => {
   }
 });
 
+// Update Referral Status
 app.put("/api/staff/referrals/:id", async (req, res) => {
   try {
     const { status, notes } = req.body;
+    const referralId = req.params.id;
+
+    console.log(
+      "[PUT /api/staff/referrals/:id] Updating referral:",
+      referralId,
+      "to status:",
+      status,
+    );
+
+    // Check if referral exists
+    const existingReferral = await get(
+      "SELECT * FROM referrals WHERE referral_id = ?",
+      [referralId],
+    );
+
+    if (!existingReferral) {
+      return res.status(404).json({ message: "Referral not found" });
+    }
+
+    // Update the referral
     await run(
       "UPDATE referrals SET referral_status = ?, notes = ? WHERE referral_id = ?",
-      [status, notes, req.params.id],
+      [status, notes || existingReferral.notes, referralId],
     );
-    res.json({ success: true });
+
+    console.log("[PUT /api/staff/referrals/:id] Success");
+    res.json({ success: true, message: "Referral updated successfully" });
   } catch (error) {
-    console.error("Update referral error:", error);
+    console.error("[PUT /api/staff/referrals/:id] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -829,6 +854,9 @@ app.listen(PORT, () => {
   );
   console.log(
     `Staff crisis alerts: GET/PUT http://localhost:${PORT}/api/staff/crisis-alerts`,
+  );
+  console.log(
+    `Staff referrals: GET/PUT http://localhost:${PORT}/api/staff/referrals`,
   );
 });
 
