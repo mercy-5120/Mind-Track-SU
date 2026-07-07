@@ -1,42 +1,68 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '../../../components/Layout';
-import styles from '../../../styles/Dashboard.module.css';
-import buttonStyles from '../../../styles/Button.module.css';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  FaBook,
+  FaPlus,
+  FaLink,
+  FaTrashAlt,
+  FaTimes,
+  FaUser,
+  FaCalendarAlt,
+  FaTag,
+  FaFileAlt,
+  FaVideo,
+  FaTools,
+  FaShieldAlt,
+  FaHeart,
+  FaExclamationTriangle,
+  FaHandsHelping,
+  FaGraduationCap,
+} from "react-icons/fa";
+import Layout from "../../../components/Layout";
+import styles from "../../../styles/Dashboard.module.css";
+import buttonStyles from "../../../styles/Button.module.css";
 
 export default function AddResources() {
   const navigate = useNavigate();
   const [resources, setResources] = useState([]);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    resourceType: 'guide',
-    link: '',
-    category: 'general'
+    title: "",
+    description: "",
+    resourceType: "guide",
+    link: "",
+    category: "general",
   });
   const [showForm, setShowForm] = useState(false);
-  const role = (sessionStorage.getItem('staffRole') || 'sumc_counsellor').toLowerCase().trim();
+  const role = (sessionStorage.getItem("staffRole") || "sumc_counsellor")
+    .toLowerCase()
+    .trim();
 
   useEffect(() => {
-    // Load resources from localStorage
-    const storedResources = JSON.parse(localStorage.getItem('resources') || '[]');
+    const storedResources = JSON.parse(
+      localStorage.getItem("resources") || "[]",
+    );
     setResources(storedResources);
   }, []);
 
-  // Only SUMC can add resources
-  if (role !== 'sumc_counsellor') {
-    const displayRole = role === 'peer_counsellor' ? 'Peer Counsellor' : 'SUMC Counsellor';
+  if (role !== "sumc_counsellor") {
+    const displayRole =
+      role === "peer_counsellor" ? "Peer Counsellor" : "SUMC Counsellor";
     return (
       <Layout title="Manage Resources" role={displayRole}>
-        <div style={{
-          background: '#fed7d7',
-          border: '1px solid #fc8181',
-          color: '#9b2c2c',
-          padding: '20px',
-          borderRadius: '12px',
-          textAlign: 'center'
-        }}>
-          <p>You do not have permission to manage resources. Only SUMC Counsellors can perform this action.</p>
+        <div
+          style={{
+            background: "#fed7d7",
+            border: "1px solid #fc8181",
+            color: "#9b2c2c",
+            padding: "20px",
+            borderRadius: "12px",
+            textAlign: "center",
+          }}
+        >
+          <p>
+            You do not have permission to manage resources. Only SUMC
+            Counsellors can perform this action.
+          </p>
         </div>
       </Layout>
     );
@@ -44,15 +70,15 @@ export default function AddResources() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleAddResource = () => {
     if (!formData.title.trim() || !formData.description.trim()) {
-      alert('Please fill in all required fields');
+      alert("Please fill in all required fields");
       return;
     }
 
@@ -64,54 +90,113 @@ export default function AddResources() {
       category: formData.category,
       link: formData.link,
       created_at: new Date().toISOString(),
-      created_by: sessionStorage.getItem('staffName') || 'Staff'
+      created_by: sessionStorage.getItem("staffName") || "Staff",
     };
 
     const updatedResources = [...resources, newResource];
     setResources(updatedResources);
-    localStorage.setItem('resources', JSON.stringify(updatedResources));
+    localStorage.setItem("resources", JSON.stringify(updatedResources));
 
     setFormData({
-      title: '',
-      description: '',
-      resourceType: 'guide',
-      link: '',
-      category: 'general'
+      title: "",
+      description: "",
+      resourceType: "guide",
+      link: "",
+      category: "general",
     });
     setShowForm(false);
-    alert('Resource added successfully');
+    alert("Resource added successfully");
   };
 
   const handleDeleteResource = (id) => {
-    if (window.confirm('Delete this resource?')) {
-      const updatedResources = resources.filter(r => r.id !== id);
+    if (window.confirm("Delete this resource?")) {
+      const updatedResources = resources.filter((r) => r.id !== id);
       setResources(updatedResources);
-      localStorage.setItem('resources', JSON.stringify(updatedResources));
+      localStorage.setItem("resources", JSON.stringify(updatedResources));
+    }
+  };
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case "guide":
+        return <FaFileAlt />;
+      case "training":
+        return <FaGraduationCap />;
+      case "policy":
+        return <FaShieldAlt />;
+      case "tool":
+        return <FaTools />;
+      case "video":
+        return <FaVideo />;
+      default:
+        return <FaFileAlt />;
+    }
+  };
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case "general":
+        return <FaBook />;
+      case "mental_health":
+        return <FaHeart />;
+      case "crisis":
+        return <FaExclamationTriangle />;
+      case "support":
+        return <FaHandsHelping />;
+      case "training":
+        return <FaGraduationCap />;
+      default:
+        return <FaTag />;
     }
   };
 
   return (
     <Layout title="Manage Resources" role="SUMC Counsellor">
       <section className={styles.alertsTableSection}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-          <h2><i className="fas fa-book" style={{ color: 'var(--deep-indigo)', marginRight: '8px' }}></i>Resources</h2>
-          <button className={buttonStyles.btnPrimary} onClick={() => setShowForm(!showForm)}>
-            <i className="fas fa-plus"></i> Add Resource
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <h2>
+            <FaBook style={{ color: "#2a2a72", marginRight: "8px" }} />
+            Resources
+          </h2>
+          <button
+            className={buttonStyles.btnPrimary}
+            onClick={() => setShowForm(!showForm)}
+          >
+            <FaPlus style={{ marginRight: "6px" }} /> Add Resource
           </button>
         </div>
 
         {showForm && (
-          <div style={{
-            background: '#f7fafc',
-            border: '1px solid #e2e8f0',
-            borderRadius: '12px',
-            padding: '20px',
-            marginBottom: '20px'
-          }}>
+          <div
+            style={{
+              background: "#f7fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "20px",
+              marginBottom: "20px",
+            }}
+          >
             <h3>Add New Resource</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
+            >
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>Title *</label>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Title *
+                </label>
                 <input
                   type="text"
                   name="title"
@@ -119,18 +204,26 @@ export default function AddResources() {
                   value={formData.title}
                   onChange={handleChange}
                   style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    boxSizing: 'border-box'
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "0.95rem",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>Description *</label>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Description *
+                </label>
                 <textarea
                   name="description"
                   placeholder="Resource description..."
@@ -138,31 +231,45 @@ export default function AddResources() {
                   onChange={handleChange}
                   rows="3"
                   style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    fontFamily: 'inherit',
-                    boxSizing: 'border-box'
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "0.95rem",
+                    fontFamily: "inherit",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: "12px",
+                }}
+              >
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>Type</label>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Type
+                  </label>
                   <select
                     name="resourceType"
                     value={formData.resourceType}
                     onChange={handleChange}
                     style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '0.95rem',
-                      boxSizing: 'border-box'
+                      width: "100%",
+                      padding: "10px 14px",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      fontSize: "0.95rem",
+                      boxSizing: "border-box",
                     }}
                   >
                     <option value="guide">Guide</option>
@@ -174,18 +281,26 @@ export default function AddResources() {
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>Category</label>
+                  <label
+                    style={{
+                      display: "block",
+                      marginBottom: "6px",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Category
+                  </label>
                   <select
                     name="category"
                     value={formData.category}
                     onChange={handleChange}
                     style={{
-                      width: '100%',
-                      padding: '10px 14px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      fontSize: '0.95rem',
-                      boxSizing: 'border-box'
+                      width: "100%",
+                      padding: "10px 14px",
+                      border: "1px solid #e2e8f0",
+                      borderRadius: "8px",
+                      fontSize: "0.95rem",
+                      boxSizing: "border-box",
                     }}
                   >
                     <option value="general">General</option>
@@ -198,7 +313,15 @@ export default function AddResources() {
               </div>
 
               <div>
-                <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600' }}>Link/URL</label>
+                <label
+                  style={{
+                    display: "block",
+                    marginBottom: "6px",
+                    fontWeight: "600",
+                  }}
+                >
+                  Link/URL
+                </label>
                 <input
                   type="url"
                   name="link"
@@ -206,19 +329,29 @@ export default function AddResources() {
                   value={formData.link}
                   onChange={handleChange}
                   style={{
-                    width: '100%',
-                    padding: '10px 14px',
-                    border: '1px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.95rem',
-                    boxSizing: 'border-box'
+                    width: "100%",
+                    padding: "10px 14px",
+                    border: "1px solid #e2e8f0",
+                    borderRadius: "8px",
+                    fontSize: "0.95rem",
+                    boxSizing: "border-box",
                   }}
                 />
               </div>
 
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button className={buttonStyles.btnPrimary} onClick={handleAddResource}>Add Resource</button>
-                <button className={buttonStyles.btnSecondary} onClick={() => setShowForm(false)}>Cancel</button>
+              <div style={{ display: "flex", gap: "10px" }}>
+                <button
+                  className={buttonStyles.btnPrimary}
+                  onClick={handleAddResource}
+                >
+                  Add Resource
+                </button>
+                <button
+                  className={buttonStyles.btnSecondary}
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           </div>
@@ -227,21 +360,63 @@ export default function AddResources() {
         <div className={styles.tableResponsive}>
           <table>
             <thead>
-              <tr><th>Title</th><th>Type</th><th>Category</th><th>Created By</th><th>Date</th><th>Action</th></tr>
+              <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Created By</th>
+                <th>Date</th>
+                <th>Action</th>
+              </tr>
             </thead>
             <tbody>
               {resources.length === 0 ? (
-                <tr><td colSpan="6" style={{ textAlign: 'center', padding: '20px', color: '#4a5568' }}>No resources yet</td></tr>
+                <tr>
+                  <td
+                    colSpan="6"
+                    style={{
+                      textAlign: "center",
+                      padding: "20px",
+                      color: "#4a5568",
+                    }}
+                  >
+                    No resources yet
+                  </td>
+                </tr>
               ) : (
                 resources.map((resource) => (
                   <tr key={resource.id}>
-                    <td>{resource.title}</td>
-                    <td>{resource.resource_type}</td>
-                    <td>{resource.category}</td>
-                    <td>{resource.created_by}</td>
-                    <td>{new Date(resource.created_at).toLocaleDateString()}</td>
                     <td>
-                      <div style={{ display: 'flex', gap: '6px' }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        {getTypeIcon(resource.resource_type)}
+                        {resource.title}
+                      </div>
+                    </td>
+                    <td>{resource.resource_type}</td>
+                    <td>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                      >
+                        {getCategoryIcon(resource.category)}
+                        {resource.category}
+                      </div>
+                    </td>
+                    <td>{resource.created_by}</td>
+                    <td>
+                      {new Date(resource.created_at).toLocaleDateString()}
+                    </td>
+                    <td>
+                      <div style={{ display: "flex", gap: "6px" }}>
                         {resource.link && (
                           <a
                             href={resource.link}
@@ -250,7 +425,7 @@ export default function AddResources() {
                             className={buttonStyles.btnSm}
                             title="Open link"
                           >
-                            🔗
+                            <FaLink />
                           </a>
                         )}
                         <button
@@ -258,7 +433,7 @@ export default function AddResources() {
                           onClick={() => handleDeleteResource(resource.id)}
                           title="Delete resource"
                         >
-                          🗑️
+                          <FaTrashAlt />
                         </button>
                       </div>
                     </td>

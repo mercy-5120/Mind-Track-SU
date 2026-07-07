@@ -325,7 +325,17 @@ export const getLatestAssessment = async (student) => {
   try {
     const history = await getAssessmentHistory(student);
     if (history && Array.isArray(history) && history.length > 0) {
-      const latest = history[history.length - 1];
+      // Sort by date - NEWEST FIRST
+      const sortedHistory = [...history].sort((a, b) => {
+        const dateA = new Date(
+          a.taken_at || a.completed_at || a.assessment_date,
+        );
+        const dateB = new Date(
+          b.taken_at || b.completed_at || b.assessment_date,
+        );
+        return dateB - dateA;
+      });
+      const latest = sortedHistory[0];
       console.log("[getLatestAssessment] Latest assessment:", latest);
       return latest;
     }
@@ -345,7 +355,12 @@ export const saveCrisisAlert = async (student, contactInfo) => {
     const studentId =
       student?.student_id || sessionStorage.getItem("studentId");
 
-    // If no student ID, save locally
+    console.log("[saveCrisisAlert] Saving crisis alert:", {
+      studentId,
+      contactInfo: contactInfo,
+    });
+
+    // If no student ID, save locally (anonymous)
     if (!studentId) {
       console.log("[saveCrisisAlert] No student ID, saving locally");
       const crisisAlerts = JSON.parse(
@@ -356,6 +371,7 @@ export const saveCrisisAlert = async (student, contactInfo) => {
         created_at: new Date().toISOString(),
         contact_info: contactInfo,
         student_id: null,
+        student_identifier: `Anonymous ••••• ${contactInfo.slice(-4)}`,
         status: "crisis_contacted",
         category: "crisis",
         risk_level: "high",
@@ -366,8 +382,12 @@ export const saveCrisisAlert = async (student, contactInfo) => {
         "anonymousCrisisAlerts",
         JSON.stringify(crisisAlerts),
       );
+      console.log("[saveCrisisAlert] Crisis alert saved locally:", alert);
       return alert;
     }
+
+    // Save to database for logged-in students
+    console.log("[saveCrisisAlert] Saving to database for student:", studentId);
 
     const response = await fetch(`${API_BASE}/crisis-alerts`, {
       method: "POST",
@@ -386,7 +406,7 @@ export const saveCrisisAlert = async (student, contactInfo) => {
     }
 
     const data = await response.json();
-    console.log("[saveCrisisAlert] Crisis alert saved:", data);
+    console.log("[saveCrisisAlert] Crisis alert saved to database:", data);
     return data.alert;
   } catch (error) {
     console.error("[saveCrisisAlert] Save error:", error);
@@ -403,6 +423,10 @@ export const getCrisisAlerts = async (student) => {
     if (!studentId) {
       const crisisAlerts = JSON.parse(
         sessionStorage.getItem("anonymousCrisisAlerts") || "[]",
+      );
+      console.log(
+        "[getCrisisAlerts] Returning anonymous crisis alerts:",
+        crisisAlerts,
       );
       return crisisAlerts;
     }
@@ -435,9 +459,6 @@ export const getCrisisAlerts = async (student) => {
 // =====================================================
 // LEGACY FUNCTIONS (for backward compatibility)
 // =====================================================
-
-// These functions are kept for backward compatibility with components
-// that might still be using the old localStorage-based approach
 
 export const getStoredStudents = () => {
   console.warn(

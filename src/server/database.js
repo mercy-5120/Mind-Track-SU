@@ -15,9 +15,9 @@ dotenv.config({
 // Schema path - looks for db.sql in project root
 const schemaPath = path.join(__dirname, "..", "..", "db.sql");
 
-console.log(" Loading .env from:", path.join(__dirname, "..", "..", ".env"));
-console.log(" Looking for db.sql at:", schemaPath);
-console.log(" db.sql exists?", fs.existsSync(schemaPath));
+// console.log(" Loading .env from:", path.join(__dirname, "..", "..", ".env"));
+// console.log(" Looking for db.sql at:", schemaPath);
+// console.log(" db.sql exists?", fs.existsSync(schemaPath));
 
 const dbName =
   process.env.MYSQL_DATABASE || process.env.DB_NAME || "mindtracksu";
@@ -29,12 +29,12 @@ const dbConfig = {
   multipleStatements: true,
 };
 
-console.log(" Database config:");
-console.log("  Host:", dbConfig.host);
-console.log("  Port:", dbConfig.port);
-console.log("  User:", dbConfig.user);
-console.log("  Password:", dbConfig.password ? "(set)" : " (empty)");
-console.log("  Database:", dbName);
+//console.log(" Database config:");
+// console.log("  Host:", dbConfig.host);
+// console.log("  Port:", dbConfig.port);
+// console.log("  User:", dbConfig.user);
+// console.log("  Password:", dbConfig.password ? "(set)" : " (empty)");
+// console.log("  Database:", dbName);
 
 let initialized = false;
 
@@ -43,7 +43,7 @@ const buildStaffDatabaseName = (staffId) => `mindtracksu_staff_${staffId}`;
 const initializeSchema = async () => {
   if (initialized) return;
 
-  console.log("Initializing database schema...");
+  // console.log("Initializing database schema...");
 
   const bootstrap = await mysql.createConnection({
     host: dbConfig.host,
@@ -55,7 +55,7 @@ const initializeSchema = async () => {
 
   try {
     await bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
-    console.log(`Database '${dbName}' created or already exists`);
+    // console.log(`Database '${dbName}' created or already exists`);
   } finally {
     await bootstrap.end();
   }
@@ -69,7 +69,7 @@ const initializeSchema = async () => {
     // Check if schema file exists
     if (!fs.existsSync(schemaPath)) {
       console.warn(
-        `Schema file not found at ${schemaPath}, skipping schema initialization`,
+        // `Schema file not found at ${schemaPath}, skipping schema initialization`,
       );
       initialized = true;
       return;
@@ -107,7 +107,7 @@ const initializeSchema = async () => {
       }
     }
 
-    console.log("Database tables created successfully");
+    // console.log("Database tables created successfully");
 
     // Ensure demo student exists with proper password
     await ensureDemoStudent(connection);

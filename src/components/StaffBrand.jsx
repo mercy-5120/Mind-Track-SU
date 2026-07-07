@@ -5,36 +5,43 @@ export default function StaffBrand({
   compact = false,
   showLabel = true,
   align = "center",
-  size = "medium",
+  size = "large",
 }) {
   const getLogoSizes = () => {
     switch (size) {
+      case "xxlarge":
+        return {
+          width: 160,
+          height: 160,
+          labelSize: "1.6rem",
+          subLabelSize: "0.95rem",
+        };
       case "xlarge":
         return {
-          width: 120,
-          height: 120,
+          width: 130,
+          height: 130,
           labelSize: "1.4rem",
           subLabelSize: "0.85rem",
         };
       case "large":
         return {
-          width: 90,
-          height: 90,
+          width: 110,
+          height: 110,
           labelSize: "1.2rem",
           subLabelSize: "0.78rem",
         };
       case "medium":
         return {
-          width: 70,
-          height: 70,
+          width: 80,
+          height: 80,
           labelSize: "1rem",
           subLabelSize: "0.72rem",
         };
       case "small":
       default:
         return {
-          width: 50,
-          height: 50,
+          width: 60,
+          height: 60,
           labelSize: "0.95rem",
           subLabelSize: "0.72rem",
         };
@@ -42,8 +49,9 @@ export default function StaffBrand({
   };
 
   const sizes = getLogoSizes();
-  const logoWidth = compact ? 40 : sizes.width;
-  const logoHeight = compact ? 40 : sizes.height;
+  
+  const logoWidth = compact ? 50 : sizes.width;
+  const logoHeight = compact ? 50 : sizes.height;
   const labelFontSize = compact ? "0.95rem" : sizes.labelSize;
   const subLabelFontSize = compact ? "0.72rem" : sizes.subLabelSize;
 
@@ -58,7 +66,7 @@ export default function StaffBrand({
             : align === "left"
               ? "flex-start"
               : "flex-end",
-        gap: compact ? 6 : 10,
+        gap: compact ? 8 : 12,
         textDecoration: "none",
         width: "100%",
       }}
@@ -86,13 +94,14 @@ export default function StaffBrand({
           style={{
             display: "flex",
             flexDirection: "column",
-            lineHeight: 1.2,
+            lineHeight: 1.3,
             alignItems:
               align === "center"
                 ? "center"
                 : align === "left"
                   ? "flex-start"
                   : "flex-end",
+            gap: "2px",
           }}
         >
           <span
@@ -100,7 +109,7 @@ export default function StaffBrand({
               fontSize: labelFontSize,
               fontWeight: 700,
               color: "#2A2A72",
-              letterSpacing: "-0.3px",
+              letterSpacing: "-0.5px",
             }}
           >
             MindTrackSU
@@ -110,6 +119,8 @@ export default function StaffBrand({
               fontSize: subLabelFontSize,
               fontWeight: 600,
               color: "#5f6470",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
             }}
           >
             Staff Portal
