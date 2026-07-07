@@ -60,12 +60,42 @@ export default function StudentDashboard() {
   const latestScore =
     completedCount > 0 ? history[history.length - 1].overallScore : null;
 
+  // IMPROVED TREND CALCULATION
   const getTrend = () => {
-    if (completedCount < 2) return "stable";
-    const firstScore = history[0].overallScore;
-    const lastScore = history[history.length - 1].overallScore;
-    if (lastScore > firstScore) return "improving";
-    if (lastScore < firstScore) return "declining";
+    if (completedCount === 0) return "stable";
+    if (completedCount === 1) return "stable";
+
+    // Get the last 3 assessments or all if less than 3
+    const recentAssessments = history.slice(-3);
+
+    // Calculate the trend based on score changes
+    let improvements = 0;
+    let declines = 0;
+    let totalChange = 0;
+
+    for (let i = 1; i < recentAssessments.length; i++) {
+      const prevScore = recentAssessments[i - 1].overallScore;
+      const currentScore = recentAssessments[i].overallScore;
+      const change = currentScore - prevScore;
+      totalChange += change;
+
+      if (change > 0) {
+        improvements++;
+      } else if (change < 0) {
+        declines++;
+      }
+    }
+
+    // If we have at least 3 assessments, use the majority trend
+    if (recentAssessments.length >= 3) {
+      if (improvements > declines) return "improving";
+      if (declines > improvements) return "declining";
+    }
+
+    // Otherwise, use the overall change
+    if (totalChange > 2) return "improving";
+    if (totalChange < -2) return "declining";
+
     return "stable";
   };
 
@@ -91,6 +121,29 @@ export default function StudentDashboard() {
       default:
         return "Stable";
     }
+  };
+
+  const getTrendColor = () => {
+    switch (trend) {
+      case "improving":
+        return "#2f855a";
+      case "declining":
+        return "#b34747";
+      default:
+        return "#4a5568";
+    }
+  };
+
+  // Get trend description based on number of assessments
+  const getTrendDescription = () => {
+    if (completedCount === 0) return "Complete an assessment to see your trend";
+    if (completedCount === 1)
+      return "Complete more assessments to see your trend";
+    if (trend === "improving")
+      return "Your scores are trending upward! Keep up the good work!";
+    if (trend === "declining")
+      return "Your scores are trending downward. Consider reaching out for support.";
+    return "Your scores are consistent. Continue maintaining your wellness.";
   };
 
   return (
@@ -267,25 +320,31 @@ export default function StudentDashboard() {
               <FaClock style={{ marginRight: "8px", color: "#4a8b6b" }} />
               Trend
             </p>
-            <p
-              style={{
-                margin: "8px 0 0",
-                fontSize: "18px",
-                fontWeight: "600",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                color:
-                  trend === "improving"
-                    ? "#2f855a"
-                    : trend === "declining"
-                      ? "#b34747"
-                      : "#4a5568",
-              }}
-            >
-              {getTrendIcon()}
-              {getTrendText()}
-            </p>
+            <div style={{ marginTop: "8px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  fontSize: "18px",
+                  fontWeight: "600",
+                  color: getTrendColor(),
+                }}
+              >
+                {getTrendIcon()}
+                {getTrendText()}
+              </div>
+              <p
+                style={{
+                  margin: "4px 0 0",
+                  fontSize: "12px",
+                  color: "#6b7280",
+                  fontWeight: "400",
+                }}
+              >
+                {getTrendDescription()}
+              </p>
+            </div>
           </div>
         </div>
 

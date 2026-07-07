@@ -18,6 +18,9 @@ import {
   FaTimes,
   FaEnvelope,
   FaPhone,
+  FaRegSmile,
+  FaRegMeh,
+  FaRegFrown,
 } from "react-icons/fa";
 
 export default function StudentProfile() {
@@ -33,6 +36,7 @@ export default function StudentProfile() {
     phone: "",
   });
   const [saveMessage, setSaveMessage] = useState({ type: "", text: "" });
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (student) {
@@ -56,9 +60,19 @@ export default function StudentProfile() {
     }));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsLoading(true);
     try {
-      const updatedStudent = updateStudentProfile(formData);
+      // Only send editable fields - student_id is NOT included
+      const updatedStudent = updateStudentProfile({
+        display_name: formData.display_name,
+        username: formData.username,
+        department: formData.department,
+        year_of_study: formData.year_of_study,
+        email: formData.email,
+        phone: formData.phone,
+      });
+
       setStudent(updatedStudent);
       setIsEditing(false);
       setSaveMessage({
@@ -72,6 +86,8 @@ export default function StudentProfile() {
         text: "Failed to update profile. Please try again.",
       });
       setTimeout(() => setSaveMessage({ type: "", text: "" }), 3000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +103,18 @@ export default function StudentProfile() {
     });
     setIsEditing(false);
     setSaveMessage({ type: "", text: "" });
+  };
+
+  const getScoreColor = (score) => {
+    if (score >= 70) return "#2f855a";
+    if (score >= 40) return "#4a5568";
+    return "#b34747";
+  };
+
+  const getScoreIcon = (score) => {
+    if (score >= 70) return <FaRegSmile color="#2f855a" size={20} />;
+    if (score >= 40) return <FaRegMeh color="#4a5568" size={20} />;
+    return <FaRegFrown color="#b34747" size={20} />;
   };
 
   if (!student) {
@@ -130,35 +158,35 @@ export default function StudentProfile() {
           display: "grid",
           gap: "24px",
           width: "100%",
-          maxWidth: "1200px",
+          maxWidth: "1000px",
           margin: "0 auto",
         }}
       >
-        {/* Header Section - Full Width */}
+        {/* Header Section */}
         <div
           style={{
             background: "linear-gradient(135deg, #2a2a72 0%, #3a3a8a 100%)",
             borderRadius: "20px",
-            padding: "40px 48px",
+            padding: "32px 40px",
             color: "#fff",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             flexWrap: "wrap",
-            gap: "24px",
+            gap: "20px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
             <div
               style={{
-                width: "100px",
-                height: "100px",
+                width: "80px",
+                height: "80px",
                 borderRadius: "50%",
                 background: "rgba(255,255,255,0.2)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "42px",
+                fontSize: "36px",
                 fontWeight: "bold",
                 color: "#fff",
                 flexShrink: 0,
@@ -171,12 +199,13 @@ export default function StudentProfile() {
                   : "S"}
             </div>
             <div>
-              <h1 style={{ margin: 0, fontSize: "32px", fontWeight: "600" }}>
+              <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "600" }}>
                 {student.display_name ||
                   student.username ||
                   "Anonymous Student"}
               </h1>
               <p style={{ margin: "4px 0 0", opacity: 0.9, fontSize: "16px" }}>
+                <FaUniversity style={{ marginRight: "8px" }} size={14} />
                 {student.department || "No department specified"} • Year{" "}
                 {student.year_of_study || "N/A"}
               </p>
@@ -198,9 +227,12 @@ export default function StudentProfile() {
                 borderRadius: "20px",
                 fontSize: "14px",
                 fontWeight: "500",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
               }}
             >
-              <FaCheckCircle style={{ marginRight: "8px" }} size={14} />
+              <FaCheckCircle size={14} />
               Active Account
             </span>
           </div>
@@ -226,12 +258,12 @@ export default function StudentProfile() {
           </div>
         )}
 
-        {/* Profile Content - Full Width */}
+        {/* Profile Content */}
         <div
           style={{
             background: "#fff",
             borderRadius: "20px",
-            padding: "40px 48px",
+            padding: "32px 40px",
             boxShadow: "0 16px 32px rgba(42,42,114,0.08)",
           }}
         >
@@ -243,19 +275,22 @@ export default function StudentProfile() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "32px",
+                  marginBottom: "24px",
                   flexWrap: "wrap",
                   gap: "16px",
                 }}
               >
-                <h2 style={{ margin: 0, color: "#2a2a72" }}>Profile Details</h2>
+                <h2 style={{ margin: 0, color: "#2a2a72", fontSize: "22px" }}>
+                  <FaUser style={{ marginRight: "10px" }} />
+                  Profile Details
+                </h2>
                 <button
                   style={{
                     padding: "10px 24px",
                     background: "#2a2a72",
                     color: "#fff",
                     border: "none",
-                    borderRadius: "8px",
+                    borderRadius: "10px",
                     fontSize: "14px",
                     fontWeight: "500",
                     cursor: "pointer",
@@ -267,10 +302,12 @@ export default function StudentProfile() {
                   onMouseEnter={(e) => {
                     e.target.style.background = "#1a1a5a";
                     e.target.style.transform = "translateY(-2px)";
+                    e.target.style.boxShadow = "0 4px 12px rgba(42,42,114,0.3)";
                   }}
                   onMouseLeave={(e) => {
                     e.target.style.background = "#2a2a72";
                     e.target.style.transform = "translateY(0)";
+                    e.target.style.boxShadow = "none";
                   }}
                   onClick={() => setIsEditing(true)}
                 >
@@ -283,13 +320,13 @@ export default function StudentProfile() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                  gap: "24px",
+                  gap: "20px",
                 }}
               >
-                {/* Name */}
+                {/* Full Name - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #2a2a72",
@@ -303,7 +340,7 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaUser color="#2a2a72" size={18} />
+                    <FaUser color="#2a2a72" size={16} />
                     <strong style={{ color: "#2a2a72", fontSize: "14px" }}>
                       Full Name
                     </strong>
@@ -313,10 +350,10 @@ export default function StudentProfile() {
                   </p>
                 </div>
 
-                {/* Username */}
+                {/* Username - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #4a8b6b",
@@ -330,7 +367,7 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaKey color="#4a8b6b" size={18} />
+                    <FaKey color="#4a8b6b" size={16} />
                     <strong style={{ color: "#4a8b6b", fontSize: "14px" }}>
                       Username
                     </strong>
@@ -340,10 +377,10 @@ export default function StudentProfile() {
                   </p>
                 </div>
 
-                {/* Student ID */}
+                {/* Student ID / Registration Number - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #2a2a72",
@@ -357,9 +394,9 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaIdCard color="#2a2a72" size={18} />
+                    <FaIdCard color="#2a2a72" size={16} />
                     <strong style={{ color: "#2a2a72", fontSize: "14px" }}>
-                      Student ID
+                      Registration Number
                     </strong>
                   </div>
                   <p style={{ margin: 0, fontSize: "16px", color: "#1f2937" }}>
@@ -367,10 +404,10 @@ export default function StudentProfile() {
                   </p>
                 </div>
 
-                {/* Department */}
+                {/* Department - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #4a8b6b",
@@ -384,7 +421,7 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaUniversity color="#4a8b6b" size={18} />
+                    <FaUniversity color="#4a8b6b" size={16} />
                     <strong style={{ color: "#4a8b6b", fontSize: "14px" }}>
                       Department
                     </strong>
@@ -394,10 +431,10 @@ export default function StudentProfile() {
                   </p>
                 </div>
 
-                {/* Year of Study */}
+                {/* Year of Study - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #2a2a72",
@@ -411,7 +448,7 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaBook color="#2a2a72" size={18} />
+                    <FaBook color="#2a2a72" size={16} />
                     <strong style={{ color: "#2a2a72", fontSize: "14px" }}>
                       Year of Study
                     </strong>
@@ -421,10 +458,10 @@ export default function StudentProfile() {
                   </p>
                 </div>
 
-                {/* Email */}
+                {/* Email - UNEDITABLE */}
                 <div
                   style={{
-                    padding: "20px",
+                    padding: "18px 20px",
                     background: "#f8fafc",
                     borderRadius: "12px",
                     borderLeft: "4px solid #4a8b6b",
@@ -438,13 +475,40 @@ export default function StudentProfile() {
                       marginBottom: "6px",
                     }}
                   >
-                    <FaEnvelope color="#4a8b6b" size={18} />
+                    <FaEnvelope color="#4a8b6b" size={16} />
                     <strong style={{ color: "#4a8b6b", fontSize: "14px" }}>
                       Email
                     </strong>
                   </div>
                   <p style={{ margin: 0, fontSize: "16px", color: "#1f2937" }}>
                     {student.email || "Not set"}
+                  </p>
+                </div>
+
+                {/* Phone - UNEDITABLE */}
+                <div
+                  style={{
+                    padding: "18px 20px",
+                    background: "#f8fafc",
+                    borderRadius: "12px",
+                    borderLeft: "4px solid #2a2a72",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "10px",
+                      marginBottom: "6px",
+                    }}
+                  >
+                    <FaPhone color="#2a2a72" size={16} />
+                    <strong style={{ color: "#2a2a72", fontSize: "14px" }}>
+                      Phone
+                    </strong>
+                  </div>
+                  <p style={{ margin: 0, fontSize: "16px", color: "#1f2937" }}>
+                    {student.phone || "Not set"}
                   </p>
                 </div>
               </div>
@@ -457,12 +521,15 @@ export default function StudentProfile() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: "32px",
+                  marginBottom: "24px",
                   flexWrap: "wrap",
                   gap: "16px",
                 }}
               >
-                <h2 style={{ margin: 0, color: "#2a2a72" }}>Edit Profile</h2>
+                <h2 style={{ margin: 0, color: "#2a2a72", fontSize: "22px" }}>
+                  <FaEdit style={{ marginRight: "10px" }} />
+                  Edit Profile
+                </h2>
                 <div style={{ display: "flex", gap: "12px" }}>
                   <button
                     style={{
@@ -470,7 +537,7 @@ export default function StudentProfile() {
                       background: "#6b7280",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       fontSize: "14px",
                       fontWeight: "500",
                       cursor: "pointer",
@@ -488,6 +555,7 @@ export default function StudentProfile() {
                       e.target.style.transform = "translateY(0)";
                     }}
                     onClick={handleCancel}
+                    disabled={isLoading}
                   >
                     <FaTimes size={16} />
                     Cancel
@@ -498,27 +566,36 @@ export default function StudentProfile() {
                       background: "#4a8b6b",
                       color: "#fff",
                       border: "none",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       fontSize: "14px",
                       fontWeight: "500",
-                      cursor: "pointer",
+                      cursor: isLoading ? "default" : "pointer",
                       transition: "all 0.2s",
                       display: "flex",
                       alignItems: "center",
                       gap: "8px",
+                      opacity: isLoading ? 0.7 : 1,
                     }}
                     onMouseEnter={(e) => {
-                      e.target.style.background = "#3a7a5a";
-                      e.target.style.transform = "translateY(-2px)";
+                      if (!isLoading) {
+                        e.target.style.background = "#3a7a5a";
+                        e.target.style.transform = "translateY(-2px)";
+                        e.target.style.boxShadow =
+                          "0 4px 12px rgba(74,139,107,0.3)";
+                      }
                     }}
                     onMouseLeave={(e) => {
-                      e.target.style.background = "#4a8b6b";
-                      e.target.style.transform = "translateY(0)";
+                      if (!isLoading) {
+                        e.target.style.background = "#4a8b6b";
+                        e.target.style.transform = "translateY(0)";
+                        e.target.style.boxShadow = "none";
+                      }
                     }}
                     onClick={handleSave}
+                    disabled={isLoading}
                   >
                     <FaSave size={16} />
-                    Save Changes
+                    {isLoading ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </div>
@@ -527,18 +604,25 @@ export default function StudentProfile() {
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                  gap: "24px",
+                  gap: "20px",
                 }}
               >
+                {/* Full Name - EDITABLE */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#2a2a72" }}>
-                    <FaUser style={{ marginRight: "8px" }} />
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#2a2a72",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaUser style={{ marginRight: "8px" }} size={14} />
                     Full Name
                   </label>
                   <input
@@ -548,25 +632,33 @@ export default function StudentProfile() {
                     onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
+                      fontSize: "15px",
                       transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                   />
                 </div>
 
+                {/* Username - EDITABLE */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#2a2a72" }}>
-                    <FaKey style={{ marginRight: "8px" }} />
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#4a8b6b",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaKey style={{ marginRight: "8px" }} size={14} />
                     Username
                   </label>
                   <input
@@ -576,53 +668,72 @@ export default function StudentProfile() {
                     onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
+                      fontSize: "15px",
                       transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
+                    onFocus={(e) => (e.target.style.borderColor = "#4a8b6b")}
                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                   />
                 </div>
 
+                {/* Student ID / Registration Number - READ-ONLY */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#2a2a72" }}>
-                    <FaIdCard style={{ marginRight: "8px" }} />
-                    Student ID
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#2a2a72",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaIdCard style={{ marginRight: "8px" }} size={14} />
+                    Registration Number{" "}
+                    <span style={{ color: "#b34747", fontSize: "12px" }}>
+                      (Cannot be changed)
+                    </span>
                   </label>
                   <input
                     type="text"
                     name="student_id"
                     value={formData.student_id}
-                    onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
-                      transition: "border-color 0.2s",
+                      fontSize: "15px",
+                      backgroundColor: "#f3f4f6",
+                      color: "#6b7280",
+                      cursor: "not-allowed",
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
-                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                    disabled
+                    readOnly
                   />
                 </div>
 
+                {/* Department - EDITABLE */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#4a8b6b" }}>
-                    <FaUniversity style={{ marginRight: "8px" }} />
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#4a8b6b",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaUniversity style={{ marginRight: "8px" }} size={14} />
                     Department
                   </label>
                   <input
@@ -632,25 +743,33 @@ export default function StudentProfile() {
                     onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
+                      fontSize: "15px",
                       transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#4a8b6b")}
                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                   />
                 </div>
 
+                {/* Year of Study - EDITABLE */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#2a2a72" }}>
-                    <FaBook style={{ marginRight: "8px" }} />
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#2a2a72",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaBook style={{ marginRight: "8px" }} size={14} />
                     Year of Study
                   </label>
                   <input
@@ -660,25 +779,33 @@ export default function StudentProfile() {
                     onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
+                      fontSize: "15px",
                       transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                   />
                 </div>
 
+                {/* Email - EDITABLE */}
                 <div
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    gap: "8px",
+                    gap: "6px",
                   }}
                 >
-                  <label style={{ fontWeight: "500", color: "#4a8b6b" }}>
-                    <FaEnvelope style={{ marginRight: "8px" }} />
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#4a8b6b",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaEnvelope style={{ marginRight: "8px" }} size={14} />
                     Email
                   </label>
                   <input
@@ -688,15 +815,72 @@ export default function StudentProfile() {
                     onChange={handleInputChange}
                     style={{
                       padding: "12px 16px",
-                      borderRadius: "8px",
+                      borderRadius: "10px",
                       border: "1px solid #d1d5db",
-                      fontSize: "16px",
+                      fontSize: "15px",
                       transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
                     }}
                     onFocus={(e) => (e.target.style.borderColor = "#4a8b6b")}
                     onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                   />
                 </div>
+
+                {/* Phone - EDITABLE */}
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <label
+                    style={{
+                      fontWeight: "500",
+                      color: "#2a2a72",
+                      fontSize: "14px",
+                    }}
+                  >
+                    <FaPhone style={{ marginRight: "8px" }} size={14} />
+                    Phone
+                  </label>
+                  <input
+                    type="text"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    style={{
+                      padding: "12px 16px",
+                      borderRadius: "10px",
+                      border: "1px solid #d1d5db",
+                      fontSize: "15px",
+                      transition: "border-color 0.2s",
+                      backgroundColor: "#fff",
+                    }}
+                    onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
+                    onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  marginTop: "20px",
+                  padding: "16px 20px",
+                  background: "#fef2f2",
+                  borderRadius: "10px",
+                  border: "1px solid #fecaca",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <FaIdCard color="#b34747" size={18} />
+                <span style={{ color: "#b34747", fontSize: "14px" }}>
+                  <strong>Note:</strong> Your Registration Number (Student ID)
+                  cannot be changed. If you need to update it, please contact
+                  support.
+                </span>
               </div>
             </>
           )}
