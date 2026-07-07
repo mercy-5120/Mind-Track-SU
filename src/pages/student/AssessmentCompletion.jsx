@@ -1,77 +1,147 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { FaCheckCircle } from "react-icons/fa";
+// src/pages/student/AssessmentCompletion.jsx
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { FaCheckCircle, FaArrowRight } from "react-icons/fa";
+import AssessmentLayout from "../../components/AssessmentLayout";
 import Button from "../../components/Button";
-import {
-  getCurrentStudent,
-  getLatestAssessment,
-} from "../../utils/studentSession";
 
 export default function AssessmentCompletion() {
   const location = useLocation();
-  const currentStudent = getCurrentStudent();
-  const latest = location.state?.result || getLatestAssessment(currentStudent);
+  const navigate = useNavigate();
+  const result = location.state?.result;
 
-  return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <div className="auth-card" style={{ textAlign: "center" }}>
-          <FaCheckCircle
-            style={{
-              fontSize: "48px",
-              color: "var(--secondary)",
-              marginBottom: "16px",
-            }}
-          />
-          <h1 style={{ marginBottom: "16px" }}>Assessment Complete</h1>
-          <p style={{ marginBottom: "24px", color: "var(--warm-gray)" }}>
-            Your wellness check-in has been recorded{" "}
-            {currentStudent ? "to your student account" : "anonymously"}. You
-            can review your summary and explore support options next.
-          </p>
-          {latest ? (
-            <div
-              style={{
-                marginBottom: "24px",
-                padding: "16px",
-                background: "rgba(42,42,114,0.06)",
-                borderRadius: "14px",
-              }}
-            >
-              <p style={{ fontSize: "0.9rem", color: "var(--warm-gray)" }}>
-                Latest score
-              </p>
-              <p
-                style={{
-                  fontSize: "1.8rem",
-                  fontWeight: 700,
-                  color: "var(--primary)",
-                }}
-              >
-                {latest.overallScore}/100
-              </p>
-            </div>
-          ) : null}
-          <Link to="/feedback">
-            <Button full>View My Feedback</Button>
-          </Link>
-          <Link to="/resources">
-            <Button variant="secondary" full style={{ marginTop: "12px" }}>
-              Explore Resources
-            </Button>
-          </Link>
-          <p
-            style={{
-              marginTop: "24px",
-              fontSize: "0.85rem",
-              color: "var(--warm-gray)",
-            }}
-          >
-            Your privacy is protected. These details are for your own reflection
-            and support planning.
+  useEffect(() => {
+    // If no result, redirect to dashboard after a moment
+    if (!result) {
+      const timer = setTimeout(() => {
+        navigate("/student/dashboard");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [result, navigate]);
+
+  if (!result) {
+    return (
+      <AssessmentLayout>
+        <div
+          style={{
+            maxWidth: "600px",
+            margin: "0 auto",
+            textAlign: "center",
+            padding: "60px 20px",
+          }}
+        >
+          <p style={{ color: "#6b7280" }}>
+            No assessment data found. Redirecting...
           </p>
         </div>
+      </AssessmentLayout>
+    );
+  }
+
+  return (
+    <AssessmentLayout>
+      <div
+        style={{
+          maxWidth: "600px",
+          margin: "0 auto",
+          textAlign: "center",
+          padding: "40px 20px",
+        }}
+      >
+        <div
+          style={{
+            width: "80px",
+            height: "80px",
+            borderRadius: "50%",
+            background: "#d4edda",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 24px",
+          }}
+        >
+          <FaCheckCircle size={48} color="#2f855a" />
+        </div>
+
+        <h1
+          style={{
+            color: "#2a2a72",
+            fontSize: "32px",
+            marginBottom: "12px",
+          }}
+        >
+          Assessment Complete
+        </h1>
+
+        <p
+          style={{
+            color: "#6b7280",
+            fontSize: "18px",
+            marginBottom: "8px",
+          }}
+        >
+          Your responses have been recorded.
+        </p>
+
+        <p
+          style={{
+            color: "#6b7280",
+            fontSize: "16px",
+            marginBottom: "32px",
+          }}
+        >
+          Your personalized feedback is ready.
+        </p>
+
+        <div
+          style={{
+            padding: "20px",
+            background: "#f8fafc",
+            borderRadius: "12px",
+            marginBottom: "32px",
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              color: "#1f2937",
+              fontSize: "14px",
+            }}
+          >
+            Your overall wellness score:
+          </p>
+          <p
+            style={{
+              fontSize: "48px",
+              fontWeight: "700",
+              color:
+                result.overallScore >= 70
+                  ? "#2f855a"
+                  : result.overallScore >= 40
+                    ? "#4a5568"
+                    : "#b34747",
+              margin: "8px 0 0",
+            }}
+          >
+            {result.overallScore}/100
+          </p>
+        </div>
+
+        <Button
+          onClick={() => navigate("/feedback", { state: { result } })}
+          style={{
+            padding: "14px 32px",
+            fontSize: "16px",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          View Feedback
+          <FaArrowRight size={16} />
+        </Button>
       </div>
-    </div>
+    </AssessmentLayout>
   );
 }

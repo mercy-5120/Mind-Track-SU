@@ -1,6 +1,8 @@
-/* src/styles/StudentLayout.module.css */
+/* src/styles/AssessmentLayout.module.css */
 
-/* Anonymous Mode - Full width */
+/* ============================================
+   ANONYMOUS MODE - Full width, centered content
+   ============================================ */
 .anonymousContainer {
   display: flex;
   min-height: 100vh;
@@ -9,7 +11,7 @@
   align-items: flex-start;
 }
 
-.anonymousContainer .mainContent {
+.anonymousMainContent {
   flex: 1;
   max-width: 900px;
   width: 100%;
@@ -18,13 +20,15 @@
   justify-content: center;
 }
 
-.anonymousContainer .mainContent > * {
+.anonymousContentWrapper {
   width: 100%;
   max-width: 800px;
   margin: 0 auto;
 }
 
-/* Student Mode - With sidebar */
+/* ============================================
+   STUDENT MODE - With sidebar, left aligned
+   ============================================ */
 .studentContainer {
   display: flex;
   min-height: 100vh;
@@ -32,7 +36,7 @@
   align-items: flex-start;
 }
 
-.studentContainer .mainContent {
+.studentMainContent {
   flex: 1;
   padding: 24px 32px;
   width: 100%;
@@ -42,6 +46,9 @@
   transition: all 0.3s ease;
 }
 
+/* ============================================
+   SHARED STYLES
+   ============================================ */
 .topHeader {
   display: none;
 }
@@ -50,7 +57,7 @@
   display: none;
 }
 
-/* Show hamburger only in student mode */
+/* Show hamburger only in student mode (with sidebar) */
 .studentContainer .topHeader {
   display: flex;
   align-items: center;
@@ -75,13 +82,21 @@
   background: rgba(42, 42, 114, 0.08);
 }
 
-/* Mobile responsiveness */
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+/* Tablet and smaller */
 @media (max-width: 768px) {
-  .anonymousContainer .mainContent {
+  .anonymousMainContent {
     padding: 20px 16px;
   }
   
-  .studentContainer .mainContent {
+  .anonymousContentWrapper {
+    max-width: 100%;
+  }
+  
+  .studentMainContent {
     padding: 16px 20px;
     max-width: 100%;
   }
@@ -95,6 +110,7 @@
   }
 }
 
+/* Desktop - Hide hamburger */
 @media (min-width: 769px) {
   .studentContainer .hamburger {
     display: none;
