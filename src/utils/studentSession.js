@@ -43,6 +43,8 @@ export const getStoredStudents = () => {
       display_name: "Demo Student",
       department: "Computer Science",
       year_of_study: 2,
+      email: "demo@student.edu",
+      phone: "",
       anonymous_account: 0,
       is_active: 1,
       created_at: new Date().toISOString(),
@@ -55,7 +57,16 @@ export const getStoredStudents = () => {
   return students;
 };
 
-export const registerStudent = ({ username, password, displayName, studentId, department, yearOfStudy }) => {
+export const registerStudent = ({
+  username,
+  password,
+  displayName,
+  studentId,
+  department,
+  yearOfStudy,
+  email,
+  phone,
+}) => {
   const students = getStoredStudents();
   const normalizedUsername = username.trim().toLowerCase();
   const existingStudent = students.find(
@@ -80,6 +91,8 @@ export const registerStudent = ({ username, password, displayName, studentId, de
     display_name: displayName?.trim() || username.trim(),
     department: department?.trim() || "",
     year_of_study: yearOfStudy ? Number(yearOfStudy) : null,
+    email: email?.trim() || "",
+    phone: phone?.trim() || "",
     anonymous_account: 0,
     is_active: 1,
     created_at: new Date().toISOString(),
@@ -126,6 +139,47 @@ export const getCurrentStudent = () => readStorage(CURRENT_STUDENT_KEY, null);
 
 export const logoutStudent = () => {
   writeStorage(CURRENT_STUDENT_KEY, null);
+};
+
+export const updateStudentProfile = (updatedData) => {
+  try {
+    const currentStudent = getCurrentStudent();
+    if (!currentStudent) {
+      throw new Error("No student logged in");
+    }
+
+    // Get all students
+    const students = getStoredStudents();
+
+    // Find the student in the array
+    const studentIndex = students.findIndex(
+      (s) => s.student_id === currentStudent.student_id,
+    );
+
+    if (studentIndex === -1) {
+      throw new Error("Student not found in database");
+    }
+
+    // Update the student with new data
+    const updatedStudent = {
+      ...students[studentIndex],
+      ...updatedData,
+      // Don't allow password updates through this function
+      password_hash: students[studentIndex].password_hash,
+    };
+
+    // Update the students array
+    students[studentIndex] = updatedStudent;
+    writeStorage(STUDENT_STORAGE_KEY, students);
+
+    // Update the current session
+    setCurrentStudent(updatedStudent);
+
+    return updatedStudent;
+  } catch (error) {
+    console.error("Error updating student profile:", error);
+    throw error;
+  }
 };
 
 export const saveAssessmentResult = (student, result) => {
