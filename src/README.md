@@ -531,8 +531,8 @@ console.log(sessionStorage);
 
 # Contributors
 
-- Gachau Mercy Muthoni(@mercy-5120)
-- midevaa(@midevaa)
+- Gachau Mercy Muthoni (@mercy-5120)
+- midevaa (@midevaa)
 
 ---
 
