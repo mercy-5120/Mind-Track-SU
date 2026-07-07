@@ -1,7 +1,15 @@
-import React from 'react';
-import styles from '../../styles/DeanDashboard.module.css';
+// src/components/dean/DepartmentBreakdown.jsx
+import React from "react";
+import { FaUniversity } from "react-icons/fa";
+import styles from "../../styles/DeanDashboard.module.css";
 
-export default function DepartmentBreakdown({ departments, selectedDepartment, onDepartmentChange }) {
+export default function DepartmentBreakdown({
+  departments,
+  selectedDepartment,
+  onDepartmentChange,
+}) {
+  const safeDepartments = departments || [];
+
   return (
     <section className={styles.panelCard}>
       <div className={styles.cardHeader}>
@@ -9,9 +17,13 @@ export default function DepartmentBreakdown({ departments, selectedDepartment, o
           <p className={styles.cardEyebrow}>Department view</p>
           <h3>Wellness benchmark by faculty</h3>
         </div>
-        <select value={selectedDepartment} onChange={(event) => onDepartmentChange(event.target.value)} className={styles.selectInput}>
+        <select
+          value={selectedDepartment}
+          onChange={(event) => onDepartmentChange(event.target.value)}
+          className={styles.selectInput}
+        >
           <option value="All">All departments</option>
-          {departments.map((item) => (
+          {safeDepartments.map((item) => (
             <option key={item.name} value={item.name}>
               {item.name}
             </option>
@@ -28,9 +40,15 @@ export default function DepartmentBreakdown({ departments, selectedDepartment, o
             </tr>
           </thead>
           <tbody>
-            {departments.map((item) => (
+            {safeDepartments.map((item) => (
               <tr key={item.name}>
-                <td>{item.name}</td>
+                <td>
+                  <FaUniversity
+                    style={{ marginRight: "6px", color: "#6b7280" }}
+                    size={14}
+                  />{" "}
+                  {item.name}
+                </td>
                 <td>{item.averageScore}</td>
                 <td>{item.highRisk}</td>
               </tr>
