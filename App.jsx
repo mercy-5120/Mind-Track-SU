@@ -26,7 +26,8 @@ import SUMCDashboard from "./src/pages/staff/SUMC/SUMCDashboard";
 import PeerDashboard from "./src/pages/staff/PeerCounsellors/PeerDashboard";
 import DeanDashboard from "./src/pages/staff/Dean/DeanDashboard";
 import HighRiskAlerts from "./src/pages/staff/PeerCounsellors/HighRiskAlerts";
-import Referrals from "./src/pages/staff/PeerCounsellors/Referrals";
+import PeerReferrals from "./src/pages/staff/PeerCounsellors/Referrals"; // ✅ Renamed for clarity
+import SUMCReferrals from "./src/pages/staff/SUMC/Referrals"; // ✅ Fixed import (was sumcReferrals)
 // REMOVED: import Resources from "./src/pages/staff/SUMC/Resources";
 import ScheduleSessions from "./src/pages/staff/SUMC/ScheduleSessions";
 import Settings from "./src/pages/staff/SUMC/Settings";
@@ -208,7 +209,7 @@ function App() {
             path="/staff/sumc/high-risk-alerts"
             element={<HighRiskAlerts role="sumc" />}
           />
-          <Route path="/staff/sumc/referrals" element={<Referrals />} />
+          <Route path="/staff/sumc/referrals" element={<SUMCReferrals />} /> {/* ✅ FIXED: Using SUMCReferrals */}
           <Route
             path="/staff/sumc/create-referral"
             element={<CreateReferral />}
@@ -237,7 +238,7 @@ function App() {
             path="/staff/peer/high-risk-alerts"
             element={<HighRiskAlerts role="peer" />}
           />
-          <Route path="/staff/peer/referrals" element={<Referrals />} />
+          <Route path="/staff/peer/referrals" element={<PeerReferrals />} /> {/* ✅ FIXED: Using PeerReferrals */}
           <Route
             path="/staff/peer/schedule-sessions"
             element={<ScheduleSessions />}
