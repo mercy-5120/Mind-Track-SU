@@ -45,69 +45,100 @@ const getRiskLevel = (score) => {
   return "high";
 };
 
-// Format date for MySQL using Kenyan time (UTC+3)
+// Format date for MySQL (YYYY-MM-DD HH:MM:SS)
 const formatMySQLDate = (date) => {
-  const kenyanTime = new Date(
-    date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" }),
-  );
-  return kenyanTime.toISOString().replace("T", " ").slice(0, 19);
+  return date.toISOString().replace("T", " ").slice(0, 19);
 };
 
 // =====================================================
 // STAFF ROUTES
 // =====================================================
 
+// Get All Alerts (with contact_info from crisis_alerts)
 app.get("/api/staff/alerts", async (req, res) => {
   try {
     const alerts = await all(
       `
-      SELECT a.alert_id, a.category, a.risk_level, a.alert_status, a.student_name, a.student_identifier, a.created_at,
-             s.name AS assigned_staff_name, s.role AS assigned_staff_role
+      SELECT 
+        a.alert_id, 
+        a.category, 
+        a.risk_level, 
+        a.alert_status, 
+        a.student_name, 
+        a.student_identifier, 
+        a.created_at,
+        s.name AS assigned_staff_name, 
+        s.role AS assigned_staff_role,
+        c.contact_info
       FROM staff_alerts a
       LEFT JOIN staff_accounts s ON a.assigned_staff_id = s.staff_id
-      ORDER BY a.alert_id DESC
+      LEFT JOIN crisis_alerts c ON a.alert_id = c.alert_id
+      ORDER BY a.created_at DESC
     `,
       [],
-      { staffId: getRequestedStaffId(req) },
     );
+
+    console.log("[GET /api/staff/alerts] Alerts found:", alerts.length);
     res.json(alerts);
   } catch (error) {
+    console.error("[GET /api/staff/alerts] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Get Alert by ID (with contact_info from crisis_alerts)
 app.get("/api/staff/alerts/:id", async (req, res) => {
   try {
     const alert = await get(
       `
-      SELECT a.*, s.name AS assigned_staff_name, s.role AS assigned_staff_role
+      SELECT a.*, s.name AS assigned_staff_name, s.role AS assigned_staff_role,
+             c.contact_info
       FROM staff_alerts a
       LEFT JOIN staff_accounts s ON a.assigned_staff_id = s.staff_id
+      LEFT JOIN crisis_alerts c ON a.alert_id = c.alert_id
       WHERE a.alert_id = ?
     `,
       [req.params.id],
-      { staffId: getRequestedStaffId(req) },
     );
+
+    if (!alert) {
+      return res.status(404).json({ message: "Alert not found" });
+    }
+
     res.json(alert);
   } catch (error) {
+    console.error("[GET /api/staff/alerts/:id] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Update Alert Status
 app.put("/api/staff/alerts/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
-    await run(
-      "UPDATE staff_alerts SET alert_status = ? WHERE alert_id = ?",
-      [status, req.params.id],
-      { staffId: getRequestedStaffId(req) },
+    const alertId = req.params.id;
+
+    console.log(
+      "[PUT /api/staff/alerts/:id/status] Updating alert:",
+      alertId,
+      "to:",
+      status,
     );
+
+    await run("UPDATE staff_alerts SET alert_status = ? WHERE alert_id = ?", [
+      status,
+      alertId,
+    ]);
+
+    console.log("[PUT /api/staff/alerts/:id/status] Success");
     res.json({ success: true });
   } catch (error) {
+    console.error("[PUT /api/staff/alerts/:id/status] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Get Referrals
 app.get("/api/staff/referrals", async (req, res) => {
   try {
     const referrals = await all(
@@ -118,14 +149,15 @@ app.get("/api/staff/referrals", async (req, res) => {
       ORDER BY r.referral_id DESC
     `,
       [],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json(referrals);
   } catch (error) {
+    console.error("Get referrals error:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Create Referral
 app.post("/api/staff/referrals", async (req, res) => {
   try {
     const {
@@ -146,24 +178,47 @@ app.post("/api/staff/referrals", async (req, res) => {
         studentName ?? (studentId ? `Student ${studentId}` : "Anonymous"),
         notes ?? "Created from staff portal",
       ],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Create referral error:", error);
     res.status(500).json({ message: error.message });
   }
 });
 
+// Update Referral Status
 app.put("/api/staff/referrals/:id", async (req, res) => {
   try {
     const { status, notes } = req.body;
+    const referralId = req.params.id;
+
+    console.log(
+      "[PUT /api/staff/referrals/:id] Updating referral:",
+      referralId,
+      "to status:",
+      status,
+    );
+
+    // Check if referral exists
+    const existingReferral = await get(
+      "SELECT * FROM referrals WHERE referral_id = ?",
+      [referralId],
+    );
+
+    if (!existingReferral) {
+      return res.status(404).json({ message: "Referral not found" });
+    }
+
+    // Update the referral
     await run(
       "UPDATE referrals SET referral_status = ?, notes = ? WHERE referral_id = ?",
-      [status, notes, req.params.id],
-      { staffId: getRequestedStaffId(req) },
+      [status, notes || existingReferral.notes, referralId],
     );
-    res.json({ success: true });
+
+    console.log("[PUT /api/staff/referrals/:id] Success");
+    res.json({ success: true, message: "Referral updated successfully" });
   } catch (error) {
+    console.error("[PUT /api/staff/referrals/:id] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -179,10 +234,10 @@ app.get("/api/staff/followups/:alertId", async (req, res) => {
       ORDER BY f.followup_id DESC
     `,
       [req.params.alertId],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json(followups);
   } catch (error) {
+    console.error("Get followups error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -198,10 +253,10 @@ app.post("/api/staff/followups", async (req, res) => {
         staffId ?? staff_id ?? null,
         notes ?? followup_notes ?? "Follow-up created from staff portal",
       ],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Create followup error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -211,10 +266,10 @@ app.get("/api/staff/resources", async (req, res) => {
     const resources = await all(
       "SELECT * FROM resources ORDER BY resource_id DESC",
       [],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json(resources);
   } catch (error) {
+    console.error("Get resources error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -225,10 +280,10 @@ app.post("/api/staff/messages", async (req, res) => {
     await run(
       "INSERT INTO messages (alert_id, sender_role, recipient, content) VALUES (?, ?, ?, ?)",
       [alertId, senderRole, recipient, content],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json({ success: true });
   } catch (error) {
+    console.error("Send message error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -238,10 +293,10 @@ app.get("/api/staff/messages/:alertId", async (req, res) => {
     const messages = await all(
       "SELECT * FROM messages WHERE alert_id = ? ORDER BY message_id DESC",
       [req.params.alertId],
-      { staffId: getRequestedStaffId(req) },
     );
     res.json(messages);
   } catch (error) {
+    console.error("Get messages error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -270,6 +325,77 @@ app.post("/api/staff/login", async (req, res) => {
     const staffDatabaseName = await getStaffDatabaseName(staff.staff_id);
     res.json({ ...staff, staff_database_name: staffDatabaseName });
   } catch (error) {
+    console.error("Staff login error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// =====================================================
+// STAFF CRISIS ALERT ROUTES
+// =====================================================
+
+// Get Crisis Alerts (Staff) - Direct from crisis_alerts
+app.get("/api/staff/crisis-alerts", async (req, res) => {
+  try {
+    const alerts = await all(
+      `
+      SELECT 
+        c.alert_id,
+        c.created_at,
+        c.contact_info,
+        c.student_id,
+        c.status,
+        c.category,
+        c.risk_level,
+        c.alert_status,
+        s.display_name AS student_name
+      FROM crisis_alerts c
+      LEFT JOIN students s ON c.student_id = s.student_id
+      ORDER BY c.created_at DESC
+    `,
+      [],
+    );
+
+    console.log(
+      "[GET /api/staff/crisis-alerts] Crisis alerts found:",
+      alerts.length,
+    );
+    res.json({ alerts: alerts || [] });
+  } catch (error) {
+    console.error("[GET /api/staff/crisis-alerts] Error:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update Crisis Alert Status (Staff)
+app.put("/api/staff/crisis-alerts/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const alertId = req.params.id;
+
+    console.log(
+      "[PUT /api/staff/crisis-alerts/:id/status] Updating crisis alert:",
+      alertId,
+      "to:",
+      status,
+    );
+
+    // Update crisis_alerts table
+    await run("UPDATE crisis_alerts SET alert_status = ? WHERE alert_id = ?", [
+      status,
+      alertId,
+    ]);
+
+    // Also update staff_alerts table
+    await run("UPDATE staff_alerts SET alert_status = ? WHERE alert_id = ?", [
+      status,
+      alertId,
+    ]);
+
+    console.log("[PUT /api/staff/crisis-alerts/:id/status] Success");
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[PUT /api/staff/crisis-alerts/:id/status] Error:", error);
     res.status(500).json({ message: error.message });
   }
 });
@@ -601,9 +727,10 @@ app.post("/api/student/assessments", async (req, res) => {
 });
 
 // =====================================================
-// CRISIS ALERT ROUTES
+// STUDENT CRISIS ALERT ROUTES
 // =====================================================
 
+// Get Crisis Alerts (Student)
 app.get("/api/student/crisis-alerts", async (req, res) => {
   try {
     const studentId = req.query.student_id;
@@ -624,9 +751,15 @@ app.get("/api/student/crisis-alerts", async (req, res) => {
   }
 });
 
+// Save Crisis Alert (Student)
 app.post("/api/student/crisis-alerts", async (req, res) => {
   try {
     const { student_id, contact_info } = req.body;
+
+    console.log("[Crisis Alert] Received request:", {
+      student_id,
+      contact_info,
+    });
 
     if (!student_id || !contact_info) {
       return res
@@ -636,37 +769,75 @@ app.post("/api/student/crisis-alerts", async (req, res) => {
 
     const formattedDate = formatMySQLDate(new Date());
 
-    const alert = {
-      alert_id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      created_at: formattedDate,
-      contact_info: contact_info,
-      student_id: student_id,
-      status: "crisis_contacted",
-      category: "crisis",
-      risk_level: "high",
-      alert_status: "new",
-    };
+    // Get student name
+    let studentName = "Anonymous Student";
+    if (student_id) {
+      const student = await get(
+        "SELECT display_name, username FROM students WHERE student_id = ?",
+        [student_id],
+      );
+      studentName =
+        student?.display_name || student?.username || "Anonymous Student";
+    }
 
+    const alertId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+
+    // Insert into crisis_alerts table
     await run(
       `INSERT INTO crisis_alerts 
        (alert_id, created_at, contact_info, student_id, status, category, risk_level, alert_status) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        alert.alert_id,
-        alert.created_at,
-        alert.contact_info,
-        alert.student_id,
-        alert.status,
-        alert.category,
-        alert.risk_level,
-        alert.alert_status,
+        alertId,
+        formattedDate,
+        contact_info,
+        student_id,
+        "crisis_contacted",
+        "crisis",
+        "high",
+        "new",
       ],
     );
 
-    res.json({ success: true, alert });
+    // Insert into staff_alerts table
+    const studentIdentifier = `••••• ${contact_info.slice(-4)}`;
+    await run(
+      `INSERT INTO staff_alerts 
+       (alert_id, category, risk_level, alert_status, student_name, student_identifier, created_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [
+        alertId,
+        "crisis",
+        "high",
+        "new",
+        studentName,
+        studentIdentifier,
+        formattedDate,
+      ],
+    );
+
+    console.log("[Crisis Alert] Crisis alert saved successfully");
+
+    res.json({
+      success: true,
+      alert: {
+        alert_id: alertId,
+        created_at: formattedDate,
+        contact_info: contact_info,
+        student_id: student_id,
+        status: "crisis_contacted",
+        category: "crisis",
+        risk_level: "high",
+        alert_status: "new",
+      },
+    });
   } catch (error) {
-    console.error("Save crisis alert error:", error);
-    res.status(500).json({ message: "Failed to save crisis alert." });
+    console.error("[Crisis Alert] ERROR:", error);
+    console.error("[Crisis Alert] Stack:", error.stack);
+    res.status(500).json({
+      message: "Failed to save crisis alert.",
+      error: error.message,
+    });
   }
 });
 
@@ -681,4 +852,12 @@ app.listen(PORT, () => {
   console.log(
     `Student assessments: GET/POST http://localhost:${PORT}/api/student/assessments`,
   );
+  console.log(
+    `Staff crisis alerts: GET/PUT http://localhost:${PORT}/api/staff/crisis-alerts`,
+  );
+  console.log(
+    `Staff referrals: GET/PUT http://localhost:${PORT}/api/staff/referrals`,
+  );
 });
+
+export default app;

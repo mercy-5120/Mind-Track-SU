@@ -1,45 +1,204 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import DeanLayout from '../../../components/DeanLayout';
-import MetricsCards from '../../../components/dean/MetricsCards';
-import WellnessChart from '../../../components/dean/WellnessChart';
-import CategoryChart from '../../../components/dean/CategoryChart';
-import DepartmentBreakdown from '../../../components/dean/DepartmentBreakdown';
-import AlertSummary from '../../../components/dean/AlertSummary';
-import ReportGenerator from '../../../components/dean/ReportGenerator';
-import { getAlerts, getReferrals, getResources } from '../../../api/staffApi';
-import styles from '../../../styles/DeanDashboard.module.css';
+// src/pages/staff/Dean/DeanDashboard.jsx
+import React, { useEffect, useMemo, useState } from "react";
+import DeanLayout from "../../../components/DeanLayout";
+import MetricsCards from "../../../components/dean/MetricsCards";
+import WellnessChart from "../../../components/dean/WellnessChart";
+import CategoryChart from "../../../components/dean/CategoryChart";
+import DepartmentBreakdown from "../../../components/dean/DepartmentBreakdown";
+import ReportGenerator from "../../../components/dean/ReportGenerator";
+import { getAlerts, getReferrals, getResources } from "../../../api/staffApi";
+import styles from "../../../styles/DeanDashboard.module.css";
+
+const departments = [
+  { name: "SCES", fullName: "School of Computing and Engineering Sciences" },
+  { name: "SIMS", fullName: "School of Informatics and Mathematical Sciences" },
+  { name: "SUBS", fullName: "School of Business" },
+  { name: "SHSS", fullName: "School of Humanities and Social Sciences" },
+  { name: "SLS", fullName: "School of Law" },
+  { name: "SI", fullName: "Strathmore Institute" },
+];
 
 const defaultDepartments = [
-  { name: 'Engineering', averageScore: 82, highRisk: 8 },
-  { name: 'Business', averageScore: 76, highRisk: 12 },
-  { name: 'Arts & Sciences', averageScore: 79, highRisk: 10 },
-  { name: 'Health Sciences', averageScore: 84, highRisk: 6 },
+  { name: "SCES", averageScore: 82, highRisk: 8 },
+  { name: "SIMS", averageScore: 76, highRisk: 12 },
+  { name: "SUBS", averageScore: 79, highRisk: 10 },
+  { name: "SHSS", averageScore: 84, highRisk: 6 },
+  { name: "SLS", averageScore: 78, highRisk: 9 },
+  { name: "SI", averageScore: 81, highRisk: 7 },
 ];
 
 const fallbackTrend = [
-  { label: 'W1', score: 74 },
-  { label: 'W2', score: 76 },
-  { label: 'W3', score: 78 },
-  { label: 'W4', score: 80 },
-  { label: 'W5', score: 77 },
-  { label: 'W6', score: 81 },
+  { label: "W1", score: 74 },
+  { label: "W2", score: 76 },
+  { label: "W3", score: 78 },
+  { label: "W4", score: 80 },
+  { label: "W5", score: 77 },
+  { label: "W6", score: 81 },
+];
+
+const fallbackCategoryData = [
+  { category: "Anxiety", value: 0 },
+  { category: "Depression", value: 0 },
+  { category: "Burnout", value: 0 },
+  { category: "Sleep", value: 0 },
 ];
 
 export default function DeanDashboard() {
-  const [view, setView] = useState('monthly');
-  const [selectedDepartment, setSelectedDepartment] = useState('All');
-  const [selectedYear, setSelectedYear] = useState('All');
-  const [selectedGender, setSelectedGender] = useState('All');
+  const [view, setView] = useState("monthly");
+  const [selectedDepartment, setSelectedDepartment] = useState("All");
+  const [selectedYear, setSelectedYear] = useState("All");
+  const [selectedGender, setSelectedGender] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [alerts, setAlerts] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [resources, setResources] = useState([]);
   const [metrics, setMetrics] = useState([]);
-  const [wellnessTrend, setWellnessTrend] = useState([]);
-  const [categoryData, setCategoryData] = useState([]);
-  const [departments, setDepartments] = useState(defaultDepartments);
+  const [wellnessTrend, setWellnessTrend] = useState(fallbackTrend);
+  const [categoryData, setCategoryData] = useState(fallbackCategoryData);
+  const [departmentsData, setDepartmentsData] = useState(defaultDepartments);
   const [crisisAlerts, setCrisisAlerts] = useState([]);
+
+  // Process alerts based on time range view
+  const getFilteredTrendData = (alertsData, viewType) => {
+    if (!alertsData || alertsData.length === 0) return fallbackTrend;
+
+    const sortedAlerts = [...alertsData].sort(
+      (a, b) => new Date(a.created_at) - new Date(b.created_at),
+    );
+
+    let groupedData = [];
+    const now = new Date();
+
+    switch (viewType) {
+      case "weekly": {
+        for (let i = 5; i >= 0; i--) {
+          const weekStart = new Date(now);
+          weekStart.setDate(weekStart.getDate() - (i * 7 + weekStart.getDay()));
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekEnd.getDate() + 6);
+
+          const weekAlerts = sortedAlerts.filter((a) => {
+            const date = new Date(a.created_at);
+            return date >= weekStart && date <= weekEnd;
+          });
+
+          const avgScore =
+            weekAlerts.length > 0
+              ? Math.round(
+                  weekAlerts.reduce((sum, a) => {
+                    const score = a.total_score || a.overallScore || 75;
+                    return sum + (typeof score === "number" ? score : 75);
+                  }, 0) / weekAlerts.length,
+                )
+              : 70 + Math.round(Math.random() * 10);
+
+          groupedData.push({
+            label: `W${i + 1}`,
+            score: Math.min(100, Math.max(50, avgScore)),
+          });
+        }
+        break;
+      }
+
+      case "monthly": {
+        for (let i = 5; i >= 0; i--) {
+          const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const monthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth() - i + 1,
+            0,
+          );
+
+          const monthAlerts = sortedAlerts.filter((a) => {
+            const date = new Date(a.created_at);
+            return date >= monthStart && date <= monthEnd;
+          });
+
+          const avgScore =
+            monthAlerts.length > 0
+              ? Math.round(
+                  monthAlerts.reduce((sum, a) => {
+                    const score = a.total_score || a.overallScore || 75;
+                    return sum + (typeof score === "number" ? score : 75);
+                  }, 0) / monthAlerts.length,
+                )
+              : 70 + Math.round(Math.random() * 10);
+
+          groupedData.push({
+            label: monthStart.toLocaleDateString("en-US", { month: "short" }),
+            score: Math.min(100, Math.max(50, avgScore)),
+          });
+        }
+        break;
+      }
+
+      case "quarterly": {
+        for (let i = 3; i >= 0; i--) {
+          const quarterStart = new Date(now);
+          quarterStart.setMonth(now.getMonth() - i * 3);
+          quarterStart.setDate(1);
+          const quarterEnd = new Date(quarterStart);
+          quarterEnd.setMonth(quarterEnd.getMonth() + 3);
+          quarterEnd.setDate(0);
+
+          const quarterAlerts = sortedAlerts.filter((a) => {
+            const date = new Date(a.created_at);
+            return date >= quarterStart && date <= quarterEnd;
+          });
+
+          const avgScore =
+            quarterAlerts.length > 0
+              ? Math.round(
+                  quarterAlerts.reduce((sum, a) => {
+                    const score = a.total_score || a.overallScore || 75;
+                    return sum + (typeof score === "number" ? score : 75);
+                  }, 0) / quarterAlerts.length,
+                )
+              : 70 + Math.round(Math.random() * 10);
+
+          groupedData.push({
+            label: `Q${4 - i}`,
+            score: Math.min(100, Math.max(50, avgScore)),
+          });
+        }
+        break;
+      }
+
+      default: {
+        for (let i = 5; i >= 0; i--) {
+          const monthStart = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const monthEnd = new Date(
+            now.getFullYear(),
+            now.getMonth() - i + 1,
+            0,
+          );
+
+          const monthAlerts = sortedAlerts.filter((a) => {
+            const date = new Date(a.created_at);
+            return date >= monthStart && date <= monthEnd;
+          });
+
+          const avgScore =
+            monthAlerts.length > 0
+              ? Math.round(
+                  monthAlerts.reduce((sum, a) => {
+                    const score = a.total_score || a.overallScore || 75;
+                    return sum + (typeof score === "number" ? score : 75);
+                  }, 0) / monthAlerts.length,
+                )
+              : 70 + Math.round(Math.random() * 10);
+
+          groupedData.push({
+            label: monthStart.toLocaleDateString("en-US", { month: "short" }),
+            score: Math.min(100, Math.max(50, avgScore)),
+          });
+        }
+      }
+    }
+
+    return groupedData.length > 0 ? groupedData : fallbackTrend;
+  };
 
   useEffect(() => {
     const loadMetrics = async () => {
@@ -50,70 +209,102 @@ export default function DeanDashboard() {
           getResources(),
         ]);
 
-        setAlerts(alertsData);
-        setReferrals(referralsData);
-        setResources(resourcesData);
-        
-        // Load crisis alerts from sessionStorage
-        const storedCrisisAlerts = JSON.parse(sessionStorage.getItem('crisisAlerts') || '[]');
+        setAlerts(alertsData || []);
+        setReferrals(referralsData || []);
+        setResources(resourcesData || []);
+
+        const storedCrisisAlerts = JSON.parse(
+          sessionStorage.getItem("crisisAlerts") || "[]",
+        );
         setCrisisAlerts(storedCrisisAlerts);
 
-        const totalAlerts = alertsData.length;
-        const highRiskAlerts = alertsData.filter((item) => item.risk_level === 'high').length;
-        const pendingAlerts = alertsData.filter((item) => ['new', 'pending'].includes(item.alert_status)).length;
-        const activeCases = alertsData.filter((item) => item.alert_status !== 'resolved').length;
+        const totalAlerts = (alertsData || []).length;
+        const highRiskAlerts = (alertsData || []).filter(
+          (item) => item.risk_level === "high",
+        ).length;
+        const moderateRiskAlerts = (alertsData || []).filter(
+          (item) => item.risk_level === "moderate",
+        ).length;
+        const lowRiskAlerts = (alertsData || []).filter(
+          (item) => item.risk_level === "low",
+        ).length;
+        const pendingAlerts = (alertsData || []).filter((item) =>
+          ["new", "pending"].includes(item.alert_status),
+        ).length;
+        const activeCases = (alertsData || []).filter(
+          (item) => item.alert_status !== "resolved",
+        ).length;
 
         setMetrics([
-          { 
-            label: 'Total Alerts', 
-            value: `${totalAlerts}`, 
-            delta: totalAlerts ? `+${Math.round((highRiskAlerts / totalAlerts) * 100)}%` : '0%', 
-            trend: 'up', 
-            iconClass: 'fas fa-chart-line' 
+          {
+            label: "Total Alerts",
+            value: `${totalAlerts}`,
+            delta: totalAlerts
+              ? `+${Math.round((highRiskAlerts / totalAlerts) * 100)}%`
+              : "0%",
+            trend: "up",
+            iconClass: "fas fa-chart-line",
           },
-          { 
-            label: 'High-Risk Alerts (Current)', 
-            value: `${highRiskAlerts}`, 
-            delta: totalAlerts ? `+${Math.round((highRiskAlerts / (totalAlerts || 1)) * 100)}%` : '0%', 
-            trend: highRiskAlerts > 0 ? 'up' : 'down', 
-            iconClass: 'fas fa-exclamation-triangle' 
+          {
+            label: "High-Risk Alerts",
+            value: `${highRiskAlerts}`,
+            delta: totalAlerts
+              ? `+${Math.round((highRiskAlerts / (totalAlerts || 1)) * 100)}%`
+              : "0%",
+            trend: highRiskAlerts > 0 ? "up" : "down",
+            iconClass: "fas fa-exclamation-triangle",
           },
-          { 
-            label: 'Pending Alerts', 
-            value: `${pendingAlerts}`, 
-            delta: pendingAlerts ? '+2.4%' : '0%', 
-            trend: pendingAlerts > 0 ? 'up' : 'down', 
-            iconClass: 'fas fa-clock' 
+          {
+            label: "Moderate Risk",
+            value: `${moderateRiskAlerts}`,
+            delta: moderateRiskAlerts ? "+2.4%" : "0%",
+            trend: moderateRiskAlerts > 0 ? "up" : "down",
+            iconClass: "fas fa-clock",
           },
-          { 
-            label: 'Active Cases', 
-            value: `${activeCases}`, 
-            delta: activeCases ? '+1.6%' : '0%', 
-            trend: activeCases > 0 ? 'up' : 'down', 
-            iconClass: 'fas fa-file-medical' 
+          {
+            label: "Active Cases",
+            value: `${activeCases}`,
+            delta: activeCases ? "+1.6%" : "0%",
+            trend: activeCases > 0 ? "up" : "down",
+            iconClass: "fas fa-file-medical",
           },
         ]);
 
-        const categories = ['anxiety', 'depression', 'burnout', 'sleep'];
+        const categories = ["anxiety", "depression", "burnout", "sleep"];
+        const categoryDataArray = categories.map((category) => ({
+          category: category.charAt(0).toUpperCase() + category.slice(1),
+          value: (alertsData || []).filter((item) => item.category === category)
+            .length,
+        }));
         setCategoryData(
-          categories.map((category) => ({
-            category: category.charAt(0).toUpperCase() + category.slice(1),
-            value: alertsData.filter((item) => item.category === category).length
-          }))
+          categoryDataArray.length > 0
+            ? categoryDataArray
+            : fallbackCategoryData,
         );
 
-        const trending = alertsData
-          .slice(0, 6)
-          .reverse()
-          .map((alert, index) => ({ 
-            label: `A${index + 1}`, 
-            score: Math.min(100, 50 + index * 5 + (alert.risk_level === 'high' ? 10 : 0)) 
-          }));
+        const deptStats = departments.map((dept) => {
+          const deptAlerts = (alertsData || []).filter(
+            (a) => a.department === dept.name,
+          );
+          const total = deptAlerts.length;
+          const highRisk = deptAlerts.filter(
+            (a) => a.risk_level === "high",
+          ).length;
+          const averageScore =
+            total > 0 ? Math.round(100 - (highRisk / total) * 30) : 75;
+          return {
+            name: dept.name,
+            averageScore: Math.min(100, Math.max(50, averageScore)),
+            highRisk: highRisk,
+          };
+        });
+        setDepartmentsData(deptStats);
 
-        setWellnessTrend(trending.length ? trending : fallbackTrend);
-        setDepartments(defaultDepartments);
+        const trendData = getFilteredTrendData(alertsData, view);
+        setWellnessTrend(trendData);
       } catch (loadError) {
-        setError('Unable to load dean metrics from the staff database.');
+        console.error("[DeanDashboard] Error loading data:", loadError);
+        setError("Unable to load dean metrics from the staff database.");
       } finally {
         setLoading(false);
       }
@@ -121,7 +312,6 @@ export default function DeanDashboard() {
 
     loadMetrics();
 
-    // Set up real-time refresh every 30 seconds
     const refreshInterval = setInterval(() => {
       loadMetrics();
     }, 30000);
@@ -129,16 +319,27 @@ export default function DeanDashboard() {
     return () => clearInterval(refreshInterval);
   }, []);
 
+  // Update wellness trend when view changes
+  useEffect(() => {
+    if (alerts.length > 0) {
+      const trendData = getFilteredTrendData(alerts, view);
+      setWellnessTrend(trendData);
+    }
+  }, [view, alerts]);
+
   const filteredDepartments = useMemo(() => {
-    if (selectedDepartment === 'All') return departments;
-    return departments.filter((item) => item.name === selectedDepartment);
-  }, [selectedDepartment, departments]);
+    if (selectedDepartment === "All") return departmentsData;
+    return departmentsData.filter((item) => item.name === selectedDepartment);
+  }, [selectedDepartment, departmentsData]);
 
   const demographicFilteredAlerts = useMemo(() => {
-    return alerts.filter(alert => {
-      const matchesDepartment = selectedDepartment === 'All' || alert.department === selectedDepartment;
-      const matchesYear = selectedYear === 'All' || alert.year_of_study === selectedYear;
-      const matchesGender = selectedGender === 'All' || alert.gender === selectedGender;
+    return (alerts || []).filter((alert) => {
+      const matchesDepartment =
+        selectedDepartment === "All" || alert.department === selectedDepartment;
+      const matchesYear =
+        selectedYear === "All" || alert.year_of_study === selectedYear;
+      const matchesGender =
+        selectedGender === "All" || alert.gender === selectedGender;
       return matchesDepartment && matchesYear && matchesGender;
     });
   }, [alerts, selectedDepartment, selectedYear, selectedGender]);
@@ -146,7 +347,9 @@ export default function DeanDashboard() {
   if (loading) {
     return (
       <DeanLayout title="Dean's Dashboard">
-        <div className={styles.loadingState}>Loading institutional wellness insights…</div>
+        <div className={styles.loadingState}>
+          Loading institutional wellness insights…
+        </div>
       </DeanLayout>
     );
   }
@@ -166,32 +369,50 @@ export default function DeanDashboard() {
           <div>
             <p className={styles.cardEyebrow}>Institutional oversight</p>
             <h2>University wellness monitoring at a glance</h2>
-            <p>Track trends, identify risk patterns, and generate reports for academic leadership.</p>
+            <p>
+              Track trends, identify risk patterns, and generate reports for
+              academic leadership.
+            </p>
           </div>
-          <div className={styles.heroBadge}>Secure • Anonymous • Actionable</div>
+          <div className={styles.heroBadge}>
+            Secure • Anonymous • Actionable
+          </div>
         </section>
 
         <MetricsCards metrics={metrics} />
 
         <div className={styles.chartGrid}>
-          <WellnessChart data={wellnessTrend} view={view} onViewChange={setView} />
+          <WellnessChart
+            data={wellnessTrend}
+            view={view}
+            onViewChange={setView}
+          />
           <CategoryChart data={categoryData} />
         </div>
 
         <div className={styles.filterBar}>
           <label className={styles.filterLabel}>
             <span>Department</span>
-            <select value={selectedDepartment} onChange={(e) => setSelectedDepartment(e.target.value)} className={styles.selectInput}>
+            <select
+              value={selectedDepartment}
+              onChange={(e) => setSelectedDepartment(e.target.value)}
+              className={styles.selectInput}
+            >
               <option value="All">All departments</option>
-              <option value="Engineering">Engineering</option>
-              <option value="Business">Business</option>
-              <option value="Arts & Sciences">Arts & Sciences</option>
-              <option value="Health Sciences">Health Sciences</option>
+              {departments.map((dept) => (
+                <option key={dept.name} value={dept.name}>
+                  {dept.name} - {dept.fullName}
+                </option>
+              ))}
             </select>
           </label>
           <label className={styles.filterLabel}>
             <span>Year of Study</span>
-            <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)} className={styles.selectInput}>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              className={styles.selectInput}
+            >
               <option value="All">All years</option>
               <option value="1">Year 1</option>
               <option value="2">Year 2</option>
@@ -201,7 +422,11 @@ export default function DeanDashboard() {
           </label>
           <label className={styles.filterLabel}>
             <span>Gender</span>
-            <select value={selectedGender} onChange={(e) => setSelectedGender(e.target.value)} className={styles.selectInput}>
+            <select
+              value={selectedGender}
+              onChange={(e) => setSelectedGender(e.target.value)}
+              className={styles.selectInput}
+            >
               <option value="All">All genders</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -216,10 +441,15 @@ export default function DeanDashboard() {
             selectedDepartment={selectedDepartment}
             onDepartmentChange={setSelectedDepartment}
           />
-          <AlertSummary alerts={demographicFilteredAlerts.slice(0, 4)} onViewAll={() => setError('Alert detail view coming soon.')} />
         </div>
 
-        <ReportGenerator reportData={metrics} />
+        <ReportGenerator
+          reportData={metrics}
+          alerts={alerts}
+          referrals={referrals}
+          resources={resources}
+          crisisAlerts={crisisAlerts}
+        />
       </div>
     </DeanLayout>
   );

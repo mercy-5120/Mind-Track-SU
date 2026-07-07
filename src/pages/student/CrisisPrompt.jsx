@@ -25,18 +25,43 @@ export default function CrisisPrompt() {
   const [showForm, setShowForm] = useState(false);
   const [contact, setContact] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (contact.trim()) {
-      saveCrisisAlert(currentStudent, contact);
+  const handleSubmit = async () => {
+    // Trim the contact info to remove whitespace
+    const trimmedContact = contact.trim();
+
+    if (!trimmedContact) {
+      setError("Please enter your contact information");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError("");
+
+      console.log(
+        "[CrisisPrompt] Submitting crisis alert with contact:",
+        trimmedContact,
+      );
+      console.log("[CrisisPrompt] Current student:", currentStudent);
+
+      await saveCrisisAlert(currentStudent, trimmedContact);
+
       setSubmitted(true);
       setContact("");
       setTimeout(() => {
         setShowForm(false);
         setSubmitted(false);
       }, 3000);
-    } else {
-      alert("Please enter your contact information");
+    } catch (error) {
+      console.error("Error submitting crisis alert:", error);
+      setError(
+        "Failed to submit crisis request. Please try again or call 1199 for immediate support.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -68,7 +93,6 @@ export default function CrisisPrompt() {
               overflow: "hidden",
             }}
           >
-            {/* Decorative top bar */}
             <div
               style={{
                 position: "absolute",
@@ -82,7 +106,6 @@ export default function CrisisPrompt() {
 
             {!submitted ? (
               <>
-                {/* Header */}
                 <div
                   style={{
                     display: "flex",
@@ -127,7 +150,6 @@ export default function CrisisPrompt() {
                   </div>
                 </div>
 
-                {/* Main Message */}
                 <div
                   style={{
                     padding: "20px 24px",
@@ -166,7 +188,26 @@ export default function CrisisPrompt() {
                   </div>
                 </div>
 
-                {/* Options */}
+                {error && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background: "#fef2f2",
+                      border: "1px solid #fecaca",
+                      borderRadius: "8px",
+                      color: "#b34747",
+                      marginBottom: "16px",
+                      fontSize: "14px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}
+                  >
+                    <FaExclamationTriangle size={16} />
+                    {error}
+                  </div>
+                )}
+
                 {!showForm ? (
                   <div
                     style={{
@@ -263,9 +304,16 @@ export default function CrisisPrompt() {
                         border: "1px solid #d1d5db",
                         width: "100%",
                         boxSizing: "border-box",
+                        transition: "border-color 0.2s",
                       }}
                       value={contact}
-                      onChange={(e) => setContact(e.target.value)}
+                      onChange={(e) => {
+                        console.log(
+                          "[CrisisPrompt] Input changed:",
+                          e.target.value,
+                        );
+                        setContact(e.target.value);
+                      }}
                       onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
                       onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                     />
@@ -273,17 +321,23 @@ export default function CrisisPrompt() {
                       <Button
                         full
                         onClick={handleSubmit}
+                        disabled={isSubmitting}
                         style={{
                           padding: "14px 24px",
                           fontSize: "16px",
                           borderRadius: "10px",
+                          opacity: isSubmitting ? 0.7 : 1,
                         }}
                       >
                         <FaCheckCircle style={{ marginRight: "8px" }} />
-                        Submit Request
+                        {isSubmitting ? "Submitting..." : "Submit Request"}
                       </Button>
                       <button
-                        onClick={() => setShowForm(false)}
+                        onClick={() => {
+                          setShowForm(false);
+                          setError("");
+                          setContact("");
+                        }}
                         style={{
                           padding: "14px 24px",
                           background: "#f8fafc",
@@ -305,6 +359,7 @@ export default function CrisisPrompt() {
                         onMouseLeave={(e) => {
                           e.target.style.background = "#f8fafc";
                         }}
+                        disabled={isSubmitting}
                       >
                         <FaTimes size={16} />
                         Cancel
@@ -313,7 +368,6 @@ export default function CrisisPrompt() {
                   </div>
                 )}
 
-                {/* Emergency Contact */}
                 <div
                   style={{
                     marginTop: "28px",
@@ -377,7 +431,6 @@ export default function CrisisPrompt() {
                 </div>
               </>
             ) : (
-              // Success State
               <div
                 style={{
                   textAlign: "center",

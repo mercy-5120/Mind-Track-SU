@@ -1,3 +1,4 @@
+// src/api/staffApi.js
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/staff";
 
 const getStaffIdQuery = () => {
@@ -32,36 +33,179 @@ const fetchJson = async (path, fallback = []) => {
   }
 };
 
+// =====================================================
+// ALERT FUNCTIONS
+// =====================================================
+
 export async function getAlerts() {
-  return await fetchJson("/alerts", []);
+  try {
+    const response = await fetch(`${API_BASE}/alerts`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("[getAlerts] Data received:", data);
+    return data;
+  } catch (error) {
+    console.error("[getAlerts] Error:", error);
+    return [];
+  }
 }
 
 export async function getAlert(id) {
-  return await fetchJson(`/alerts/${id}`, null);
+  try {
+    console.log("[getAlert] Fetching alert:", id);
+    const response = await fetch(`${API_BASE}/alerts/${id}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("[getAlert] Error:", error);
+    return null;
+  }
 }
 
 export async function updateAlertStatus(id, status) {
-  return await happyFetch(
-    `${API_BASE}${appendStaffId(`/alerts/${id}/status`)}`,
-    {
+  try {
+    console.log("[updateAlertStatus] Updating alert:", id, "to:", status);
+    const response = await fetch(`${API_BASE}/alerts/${id}/status`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
-    },
-  );
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update alert status");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[updateAlertStatus] Error:", error);
+    throw error;
+  }
 }
 
+// =====================================================
+// CRISIS ALERT FUNCTIONS
+// =====================================================
+
+export async function getCrisisAlerts() {
+  try {
+    const response = await fetch(`${API_BASE}/crisis-alerts`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch crisis alerts");
+    }
+    const data = await response.json();
+    return data.alerts || [];
+  } catch (error) {
+    console.warn("Error fetching crisis alerts:", error);
+    return [];
+  }
+}
+
+export async function updateCrisisAlertStatus(alertId, status) {
+  try {
+    console.log(
+      "[updateCrisisAlertStatus] Updating crisis alert:",
+      alertId,
+      "to:",
+      status,
+    );
+    const response = await fetch(
+      `${API_BASE}/crisis-alerts/${alertId}/status`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      },
+    );
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "Failed to update crisis alert status",
+      );
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[updateCrisisAlertStatus] Error:", error);
+    throw error;
+  }
+}
+
+// =====================================================
+// REFERRAL FUNCTIONS
+// =====================================================
+
 export async function getReferrals() {
-  return await fetchJson("/referrals", []);
+  try {
+    const response = await fetch(`${API_BASE}/referrals`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("[getReferrals] Data received:", data);
+    return data;
+  } catch (error) {
+    console.error("[getReferrals] Error:", error);
+    return [];
+  }
 }
 
 export async function updateReferral(id, status, notes) {
-  return await happyFetch(`${API_BASE}/referrals/${id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status, notes }),
-  });
+  try {
+    console.log(
+      "[updateReferral] Updating referral:",
+      id,
+      "to status:",
+      status,
+    );
+
+    const response = await fetch(`${API_BASE}/referrals/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status, notes }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to update referral status");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[updateReferral] Error:", error);
+    throw error;
+  }
 }
+
+export async function createReferral(payload) {
+  try {
+    console.log("[createReferral] Creating referral:", payload);
+    const response = await fetch(`${API_BASE}/referrals`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.message || "Failed to create referral");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("[createReferral] Error:", error);
+    throw error;
+  }
+}
+
+// =====================================================
+// FOLLOW-UP FUNCTIONS
+// =====================================================
 
 export async function getFollowups(alertId) {
   if (!alertId) return [];
@@ -76,16 +220,23 @@ export async function createFollowUp(alertId, staffId, notes) {
   });
 }
 
-export async function createReferral(payload) {
-  return await happyFetch(`${API_BASE}${appendStaffId("/referrals")}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-}
+// =====================================================
+// RESOURCE FUNCTIONS
+// =====================================================
 
 export async function getResources() {
-  return await fetchJson("/resources", []);
+  try {
+    const response = await fetch(`${API_BASE}/resources`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("[getResources] Data received:", data);
+    return data;
+  } catch (error) {
+    console.error("[getResources] Error:", error);
+    return [];
+  }
 }
 
 export async function createResource(payload) {
@@ -95,6 +246,10 @@ export async function createResource(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+// =====================================================
+// MESSAGE FUNCTIONS
+// =====================================================
 
 export async function sendMessage(alertId, senderRole, recipient, content) {
   return await happyFetch(`${API_BASE}/messages`, {
@@ -107,6 +262,10 @@ export async function sendMessage(alertId, senderRole, recipient, content) {
 export async function getMessages(alertId) {
   return await fetchJson(`/messages/${alertId}`, []);
 }
+
+// =====================================================
+// STAFF LOGIN
+// =====================================================
 
 const guessRoleFromEmail = (email) => {
   const normalized = String(email || "")
@@ -151,3 +310,25 @@ export async function loginStaff(email, password) {
     };
   }
 }
+
+// =====================================================
+// EXPORT ALL FUNCTIONS
+// =====================================================
+
+export default {
+  getAlerts,
+  getAlert,
+  updateAlertStatus,
+  getCrisisAlerts,
+  updateCrisisAlertStatus,
+  getReferrals,
+  updateReferral,
+  createReferral,
+  getFollowups,
+  createFollowUp,
+  getResources,
+  createResource,
+  sendMessage,
+  getMessages,
+  loginStaff,
+};

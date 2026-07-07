@@ -27,12 +27,12 @@ import PeerDashboard from "./src/pages/staff/PeerCounsellors/PeerDashboard";
 import DeanDashboard from "./src/pages/staff/Dean/DeanDashboard";
 import HighRiskAlerts from "./src/pages/staff/PeerCounsellors/HighRiskAlerts";
 import Referrals from "./src/pages/staff/PeerCounsellors/Referrals";
-import Resources from "./src/pages/staff/SUMC/Resources";
+// REMOVED: import Resources from "./src/pages/staff/SUMC/Resources";
 import ScheduleSessions from "./src/pages/staff/SUMC/ScheduleSessions";
 import Settings from "./src/pages/staff/SUMC/Settings";
 import AlertDetails from "./src/pages/staff/SUMC/AlertDetails";
 import CreateReferral from "./src/pages/staff/SUMC/CreateReferral";
-import AddResources from "./src/pages/staff/SUMC/AddResources";
+import AddResources from "./src/pages/staff/SUMC/AddResources"; // ✅ KEEP THIS
 import FollowUpNotes from "./src/pages/staff/PeerCounsellors/FollowUpNotes";
 import "./src/styles/globals.css";
 import PrivacyPolicy from "./src/pages/user/PrivacyPolicy";
@@ -96,13 +96,15 @@ function App() {
             path="/terms-and-conditions"
             element={<TermsandConditions />}
           />
-          {/* Assessment Routes - Using AssessmentLayout (handles both logged in and anonymous) */}
+
+          {/* Assessment Routes - Using AssessmentLayout */}
           <Route path="/assessment-intro" element={<AssessmentIntro />} />
           <Route path="/assessment" element={<AssessmentQuestions />} />
           <Route path="/completion" element={<AssessmentCompletion />} />
           <Route path="/feedback" element={<FeedbackScreen />} />
           <Route path="/resources" element={<ResourceDirectory />} />
           <Route path="/crisis" element={<CrisisPrompt />} />
+
           {/* Staff Routes */}
           <Route
             path="/staff/dashboard"
@@ -146,14 +148,7 @@ function App() {
             path="/staff/create-referral"
             element={<Navigate to="/staff/sumc/create-referral" replace />}
           />
-          <Route
-            path="/staff/resources"
-            element={<Resources role={staffRole} />}
-          />
-          <Route
-            path="/staff/add-resources"
-            element={<Navigate to="/staff/sumc/add-resources" replace />}
-          />
+          {/* REMOVED: /staff/resources route */}
           <Route
             path="/staff/schedule-sessions"
             element={
@@ -206,6 +201,8 @@ function App() {
               />
             }
           />
+
+          {/* SUMC Routes */}
           <Route path="/staff/sumc/dashboard" element={<SUMCDashboard />} />
           <Route
             path="/staff/sumc/high-risk-alerts"
@@ -217,10 +214,9 @@ function App() {
             element={<CreateReferral />}
           />
           <Route
-            path="/staff/sumc/resources"
-            element={<Resources role="sumc" />}
+            path="/staff/sumc/add-resources"
+            element={<AddResources />} // ✅ KEEP THIS
           />
-          <Route path="/staff/sumc/add-resources" element={<AddResources />} />
           <Route
             path="/staff/sumc/schedule-sessions"
             element={<ScheduleSessions />}
@@ -233,20 +229,15 @@ function App() {
             path="/staff/sumc/settings"
             element={<Settings role="sumc" />}
           />
-          <Route
-            path="/staff/sumc/alert-details"
-            element={<AlertDetails role="sumc" />}
-          />
+          <Route path="/staff/sumc/alert-details" element={<AlertDetails />} />
+
+          {/* Peer Routes */}
           <Route path="/staff/peer/dashboard" element={<PeerDashboard />} />
           <Route
             path="/staff/peer/high-risk-alerts"
             element={<HighRiskAlerts role="peer" />}
           />
           <Route path="/staff/peer/referrals" element={<Referrals />} />
-          <Route
-            path="/staff/peer/resources"
-            element={<Resources role="peer" />}
-          />
           <Route
             path="/staff/peer/schedule-sessions"
             element={<ScheduleSessions />}
@@ -259,13 +250,12 @@ function App() {
             path="/staff/peer/settings"
             element={<Settings role="peer" />}
           />
-          <Route
-            path="/staff/peer/alert-details"
-            element={<AlertDetails role="peer" />}
-          />
+          <Route path="/staff/peer/alert-details" element={<AlertDetails />} />
+
+          {/* Dean Routes */}
           <Route path="/staff/dean/dashboard" element={<DeanDashboard />} />
-          {/* Student Routes - Using StudentLayout (only logged in users) */}
-          // In App.jsx - Student routes
+
+          {/* Student Routes - Using StudentLayout */}
           <Route
             path="/student/dashboard"
             element={
@@ -290,6 +280,7 @@ function App() {
               </StudentLayout>
             }
           />
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>
