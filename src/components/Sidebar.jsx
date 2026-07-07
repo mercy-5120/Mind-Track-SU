@@ -51,7 +51,7 @@ export default function Sidebar({ open, onClose }) {
       },
       {
         href: "/staff/peer/referrals",
-        label: "Referrals",
+        label: "Peer Referrals", // ✅ Changed to "Peer Referrals" for clarity
         icon: "fas fa-user-md",
       },
       {
@@ -66,12 +66,17 @@ export default function Sidebar({ open, onClose }) {
       },
     ];
   } else {
-    // Default: sumc_counsellor - Changed "Alert Details" to go to alert-details
+    // Default: sumc_counsellor - Added "Referrals" link for SUMC
     navItems = [
       {
         href: "/staff/sumc/dashboard",
         label: "Dashboard",
         icon: "fas fa-tachometer-alt",
+      },
+      {
+        href: "/staff/sumc/referrals", // ✅ ADDED: SUMC Referrals link
+        label: "SUMC Referrals", // ✅ Changed to "SUMC Referrals" for clarity
+        icon: "fas fa-user-md",
       },
       {
         href: "/staff/sumc/alert-details",
