@@ -38,18 +38,36 @@ import TermsandConditions from "./pages/user/TermsandConditions";
 
 function App() {
   const location = useLocation();
-  const staffRole = typeof window !== "undefined" ? sessionStorage.getItem("staffRole") : null;
+  const staffRole =
+    typeof window !== "undefined" ? sessionStorage.getItem("staffRole") : null;
+
+  // Check if the route is either staff OR student (both should NOT have header/footer)
   const isStaffRoute = location.pathname.startsWith("/staff");
+  const isStudentRoute = location.pathname.startsWith("/student");
+  const isAssessmentRoute =
+    location.pathname.startsWith("/assessment") ||
+    location.pathname.startsWith("/feedback") ||
+    location.pathname.startsWith("/completion") ||
+    location.pathname.startsWith("/crisis") ||
+    location.pathname.startsWith("/resources");
 
-  const defaultStaffHome = staffRole === "peer_counsellor"
-    ? "/staff/peer/dashboard"
-    : staffRole === "dean"
-      ? "/staff/dean/dashboard"
-      : staffRole
-        ? "/staff/sumc/dashboard"
-        : "/staff/login";
+  // Hide header/footer on staff routes, student routes, and assessment routes
+  const hideHeaderFooter = isStaffRoute || isStudentRoute || isAssessmentRoute;
 
-  const resolveRolePath = (sumcPath, peerPath, deanPath = "/staff/dean/dashboard") => {
+  const defaultStaffHome =
+    staffRole === "peer_counsellor"
+      ? "/staff/peer/dashboard"
+      : staffRole === "dean"
+        ? "/staff/dean/dashboard"
+        : staffRole
+          ? "/staff/sumc/dashboard"
+          : "/staff/login";
+
+  const resolveRolePath = (
+    sumcPath,
+    peerPath,
+    deanPath = "/staff/dean/dashboard",
+  ) => {
     if (!staffRole) return "/staff/login";
     if (staffRole === "peer_counsellor") return peerPath;
     if (staffRole === "dean") return deanPath;
@@ -62,44 +80,175 @@ function App() {
 
   return (
     <>
-      {!isStaffRoute && <Header />}
+      {/* Only show Header on public routes (not staff, student, or assessment) */}
+      {!hideHeaderFooter && <Header />}
+
       <ErrorBoundary>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/staff/login" element={<StaffLogin />} />
 
-          <Route path="/staff/dashboard" element={<Navigate to={defaultStaffHome} replace />} />
-          <Route path="/staff/peer-dashboard" element={<Navigate to="/staff/peer/dashboard" replace />} />
-          <Route path="/staff/dean-dashboard" element={<Navigate to="/staff/dean/dashboard" replace />} />
-          <Route path="/staff/high-risk-alerts" element={<Navigate to={resolveRolePath("/staff/sumc/high-risk-alerts", "/staff/peer/high-risk-alerts", "/staff/dean/dashboard")} replace />} />
-          <Route path="/staff/referrals" element={<Navigate to={resolveRolePath("/staff/sumc/referrals", "/staff/peer/referrals", "/staff/dean/dashboard")} replace />} />
-          <Route path="/staff/create-referral" element={<Navigate to="/staff/sumc/create-referral" replace />} />
-          <Route path="/staff/resources" element={<Resources role={staffRole} />} />
-          <Route path="/staff/add-resources" element={<Navigate to="/staff/sumc/add-resources" replace />} />
-          <Route path="/staff/schedule-sessions" element={<Navigate to={resolveRolePath("/staff/sumc/schedule-sessions", "/staff/peer/schedule-sessions", "/staff/dean/dashboard")} replace />} />
-          <Route path="/staff/follow-up-notes" element={<Navigate to={resolveRolePath("/staff/sumc/follow-up-notes", "/staff/peer/follow-up-notes", "/staff/dean/dashboard")} replace />} />
-          <Route path="/staff/settings" element={<Navigate to={resolveRolePath("/staff/sumc/settings", "/staff/peer/settings", "/staff/dean/dashboard")} replace />} />
-          <Route path="/staff/alert-details" element={<Navigate to={resolveRolePath("/staff/sumc/alert-details", "/staff/peer/alert-details", "/staff/dean/dashboard")} replace />} />
+          <Route
+            path="/staff/dashboard"
+            element={<Navigate to={defaultStaffHome} replace />}
+          />
+          <Route
+            path="/staff/peer-dashboard"
+            element={<Navigate to="/staff/peer/dashboard" replace />}
+          />
+          <Route
+            path="/staff/dean-dashboard"
+            element={<Navigate to="/staff/dean/dashboard" replace />}
+          />
+          <Route
+            path="/staff/high-risk-alerts"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/high-risk-alerts",
+                  "/staff/peer/high-risk-alerts",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/staff/referrals"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/referrals",
+                  "/staff/peer/referrals",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/staff/create-referral"
+            element={<Navigate to="/staff/sumc/create-referral" replace />}
+          />
+          <Route
+            path="/staff/resources"
+            element={<Resources role={staffRole} />}
+          />
+          <Route
+            path="/staff/add-resources"
+            element={<Navigate to="/staff/sumc/add-resources" replace />}
+          />
+          <Route
+            path="/staff/schedule-sessions"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/schedule-sessions",
+                  "/staff/peer/schedule-sessions",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/staff/follow-up-notes"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/follow-up-notes",
+                  "/staff/peer/follow-up-notes",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/staff/settings"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/settings",
+                  "/staff/peer/settings",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
+          <Route
+            path="/staff/alert-details"
+            element={
+              <Navigate
+                to={resolveRolePath(
+                  "/staff/sumc/alert-details",
+                  "/staff/peer/alert-details",
+                  "/staff/dean/dashboard",
+                )}
+                replace
+              />
+            }
+          />
 
           <Route path="/staff/sumc/dashboard" element={<SUMCDashboard />} />
-          <Route path="/staff/sumc/high-risk-alerts" element={<HighRiskAlerts role="sumc" />} />
+          <Route
+            path="/staff/sumc/high-risk-alerts"
+            element={<HighRiskAlerts role="sumc" />}
+          />
           <Route path="/staff/sumc/referrals" element={<Referrals />} />
-          <Route path="/staff/sumc/create-referral" element={<CreateReferral />} />
-          <Route path="/staff/sumc/resources" element={<Resources role="sumc" />} />
+          <Route
+            path="/staff/sumc/create-referral"
+            element={<CreateReferral />}
+          />
+          <Route
+            path="/staff/sumc/resources"
+            element={<Resources role="sumc" />}
+          />
           <Route path="/staff/sumc/add-resources" element={<AddResources />} />
-          <Route path="/staff/sumc/schedule-sessions" element={<ScheduleSessions />} />
-          <Route path="/staff/sumc/follow-up-notes" element={<FollowUpNotes />} />
-          <Route path="/staff/sumc/settings" element={<Settings role="sumc" />} />
-          <Route path="/staff/sumc/alert-details" element={<AlertDetails role="sumc" />} />
+          <Route
+            path="/staff/sumc/schedule-sessions"
+            element={<ScheduleSessions />}
+          />
+          <Route
+            path="/staff/sumc/follow-up-notes"
+            element={<FollowUpNotes />}
+          />
+          <Route
+            path="/staff/sumc/settings"
+            element={<Settings role="sumc" />}
+          />
+          <Route
+            path="/staff/sumc/alert-details"
+            element={<AlertDetails role="sumc" />}
+          />
 
           <Route path="/staff/peer/dashboard" element={<PeerDashboard />} />
-          <Route path="/staff/peer/high-risk-alerts" element={<HighRiskAlerts role="peer" />} />
+          <Route
+            path="/staff/peer/high-risk-alerts"
+            element={<HighRiskAlerts role="peer" />}
+          />
           <Route path="/staff/peer/referrals" element={<Referrals />} />
-          <Route path="/staff/peer/resources" element={<Resources role="peer" />} />
-          <Route path="/staff/peer/schedule-sessions" element={<ScheduleSessions />} />
-          <Route path="/staff/peer/follow-up-notes" element={<FollowUpNotes />} />
-          <Route path="/staff/peer/settings" element={<Settings role="peer" />} />
-          <Route path="/staff/peer/alert-details" element={<AlertDetails role="peer" />} />
+          <Route
+            path="/staff/peer/resources"
+            element={<Resources role="peer" />}
+          />
+          <Route
+            path="/staff/peer/schedule-sessions"
+            element={<ScheduleSessions />}
+          />
+          <Route
+            path="/staff/peer/follow-up-notes"
+            element={<FollowUpNotes />}
+          />
+          <Route
+            path="/staff/peer/settings"
+            element={<Settings role="peer" />}
+          />
+          <Route
+            path="/staff/peer/alert-details"
+            element={<AlertDetails role="peer" />}
+          />
 
           <Route path="/staff/dean/dashboard" element={<DeanDashboard />} />
 
@@ -116,11 +265,16 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-          <Route path="/terms-and-conditions" element={<TermsandConditions />} />
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsandConditions />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>
-      {!isStaffRoute && <Footer />}
+
+      {/* Only show Footer on public routes (not staff, student, or assessment) */}
+      {!hideHeaderFooter && <Footer />}
     </>
   );
 }
