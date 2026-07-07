@@ -234,11 +234,39 @@ app.post("/api/staff/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+app.post("/api/student/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password are required." });
+    }
 
-app.use((req, res, next) => {
-  if (req.path.startsWith("/api/")) return next();
-  res.sendFile(path.join(__dirname, "..", "index.html"));
+    // Query using the 'username' column
+    const student = await get(
+      "SELECT * FROM students WHERE username = ?",
+      [username]
+    );
+    
+    if (!student) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    // Verify password
+    const isValid = await bcrypt.compare(password, student.password_hash || "");
+    if (!isValid) {
+      return res.status(401).json({ message: "Invalid username or password." });
+    }
+
+    // Return student data (excluding password)
+    const { password_hash, ...studentData } = student;
+    res.json({ 
+      success: true, 
+      student: studentData 
+    });
+    
+  } catch (error) {
+    console.error('Student login error:', error);
+    res.status(500).json({ message: "Login service unavailable." });
+  }
 });
-
-const port = process.env.PORT || 3001;
-app.listen(port, () => console.log(`Staff API listening on ${port}`));
