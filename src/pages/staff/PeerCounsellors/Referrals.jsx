@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   FaPlus,
@@ -28,6 +28,17 @@ export default function Referrals() {
   const [updateId, setUpdateId] = useState(null);
   const role = sessionStorage.getItem("staffRole");
 
+  // Normalize status strings to handle case variations and aliases
+  const normalizeStatus = (status) => {
+    if (!status) return "pending";
+    const lower = status.toLowerCase().trim();
+    if (lower === "pending" || lower === "pend") return "pending";
+    if (lower === "acknowledged" || lower === "accepted" || lower === "acknowledge") return "acknowledged";
+    if (lower === "completed" || lower === "complete" || lower === "resolved" || lower === "done") return "completed";
+    return lower;
+  };
+
+  // Load referrals from API and localStorage
   useEffect(() => {
     const loadReferrals = async () => {
       try {
@@ -35,7 +46,7 @@ export default function Referrals() {
         console.log("[Referrals] API referrals:", apiReferrals);
 
         if (apiReferrals && apiReferrals.length > 0) {
-          // ✅ FIX: Filter for peer counsellor referrals ONLY
+          // Filter to only show referrals assigned to peer counsellors
           const peerReferrals = apiReferrals.filter(
             (r) =>
               r.referred_to === "peer_counsellor" ||
@@ -51,7 +62,7 @@ export default function Referrals() {
     };
     loadReferrals();
 
-    // ✅ FIX: Also filter local referrals for peer counsellor ONLY
+    // Load from localStorage as fallback
     const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
     console.log("[Referrals] Local referrals:", stored);
 
@@ -64,30 +75,31 @@ export default function Referrals() {
     setLocalReferrals(peerLocalReferrals);
   }, []);
 
-  // Helper function to map status for database compatibility
+  // Map frontend status to database-compatible status
   const mapStatusForDatabase = (status) => {
-    // Map 'acknowledged' to 'accepted' for database ENUM
     if (status === "acknowledged") {
       return "accepted";
     }
     return status;
   };
 
+  // Handle status update for a referral
   const handleStatusUpdate = async (referralId, newStatus) => {
     if (updating) return;
 
-    // Map status for database compatibility
     const mappedStatus = mapStatusForDatabase(newStatus);
 
     try {
       setUpdating(true);
       setUpdateId(referralId);
 
+      // Check if this is a local referral or from API
       const isLocal = localReferrals.some(
         (r) => r.id === referralId || r.referral_id === referralId,
       );
 
       if (isLocal) {
+        // Update local storage
         const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
         const updated = stored.map((r) =>
           r.id === referralId || r.referral_id === referralId
@@ -96,7 +108,7 @@ export default function Referrals() {
         );
         localStorage.setItem("referrals", JSON.stringify(updated));
 
-        // Update both local and combined state
+        // Update filtered local referrals
         const updatedLocal = updated.filter(
           (r) =>
             r.referred_to === "peer_counsellor" ||
@@ -105,7 +117,7 @@ export default function Referrals() {
         );
         setLocalReferrals(updatedLocal);
 
-        // Also update the API referrals state if needed
+        // Update API referrals state
         setReferrals((prev) =>
           prev.map((r) =>
             r.id === referralId || r.referral_id === referralId
@@ -116,8 +128,8 @@ export default function Referrals() {
 
         alert(`Referral status updated to ${newStatus}`);
       } else {
+        // Update via API
         try {
-          // Pass the mapped status to the API
           await updateReferral(referralId, mappedStatus, null);
 
           setReferrals((prev) =>
@@ -130,6 +142,7 @@ export default function Referrals() {
 
           alert(`Referral status updated to ${newStatus}`);
         } catch (apiError) {
+          // Fallback to local update if API fails
           console.warn(
             "[Referrals] API update failed, updating locally:",
             apiError,
@@ -163,60 +176,81 @@ export default function Referrals() {
     }
   };
 
-  // ✅ FIX: Combine and deduplicate referrals, but ONLY peer counsellor ones
-  const allReferrals = [...referrals, ...localReferrals]
-    .filter(
-      (referral) =>
-        referral.referred_to === "peer_counsellor" ||
-        referral.referred_to?.toLowerCase().includes("peer") ||
-        referral.referredTo === "peer_counsellor"
-    )
-    .filter(
-      (referral, index, self) =>
-        index ===
-        self.findIndex(
-          (r) =>
-            (r.referral_id || r.id) === (referral.referral_id || referral.id),
-        )
-    )
-    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+  // Combine and deduplicate referrals from both sources
+  const allReferrals = useMemo(() => {
+    const combined = [...referrals, ...localReferrals]
+      .filter(
+        (referral) =>
+          referral.referred_to === "peer_counsellor" ||
+          referral.referred_to?.toLowerCase().includes("peer") ||
+          referral.referredTo === "peer_counsellor"
+      )
+      .filter(
+        (referral, index, self) =>
+          index ===
+          self.findIndex(
+            (r) =>
+              (r.referral_id || r.id) === (referral.referral_id || referral.id),
+          )
+      )
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    return combined;
+  }, [referrals, localReferrals]);
 
+  // Calculate statistics using normalized status values
+  const stats = useMemo(() => {
+    const pending = allReferrals.filter((r) => {
+      const status = r.referral_status || "pending";
+      return normalizeStatus(status) === "pending";
+    }).length;
+    
+    const acknowledged = allReferrals.filter((r) => {
+      const status = r.referral_status || "pending";
+      return normalizeStatus(status) === "acknowledged";
+    }).length;
+    
+    const completed = allReferrals.filter((r) => {
+      const status = r.referral_status || "pending";
+      return normalizeStatus(status) === "completed";
+    }).length;
+    
+    return { pending, acknowledged, completed };
+  }, [allReferrals]);
+
+  // Status display helpers
   const getStatusClass = (status) => {
-    if (status === "completed" || status === "resolved")
+    const normalized = normalizeStatus(status);
+    if (normalized === "completed" || normalized === "resolved")
       return styles.statusResolved;
-    if (
-      status === "acknowledged" ||
-      status === "viewed" ||
-      status === "accepted"
-    )
+    if (normalized === "acknowledged" || normalized === "viewed" || normalized === "accepted")
       return styles.statusReview;
     return styles.statusPending;
   };
 
   const getStatusColor = (status) => {
-    if (status === "completed" || status === "resolved") return "#2f855a";
-    if (
-      status === "acknowledged" ||
-      status === "viewed" ||
-      status === "accepted"
-    )
+    const normalized = normalizeStatus(status);
+    if (normalized === "completed" || normalized === "resolved") return "#2f855a";
+    if (normalized === "acknowledged" || normalized === "viewed" || normalized === "accepted")
       return "#1e40af";
     return "#92400e";
   };
 
   const getStatusLabel = (status) => {
-    if (status === "completed") return "Completed";
-    if (status === "resolved") return "Resolved";
-    if (status === "acknowledged") return "Acknowledged";
-    if (status === "viewed") return "Viewed";
-    if (status === "accepted") return "Accepted";
-    if (status === "pending") return "Pending";
-    if (status === "rejected") return "Rejected";
+    const normalized = normalizeStatus(status);
+    if (normalized === "completed") return "Completed";
+    if (normalized === "resolved") return "Resolved";
+    if (normalized === "acknowledged") return "Acknowledged";
+    if (normalized === "viewed") return "Viewed";
+    if (normalized === "accepted") return "Accepted";
+    if (normalized === "pending") return "Pending";
+    if (normalized === "rejected") return "Rejected";
     return status || "Pending";
   };
 
   const canUpdateStatus = (status) => {
-    return status !== "completed" && status !== "resolved";
+    const normalized = normalizeStatus(status);
+    return normalized !== "completed" && normalized !== "resolved";
   };
 
   const isUpdating = (id) => {
@@ -228,19 +262,6 @@ export default function Referrals() {
   };
 
   const canCreate = role === "sumc_counsellor";
-
-  // ✅ FIX: Calculate stats from filtered referrals only
-  const pendingCount = allReferrals.filter(
-    (r) => r.referral_status === "pending",
-  ).length;
-  const acknowledgedCount = allReferrals.filter(
-    (r) =>
-      r.referral_status === "acknowledged" || r.referral_status === "accepted",
-  ).length;
-  const completedCount = allReferrals.filter(
-    (r) =>
-      r.referral_status === "completed" || r.referral_status === "resolved",
-  ).length;
 
   return (
     <Layout
@@ -278,6 +299,7 @@ export default function Referrals() {
       </section>
 
       <section className={styles.alertsTableSection}>
+        {/* Statistics cards */}
         <div
           style={{
             marginBottom: "16px",
@@ -309,7 +331,7 @@ export default function Referrals() {
             }}
           >
             <FaClock style={{ marginRight: "4px" }} size={12} />
-            Pending: {pendingCount}
+            Pending: {stats.pending}
           </span>
           <span
             style={{
@@ -322,7 +344,7 @@ export default function Referrals() {
             }}
           >
             <FaCheckCircle style={{ marginRight: "4px" }} size={12} />
-            Acknowledged: {acknowledgedCount}
+            Acknowledged: {stats.acknowledged}
           </span>
           <span
             style={{
@@ -335,10 +357,11 @@ export default function Referrals() {
             }}
           >
             <FaTimesCircle style={{ marginRight: "4px" }} size={12} />
-            Completed: {completedCount}
+            Completed: {stats.completed}
           </span>
         </div>
 
+        {/* Referrals table */}
         <div className={styles.tableResponsive}>
           <table>
             <thead>
@@ -371,9 +394,8 @@ export default function Referrals() {
                 allReferrals.map((referral) => {
                   const referralId = referral.referral_id || referral.id;
                   const currentStatus = referral.referral_status || "pending";
-                  const isCompleted =
-                    currentStatus === "completed" ||
-                    currentStatus === "resolved";
+                  const normalizedStatus = normalizeStatus(currentStatus);
+                  const isCompleted = normalizedStatus === "completed" || normalizedStatus === "resolved";
                   const isUpdatingThis = isUpdating(referralId);
 
                   const contactNumber =
