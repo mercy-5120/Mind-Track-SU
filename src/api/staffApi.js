@@ -155,19 +155,34 @@ export async function getReferrals() {
   }
 }
 
+// Helper function to validate and map status for database
+const validateAndMapStatus = (status) => {
+  // Map 'acknowledged' to 'accepted' for database compatibility
+  if (status === "acknowledged") {
+    return "accepted";
+  }
+  return status;
+};
+
 export async function updateReferral(id, status, notes) {
   try {
+    // Map 'acknowledged' to 'accepted' before sending to API
+    const mappedStatus = validateAndMapStatus(status);
+
     console.log(
       "[updateReferral] Updating referral:",
       id,
       "to status:",
+      mappedStatus,
+      "(original status:",
       status,
+      ")",
     );
 
     const response = await fetch(`${API_BASE}/referrals/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status, notes }),
+      body: JSON.stringify({ status: mappedStatus, notes }),
     });
 
     if (!response.ok) {
@@ -184,6 +199,11 @@ export async function updateReferral(id, status, notes) {
 
 export async function createReferral(payload) {
   try {
+    // Map 'acknowledged' to 'accepted' in payload if present
+    if (payload.referral_status === "acknowledged") {
+      payload.referral_status = "accepted";
+    }
+
     console.log("[createReferral] Creating referral:", payload);
     const response = await fetch(`${API_BASE}/referrals`, {
       method: "POST",

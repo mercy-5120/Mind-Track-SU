@@ -31,7 +31,6 @@ export default function Referrals() {
   useEffect(() => {
     const loadReferrals = async () => {
       try {
-        // Try to load from API first
         const apiReferrals = await getReferrals();
         console.log("[Referrals] API referrals:", apiReferrals);
 
@@ -50,7 +49,6 @@ export default function Referrals() {
     };
     loadReferrals();
 
-    // Always load from localStorage as well
     const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
     console.log("[Referrals] Local referrals:", stored);
 
@@ -62,33 +60,42 @@ export default function Referrals() {
     setLocalReferrals(peerLocalReferrals);
   }, []);
 
+  // Helper function to map status for database compatibility
+  const mapStatusForDatabase = (status) => {
+    // Map 'acknowledged' to 'accepted' for database ENUM
+    if (status === "acknowledged") {
+      return "accepted";
+    }
+    return status;
+  };
+
   const handleStatusUpdate = async (referralId, newStatus) => {
     if (updating) return;
+
+    // Map status for database compatibility
+    const mappedStatus = mapStatusForDatabase(newStatus);
 
     try {
       setUpdating(true);
       setUpdateId(referralId);
 
-      // Check if this is a local referral (has an 'id' field from localStorage)
       const isLocal = localReferrals.some(
         (r) => r.id === referralId || r.referral_id === referralId,
       );
 
       if (isLocal) {
-        // Update in localStorage
         const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
         const updated = stored.map((r) =>
           r.id === referralId || r.referral_id === referralId
-            ? { ...r, referral_status: newStatus }
+            ? { ...r, referral_status: mappedStatus }
             : r,
         );
         localStorage.setItem("referrals", JSON.stringify(updated));
 
-        // Update local state
         setLocalReferrals((prev) =>
           prev.map((r) =>
             r.id === referralId || r.referral_id === referralId
-              ? { ...r, referral_status: newStatus }
+              ? { ...r, referral_status: mappedStatus }
               : r,
           ),
         );
@@ -96,22 +103,21 @@ export default function Referrals() {
         setReferrals((prev) =>
           prev.map((r) =>
             r.id === referralId || r.referral_id === referralId
-              ? { ...r, referral_status: newStatus }
+              ? { ...r, referral_status: mappedStatus }
               : r,
           ),
         );
 
         alert(`Referral status updated to ${newStatus}`);
       } else {
-        // Try API update
         try {
-          await updateReferral(referralId, newStatus, null);
+          // Pass the mapped status to the API
+          await updateReferral(referralId, mappedStatus, null);
 
-          // Update referrals list
           setReferrals((prev) =>
             prev.map((r) =>
               r.referral_id === referralId
-                ? { ...r, referral_status: newStatus }
+                ? { ...r, referral_status: mappedStatus }
                 : r,
             ),
           );
@@ -123,11 +129,10 @@ export default function Referrals() {
             apiError,
           );
 
-          // Fallback: update in localStorage
           const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
           const updated = stored.map((r) =>
             r.referral_id === referralId
-              ? { ...r, referral_status: newStatus }
+              ? { ...r, referral_status: mappedStatus }
               : r,
           );
           localStorage.setItem("referrals", JSON.stringify(updated));
@@ -135,7 +140,7 @@ export default function Referrals() {
           setLocalReferrals((prev) =>
             prev.map((r) =>
               r.referral_id === referralId
-                ? { ...r, referral_status: newStatus }
+                ? { ...r, referral_status: mappedStatus }
                 : r,
             ),
           );
@@ -152,7 +157,6 @@ export default function Referrals() {
     }
   };
 
-  // Combine all referrals and remove duplicates
   const allReferrals = [...referrals, ...localReferrals]
     .filter(
       (referral, index, self) =>
@@ -496,7 +500,7 @@ export default function Referrals() {
                                   opacity: isUpdatingThis ? 0.6 : 1,
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: "4px",
+                                  gap: "6px",
                                 }}
                               >
                                 {isUpdatingThis ? (
@@ -509,7 +513,7 @@ export default function Referrals() {
                                 ) : (
                                   <FaCheckCircle size={14} />
                                 )}
-                                Ack
+                                Acknowledge
                               </button>
                               <button
                                 className={buttonStyles.btnSm}
@@ -529,7 +533,7 @@ export default function Referrals() {
                                   opacity: isUpdatingThis ? 0.6 : 1,
                                   display: "flex",
                                   alignItems: "center",
-                                  gap: "4px",
+                                  gap: "6px",
                                 }}
                               >
                                 {isUpdatingThis ? (

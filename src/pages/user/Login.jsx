@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { FaUserShield } from "react-icons/fa";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
@@ -155,6 +156,7 @@ export default function Login() {
               </Button>
             </form>
 
+            {/* Divider */}
             <div
               className="divider"
               style={{
@@ -181,6 +183,7 @@ export default function Login() {
               />
             </div>
 
+            {/* Continue Anonymously */}
             <div className="anonymous-section">
               <Button
                 type="button"
@@ -227,6 +230,42 @@ export default function Login() {
               </p>
             </div>
 
+            {/* Staff Login Link */}
+            <div
+              style={{
+                marginTop: "16px",
+                paddingTop: "16px",
+                borderTop: "1px solid #e6e8f0",
+                textAlign: "center",
+              }}
+            >
+              <Link
+                to="/staff/login"
+                style={{
+                  color: "#4a8b6b",
+                  textDecoration: "none",
+                  fontSize: "14px",
+                  fontWeight: "500",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "8px 16px",
+                  borderRadius: "8px",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = "rgba(74, 139, 107, 0.08)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = "transparent";
+                }}
+              >
+                <FaUserShield size={16} />
+                Staff Login
+              </Link>
+            </div>
+
+            {/* Footer Links */}
             <div
               className="footer-links"
               style={{
