@@ -35,10 +35,12 @@ export default function Referrals() {
         console.log("[Referrals] API referrals:", apiReferrals);
 
         if (apiReferrals && apiReferrals.length > 0) {
+          // ✅ FIX: Filter for peer counsellor referrals ONLY
           const peerReferrals = apiReferrals.filter(
             (r) =>
               r.referred_to === "peer_counsellor" ||
-              r.referred_to?.toLowerCase().includes("peer"),
+              r.referred_to?.toLowerCase().includes("peer") ||
+              r.referredTo === "peer_counsellor"
           );
           setReferrals(peerReferrals || []);
         }
@@ -49,13 +51,15 @@ export default function Referrals() {
     };
     loadReferrals();
 
+    // ✅ FIX: Also filter local referrals for peer counsellor ONLY
     const stored = JSON.parse(localStorage.getItem("referrals") || "[]");
     console.log("[Referrals] Local referrals:", stored);
 
     const peerLocalReferrals = stored.filter(
       (r) =>
         r.referred_to === "peer_counsellor" ||
-        r.referred_to?.toLowerCase().includes("peer"),
+        r.referred_to?.toLowerCase().includes("peer") ||
+        r.referredTo === "peer_counsellor"
     );
     setLocalReferrals(peerLocalReferrals);
   }, []);
@@ -92,14 +96,16 @@ export default function Referrals() {
         );
         localStorage.setItem("referrals", JSON.stringify(updated));
 
-        setLocalReferrals((prev) =>
-          prev.map((r) =>
-            r.id === referralId || r.referral_id === referralId
-              ? { ...r, referral_status: mappedStatus }
-              : r,
-          ),
+        // Update both local and combined state
+        const updatedLocal = updated.filter(
+          (r) =>
+            r.referred_to === "peer_counsellor" ||
+            r.referred_to?.toLowerCase().includes("peer") ||
+            r.referredTo === "peer_counsellor"
         );
+        setLocalReferrals(updatedLocal);
 
+        // Also update the API referrals state if needed
         setReferrals((prev) =>
           prev.map((r) =>
             r.id === referralId || r.referral_id === referralId
@@ -137,13 +143,13 @@ export default function Referrals() {
           );
           localStorage.setItem("referrals", JSON.stringify(updated));
 
-          setLocalReferrals((prev) =>
-            prev.map((r) =>
-              r.referral_id === referralId
-                ? { ...r, referral_status: mappedStatus }
-                : r,
-            ),
+          const updatedLocal = updated.filter(
+            (r) =>
+              r.referred_to === "peer_counsellor" ||
+              r.referred_to?.toLowerCase().includes("peer") ||
+              r.referredTo === "peer_counsellor"
           );
+          setLocalReferrals(updatedLocal);
 
           alert(`Referral status updated locally to ${newStatus}`);
         }
@@ -157,14 +163,21 @@ export default function Referrals() {
     }
   };
 
+  // ✅ FIX: Combine and deduplicate referrals, but ONLY peer counsellor ones
   const allReferrals = [...referrals, ...localReferrals]
+    .filter(
+      (referral) =>
+        referral.referred_to === "peer_counsellor" ||
+        referral.referred_to?.toLowerCase().includes("peer") ||
+        referral.referredTo === "peer_counsellor"
+    )
     .filter(
       (referral, index, self) =>
         index ===
         self.findIndex(
           (r) =>
             (r.referral_id || r.id) === (referral.referral_id || referral.id),
-        ),
+        )
     )
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 
@@ -216,6 +229,7 @@ export default function Referrals() {
 
   const canCreate = role === "sumc_counsellor";
 
+  // ✅ FIX: Calculate stats from filtered referrals only
   const pendingCount = allReferrals.filter(
     (r) => r.referral_status === "pending",
   ).length;
@@ -367,7 +381,8 @@ export default function Referrals() {
                     referral.contact_info ||
                     referral.student_contact ||
                     referral.student_phone ||
-                    referral.phone;
+                    referral.phone ||
+                    referral.contact;
 
                   const email =
                     referral.studentEmail ||
