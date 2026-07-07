@@ -1,219 +1,346 @@
+// src/pages/user/CreateAccount.jsx
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaPhone,
+  FaUniversity,
+  FaBook,
+  FaIdCard,
+} from "react-icons/fa";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
-import logo from "../../Assets/Logo.png";
 import { registerStudent } from "../../utils/studentSession";
+import { departments } from "../../utils/departments";
+import logo from "../../Assets/Logo.png";
 import "../../styles/globals.css";
 
 export default function CreateAccount() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({
+  const [formData, setFormData] = useState({
     username: "",
     password: "",
-    confirm: "",
+    confirmPassword: "",
     displayName: "",
     studentId: "",
     department: "",
     yearOfStudy: "",
+    email: "",
+    phone: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    if (!form.studentId.trim() || !form.department.trim() || !form.yearOfStudy.trim()) {
-      setError("Please complete your student ID, department, and year of study.");
+    if (
+      !formData.username ||
+      !formData.password ||
+      !formData.displayName ||
+      !formData.department
+    ) {
+      setError("Please fill in all required fields");
+      setLoading(false);
       return;
     }
 
-    if (form.password !== form.confirm) {
-      setError("Passwords do not match.");
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters");
+      setLoading(false);
       return;
     }
 
     try {
-      registerStudent({
-        username: form.username,
-        password: form.password,
-        displayName: form.displayName || form.username,
-        studentId: form.studentId,
-        department: form.department,
-        yearOfStudy: form.yearOfStudy,
+      const student = await registerStudent({
+        username: formData.username,
+        password: formData.password,
+        displayName: formData.displayName,
+        studentId: formData.studentId,
+        department: formData.department,
+        yearOfStudy: formData.yearOfStudy,
+        email: formData.email,
+        phone: formData.phone,
       });
+
+      console.log("[CreateAccount] Student registered:", student);
       navigate("/student/dashboard");
-    } catch (error) {
-      setError(error.message || "Unable to create your account.");
+    } catch (err) {
+      setError(err.message || "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
+  const yearOptions = [
+    { value: "1", label: "Year 1" },
+    { value: "2", label: "Year 2" },
+    { value: "3", label: "Year 3" },
+    { value: "4", label: "Year 4" },
+  ];
+
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-card">
+    <div className="auth-page">
+      <div className="auth-container" style={{ maxWidth: "560px" }}>
+        <div className="auth-card">
           <div className="login-header">
             <img src={logo} alt="MindTrackSU logo" className="logo" />
             <h1 className="title">MindTrack SU</h1>
-            <p className="subtitle">
-              Create your account to track your wellness journey
-            </p>
+            <p className="subtitle">Create your student account</p>
           </div>
 
-          <div className="sign-in-section">
-            <h2 className="section-title">Create Your Account</h2>
-
-            <form className="login-form" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "14px" }}
+            >
+              {/* Display Name */}
               <div className="form-group">
-                <label htmlFor="displayName" className="form-label">
-                  Full name
+                <label className="form-label">
+                  <FaUser style={{ marginRight: "6px" }} size={14} />
+                  Full Name *
                 </label>
                 <Input
-                  id="displayName"
                   type="text"
+                  name="displayName"
                   placeholder="Enter your full name"
-                  value={form.displayName}
-                  onChange={(e) =>
-                    setForm({ ...form, displayName: e.target.value })
-                  }
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="studentId" className="form-label">
-                  Student ID
-                </label>
-                <Input
-                  id="studentId"
-                  type="text"
-                  placeholder="Enter your student registration number"
-                  value={form.studentId}
-                  onChange={(e) =>
-                    setForm({ ...form, studentId: e.target.value })
-                  }
+                  value={formData.displayName}
+                  onChange={handleChange}
                   required
-                  className="form-input"
                 />
               </div>
 
+              {/* Username */}
               <div className="form-group">
-                <label htmlFor="department" className="form-label">
-                  Department
+                <label className="form-label">
+                  <FaUser style={{ marginRight: "6px" }} size={14} />
+                  Username *
                 </label>
                 <Input
-                  id="department"
                   type="text"
-                  placeholder="Enter your department"
-                  value={form.department}
-                  onChange={(e) =>
-                    setForm({ ...form, department: e.target.value })
-                  }
-                  required
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="yearOfStudy" className="form-label">
-                  Year of study
-                </label>
-                <Input
-                  id="yearOfStudy"
-                  type="number"
-                  min="1"
-                  max="10"
-                  placeholder="Enter your year of study"
-                  value={form.yearOfStudy}
-                  onChange={(e) =>
-                    setForm({ ...form, yearOfStudy: e.target.value })
-                  }
-                  required
-                  className="form-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="username" className="form-label">
-                  Username
-                </label>
-                <Input
-                  id="username"
-                  type="text"
+                  name="username"
                   placeholder="Choose a username"
-                  value={form.username}
-                  onChange={(e) =>
-                    setForm({ ...form, username: e.target.value })
-                  }
+                  value={formData.username}
+                  onChange={handleChange}
                   required
-                  className="form-input"
                 />
               </div>
 
+              {/* Student ID */}
               <div className="form-group">
-                <label htmlFor="password" className="form-label">
-                  Password
+                <label className="form-label">
+                  <FaIdCard style={{ marginRight: "6px" }} size={14} />
+                  Registration Number
                 </label>
                 <Input
-                  id="password"
-                  type="password"
-                  placeholder="Create a password"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
-                  required
-                  className="form-input"
+                  type="text"
+                  name="studentId"
+                  placeholder="Enter your registration number (optional)"
+                  value={formData.studentId}
+                  onChange={handleChange}
                 />
               </div>
 
+              {/* Department - DROPDOWN */}
               <div className="form-group">
-                <label htmlFor="confirm" className="form-label">
-                  Confirm Password
+                <label className="form-label">
+                  <FaUniversity style={{ marginRight: "6px" }} size={14} />
+                  Department *
+                </label>
+                <select
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    background: "#fff",
+                    appearance: "auto",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="">Select your department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.value} value={dept.value}>
+                      {dept.value} - {dept.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Year of Study - DROPDOWN */}
+              <div className="form-group">
+                <label className="form-label">
+                  <FaBook style={{ marginRight: "6px" }} size={14} />
+                  Year of Study *
+                </label>
+                <select
+                  name="yearOfStudy"
+                  value={formData.yearOfStudy}
+                  onChange={handleChange}
+                  required
+                  className="form-input"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    border: "1px solid #d1d5db",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    background: "#fff",
+                    appearance: "auto",
+                    cursor: "pointer",
+                  }}
+                >
+                  <option value="">Select your year</option>
+                  {yearOptions.map((year) => (
+                    <option key={year.value} value={year.value}>
+                      {year.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Email */}
+              <div className="form-group">
+                <label className="form-label">
+                  <FaEnvelope style={{ marginRight: "6px" }} size={14} />
+                  Email Address
                 </label>
                 <Input
-                  id="confirm"
-                  type="password"
-                  placeholder="Confirm password"
-                  value={form.confirm}
-                  onChange={(e) =>
-                    setForm({ ...form, confirm: e.target.value })
-                  }
-                  required
-                  className="form-input"
+                  type="email"
+                  name="email"
+                  placeholder="Enter your email (optional)"
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
 
-              <p className="form-note">
-                This creates a normal student account so you can keep your own
-                assessment history and return later.
-              </p>
+              {/* Phone */}
+              <div className="form-group">
+                <label className="form-label">
+                  <FaPhone style={{ marginRight: "6px" }} size={14} />
+                  Phone Number
+                </label>
+                <Input
+                  type="tel"
+                  name="phone"
+                  placeholder="Enter your phone number (optional)"
+                  value={formData.phone}
+                  onChange={handleChange}
+                />
+              </div>
 
-              {error && <p className="error-message">{error}</p>}
+              {/* Password */}
+              <div className="form-group">
+                <label className="form-label">
+                  <FaLock style={{ marginRight: "6px" }} size={14} />
+                  Password *
+                </label>
+                <Input
+                  type="password"
+                  name="password"
+                  placeholder="Create a password (min 6 characters)"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
 
-              <Button type="submit" full className="sign-in-button">
-                Create Account
+              {/* Confirm Password */}
+              <div className="form-group">
+                <label className="form-label">
+                  <FaLock style={{ marginRight: "6px" }} size={14} />
+                  Confirm Password *
+                </label>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  placeholder="Confirm your password"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              {error && (
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#b34747",
+                    background: "#fef2f2",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #fecaca",
+                    fontSize: "14px",
+                    textAlign: "center",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
+              <Button
+                type="submit"
+                full
+                disabled={loading}
+                style={{
+                  padding: "14px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  borderRadius: "10px",
+                  background: loading ? "#6b7280" : "#2a2a72",
+                  cursor: loading ? "default" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                {loading ? "Creating Account..." : "Create Account"}
               </Button>
-            </form>
-
-            <div className="divider">
-              <span>or</span>
             </div>
+          </form>
 
-            <div className="footer-links">
-              <p>
-                Already have an account?{" "}
-                <Link to="/login" className="link-primary">
-                  Log in here
-                </Link>
-              </p>
-              <p style={{ marginTop: "8px" }}>
-                Are you a member of staff?{" "}
-                <Link to="/staff/login" className="link-primary">
-                  Staff login
-                </Link>
-              </p>
-            </div>
+          <div
+            className="footer-links"
+            style={{
+              marginTop: "20px",
+              textAlign: "center",
+            }}
+          >
+            <p style={{ color: "#6b7280" }}>
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="link-primary"
+                style={{
+                  color: "#2a2a72",
+                  fontWeight: "600",
+                  textDecoration: "none",
+                }}
+              >
+                Sign in
+              </Link>
+            </p>
           </div>
         </div>
       </div>

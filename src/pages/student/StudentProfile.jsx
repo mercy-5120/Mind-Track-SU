@@ -1,10 +1,10 @@
 // src/pages/student/StudentProfile.jsx
 import React, { useState, useEffect } from "react";
-// REMOVED: import StudentLayout from "../../components/StudentLayout";
 import {
   getCurrentStudent,
   updateStudentProfile,
 } from "../../utils/studentSession";
+import { departments, getDepartmentFull } from "../../utils/departments";
 import {
   FaUser,
   FaKey,
@@ -13,15 +13,11 @@ import {
   FaBook,
   FaCheckCircle,
   FaEdit,
-  FaLock,
   FaUserCircle,
   FaSave,
   FaTimes,
   FaEnvelope,
   FaPhone,
-  FaRegSmile,
-  FaRegMeh,
-  FaRegFrown,
 } from "react-icons/fa";
 
 export default function StudentProfile() {
@@ -38,6 +34,13 @@ export default function StudentProfile() {
   });
   const [saveMessage, setSaveMessage] = useState({ type: "", text: "" });
   const [isLoading, setIsLoading] = useState(false);
+
+  const yearOptions = [
+    { value: "1", label: "Year 1" },
+    { value: "2", label: "Year 2" },
+    { value: "3", label: "Year 3" },
+    { value: "4", label: "Year 4" },
+  ];
 
   useEffect(() => {
     if (student) {
@@ -105,18 +108,6 @@ export default function StudentProfile() {
     setSaveMessage({ type: "", text: "" });
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 70) return "#2f855a";
-    if (score >= 40) return "#4a5568";
-    return "#b34747";
-  };
-
-  const getScoreIcon = (score) => {
-    if (score >= 70) return <FaRegSmile color="#2f855a" size={20} />;
-    if (score >= 40) return <FaRegMeh color="#4a5568" size={20} />;
-    return <FaRegFrown color="#b34747" size={20} />;
-  };
-
   if (!student) {
     return (
       <div
@@ -129,6 +120,7 @@ export default function StudentProfile() {
           borderRadius: "18px",
           textAlign: "center",
           padding: "40px",
+          margin: "0 20px",
           boxShadow: "0 16px 32px rgba(42,42,114,0.08)",
         }}
       >
@@ -149,6 +141,7 @@ export default function StudentProfile() {
     );
   }
 
+  // Render content directly without StudentLayout wrapper
   return (
     <div
       style={{
@@ -202,8 +195,9 @@ export default function StudentProfile() {
             </h1>
             <p style={{ margin: "4px 0 0", opacity: 0.9, fontSize: "16px" }}>
               <FaUniversity style={{ marginRight: "8px" }} size={14} />
-              {student.department || "No department specified"} • Year{" "}
-              {student.year_of_study || "N/A"}
+              {getDepartmentFull(student.department) ||
+                "No department specified"}{" "}
+              • Year {student.year_of_study || "N/A"}
             </p>
             {student.email && (
               <p style={{ margin: "4px 0 0", opacity: 0.8, fontSize: "14px" }}>
@@ -370,7 +364,7 @@ export default function StudentProfile() {
                 </p>
               </div>
 
-              {/* Student ID / Registration Number */}
+              {/* Student ID */}
               <div
                 style={{
                   padding: "18px 20px",
@@ -420,7 +414,7 @@ export default function StudentProfile() {
                   </strong>
                 </div>
                 <p style={{ margin: 0, fontSize: "16px", color: "#1f2937" }}>
-                  {student.department || "Not set"}
+                  {getDepartmentFull(student.department) || "Not set"}
                 </p>
               </div>
 
@@ -447,7 +441,9 @@ export default function StudentProfile() {
                   </strong>
                 </div>
                 <p style={{ margin: 0, fontSize: "16px", color: "#1f2937" }}>
-                  {student.year_of_study || "Not set"}
+                  {student.year_of_study
+                    ? `Year ${student.year_of_study}`
+                    : "Not set"}
                 </p>
               </div>
 
@@ -664,7 +660,7 @@ export default function StudentProfile() {
                 />
               </div>
 
-              {/* Student ID / Registration Number - READ-ONLY */}
+              {/* Student ID - READ-ONLY */}
               <div
                 style={{ display: "flex", flexDirection: "column", gap: "6px" }}
               >
@@ -699,7 +695,7 @@ export default function StudentProfile() {
                 />
               </div>
 
-              {/* Department - EDITABLE */}
+              {/* Department - DROPDOWN EDITABLE */}
               <div
                 style={{ display: "flex", flexDirection: "column", gap: "6px" }}
               >
@@ -713,8 +709,7 @@ export default function StudentProfile() {
                   <FaUniversity style={{ marginRight: "8px" }} size={14} />
                   Department
                 </label>
-                <input
-                  type="text"
+                <select
                   name="department"
                   value={formData.department}
                   onChange={handleInputChange}
@@ -725,13 +720,23 @@ export default function StudentProfile() {
                     fontSize: "15px",
                     transition: "border-color 0.2s",
                     backgroundColor: "#fff",
+                    width: "100%",
+                    appearance: "auto",
+                    cursor: "pointer",
                   }}
                   onFocus={(e) => (e.target.style.borderColor = "#4a8b6b")}
                   onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                />
+                >
+                  <option value="">Select your department</option>
+                  {departments.map((dept) => (
+                    <option key={dept.value} value={dept.value}>
+                      {dept.value} - {dept.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
-              {/* Year of Study - EDITABLE */}
+              {/* Year of Study - DROPDOWN EDITABLE */}
               <div
                 style={{ display: "flex", flexDirection: "column", gap: "6px" }}
               >
@@ -745,8 +750,7 @@ export default function StudentProfile() {
                   <FaBook style={{ marginRight: "8px" }} size={14} />
                   Year of Study
                 </label>
-                <input
-                  type="text"
+                <select
                   name="year_of_study"
                   value={formData.year_of_study}
                   onChange={handleInputChange}
@@ -757,10 +761,20 @@ export default function StudentProfile() {
                     fontSize: "15px",
                     transition: "border-color 0.2s",
                     backgroundColor: "#fff",
+                    width: "100%",
+                    appearance: "auto",
+                    cursor: "pointer",
                   }}
                   onFocus={(e) => (e.target.style.borderColor = "#2a2a72")}
                   onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
-                />
+                >
+                  <option value="">Select your year</option>
+                  {yearOptions.map((year) => (
+                    <option key={year.value} value={year.value}>
+                      {year.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Email - EDITABLE */}
