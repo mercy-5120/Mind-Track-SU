@@ -28,8 +28,19 @@ export default function PeerDashboard() {
   const [referrals, setReferrals] = useState([]);
   const [resources, setResources] = useState([]);
 
+  // Normalize status strings to handle case variations and aliases
+  const normalizeStatus = (status) => {
+    if (!status) return "pending";
+    const lower = status.toLowerCase().trim();
+    if (lower === "pending" || lower === "pend") return "pending";
+    if (lower === "acknowledged" || lower === "accepted" || lower === "acknowledge") return "acknowledged";
+    if (lower === "completed" || lower === "complete" || lower === "resolved" || lower === "done") return "completed";
+    return lower;
+  };
+
   useEffect(() => {
     const loadData = async () => {
+      // Load from API
       const [alertsData, crisisData, referralsData, resourcesData] =
         await Promise.all([
           getAlerts(),
@@ -37,6 +48,31 @@ export default function PeerDashboard() {
           getReferrals(),
           getResources(),
         ]);
+
+      // Load from localStorage as well
+      const storedReferrals = JSON.parse(localStorage.getItem("referrals") || "[]");
+
+      // Combine API and localStorage referrals
+      let allReferrals = [...referralsData, ...storedReferrals];
+
+      // Deduplicate by id or referral_id
+      allReferrals = allReferrals.filter(
+        (referral, index, self) =>
+          index ===
+          self.findIndex(
+            (r) =>
+              (r.referral_id || r.id) === (referral.referral_id || referral.id),
+          )
+      );
+
+      // Filter for peer counsellor referrals
+      const peerReferrals = allReferrals.filter(
+        (item) =>
+          item.referred_to === "peer_counsellor" ||
+          item.referred_to?.toLowerCase().includes("peer") ||
+          item.referredTo === "peer_counsellor"
+      );
+      setReferrals(peerReferrals);
 
       // Filter alerts assigned to peer counsellor
       const peerAlerts = alertsData.filter(
@@ -49,28 +85,23 @@ export default function PeerDashboard() {
       // Crisis alerts (all crisis alerts are relevant)
       setCrisisAlerts(Array.isArray(crisisData) ? crisisData : []);
 
-      // Referrals for peer counsellors
-      const peerReferrals = referralsData.filter(
-        (item) =>
-          item.referred_to === "peer_counsellor" ||
-          item.referred_to === "peer_counsellor",
-      );
-      setReferrals(peerReferrals);
-
       setResources(resourcesData);
     };
     loadData();
   }, []);
 
-  // Count pending follow-ups
+  // Count pending follow-ups using normalized status
   const pendingFollowups = alerts.filter(
-    (a) => a.alert_status === "pending",
+    (a) => normalizeStatus(a.alert_status) === "pending",
   ).length;
 
-  // Count assigned referrals
+  // Count assigned referrals using normalized status
   const assignedReferrals = referrals.filter(
-    (r) =>
-      r.referral_status === "pending" || r.referral_status === "acknowledged",
+    (r) => {
+      const status = r.referral_status || "pending";
+      const normalized = normalizeStatus(status);
+      return normalized === "pending" || normalized === "acknowledged";
+    }
   ).length;
 
   const stats = [
@@ -95,13 +126,7 @@ export default function PeerDashboard() {
       value: crisisAlerts.length.toString(),
       route: "/staff/peer/high-risk-alerts",
     },
-    {
-      id: 4,
-      title: "Resources",
-      icon: <FaBook size={24} color="#4a8b6b" />,
-      value: resources.length.toString(),
-      route: "/staff/peer/resources",
-    },
+    
   ];
 
   const handleStatClick = (route) => {
@@ -134,22 +159,28 @@ export default function PeerDashboard() {
             Assigned Referrals
           </h2>
           <div>
-            {referrals.slice(0, 4).map((referral) => (
-              <div
-                key={referral.referral_id || referral.id}
-                className={styles.activityItem}
-              >
-                <span>
-                  {referral.student_name || "Anonymous student"} ·
-                  {referral.referred_to || "Peer Counsellor"}
-                </span>
-                <span
-                  className={`${styles.activityTime} ${referral.referral_status === "pending" ? styles.highRisk : styles.success}`}
+            {referrals.slice(0, 4).map((referral) => {
+              const status = referral.referral_status || "pending";
+              const normalizedStatus = normalizeStatus(status);
+              const displayStatus = normalizedStatus.charAt(0).toUpperCase() + normalizedStatus.slice(1);
+              
+              return (
+                <div
+                  key={referral.referral_id || referral.id}
+                  className={styles.activityItem}
                 >
-                  {referral.referral_status || "Pending"}
-                </span>
-              </div>
-            ))}
+                  <span>
+                    {referral.student_name || referral.studentName || "Anonymous student"} ·
+                    {referral.referred_to || referral.referredTo || "Peer Counsellor"}
+                  </span>
+                  <span
+                    className={`${styles.activityTime} ${normalizedStatus === "pending" ? styles.highRisk : normalizedStatus === "completed" ? styles.success : styles.review}`}
+                  >
+                    {displayStatus}
+                  </span>
+                </div>
+              );
+            })}
             {referrals.length === 0 && (
               <div
                 style={{
@@ -172,7 +203,7 @@ export default function PeerDashboard() {
               onClick={() => navigate("/staff/peer/schedule-sessions")}
             >
               <FaCalendarCheck style={{ marginRight: "8px" }} />
-              Record Follow-up
+              Follow-up sessions
             </button>
             <button
               className={buttonStyles.btnSecondary}
@@ -181,13 +212,7 @@ export default function PeerDashboard() {
               <FaUserMd style={{ marginRight: "8px" }} />
               Manage Referrals
             </button>
-            <button
-              className={buttonStyles.btnSecondary}
-              onClick={() => navigate("/staff/peer/resources")}
-            >
-              <FaBook style={{ marginRight: "8px" }} />
-              Open Resources
-            </button>
+            
           </div>
         </div>
       </section>
