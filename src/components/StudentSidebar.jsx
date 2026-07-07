@@ -1,13 +1,20 @@
-import React from "react";
+// src/components/StudentSidebar.jsx
+import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import styles from "../styles/StudentSidebar.module.css";
 import StudentBrand from "./StudentBrand";
 import { getCurrentStudent, logoutStudent } from "../utils/studentSession";
+import styles from "../styles/StudentSidebar.module.css";
 
 export default function StudentSidebar({ open, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const currentStudent = getCurrentStudent();
+  const [currentStudent, setCurrentStudent] = useState(null);
+
+  useEffect(() => {
+    const student = getCurrentStudent();
+    console.log("[StudentSidebar] Current student:", student);
+    setCurrentStudent(student);
+  }, [open]);
 
   const displayName =
     currentStudent?.display_name || currentStudent?.username || "Student";
@@ -51,6 +58,21 @@ export default function StudentSidebar({ open, onClose }) {
       <div className={styles.studentInfo}>
         <div className={styles.studentName}>{displayName}</div>
         <div className={styles.studentId}>{studentId}</div>
+        {currentStudent?.email && (
+          <div
+            className={styles.studentEmail}
+            style={{
+              fontSize: "12px",
+              color: "#6b7280",
+              marginTop: "4px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {currentStudent.email}
+          </div>
+        )}
       </div>
 
       <nav className={styles.nav}>

@@ -1,30 +1,32 @@
-// src/components/StudentLayout.jsx
+// src/components/AssessmentLayout.jsx
 import React, { useState } from "react";
-import StudentSidebar from "./StudentSidebar";
-import styles from "../styles/StudentLayout.module.css";
 import { isStudentLoggedIn } from "../utils/studentSession";
+import StudentSidebar from "./StudentSidebar";
+import styles from "../styles/AssessmentLayout.module.css";
 
-export default function StudentLayout({ children }) {
+export default function AssessmentLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isLoggedIn = isStudentLoggedIn();
 
   const closeSidebar = () => setSidebarOpen(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  // If not logged in, render without sidebar
+  // If NOT logged in, render without sidebar (anonymous mode) - CENTERED
   if (!isLoggedIn) {
     return (
       <div className={styles.anonymousContainer}>
-        <main className={styles.mainContent}>{children}</main>
+        <main className={styles.anonymousMainContent}>
+          <div className={styles.anonymousContentWrapper}>{children}</div>
+        </main>
       </div>
     );
   }
 
-  // If logged in, render with sidebar (ONLY ONCE)
+  // If logged in, render with sidebar (student mode) - LEFT ALIGNED
   return (
     <div className={styles.studentContainer}>
       <StudentSidebar open={sidebarOpen} onClose={closeSidebar} />
-      <main className={styles.mainContent}>
+      <main className={styles.studentMainContent}>
         <header className={styles.topHeader}>
           <button className={styles.hamburger} onClick={toggleSidebar}>
             <i className="fas fa-bars"></i>

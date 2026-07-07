@@ -4,13 +4,20 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import mysql from "mysql2/promise";
 
-dotenv.config({
-  path: path.join(path.dirname(fileURLToPath(import.meta.url)), "..", ".env"),
-});
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const schemaPath = path.join(__dirname, "..", "db.sql");
+
+// Load .env from project root (two levels up)
+dotenv.config({
+  path: path.join(__dirname, "..", "..", ".env"),
+});
+
+// Schema path - looks for db.sql in project root
+const schemaPath = path.join(__dirname, "..", "..", "db.sql");
+
+console.log(" Loading .env from:", path.join(__dirname, "..", "..", ".env"));
+console.log(" Looking for db.sql at:", schemaPath);
+console.log(" db.sql exists?", fs.existsSync(schemaPath));
 
 const dbName =
   process.env.MYSQL_DATABASE || process.env.DB_NAME || "mindtracksu";
@@ -22,12 +29,21 @@ const dbConfig = {
   multipleStatements: true,
 };
 
+console.log(" Database config:");
+console.log("  Host:", dbConfig.host);
+console.log("  Port:", dbConfig.port);
+console.log("  User:", dbConfig.user);
+console.log("  Password:", dbConfig.password ? "(set)" : " (empty)");
+console.log("  Database:", dbName);
+
 let initialized = false;
 
 const buildStaffDatabaseName = (staffId) => `mindtracksu_staff_${staffId}`;
 
 const initializeSchema = async () => {
   if (initialized) return;
+
+  console.log("Initializing database schema...");
 
   const bootstrap = await mysql.createConnection({
     host: dbConfig.host,
@@ -39,6 +55,7 @@ const initializeSchema = async () => {
 
   try {
     await bootstrap.query(`CREATE DATABASE IF NOT EXISTS \`${dbName}\``);
+    console.log(`Database '${dbName}' created or already exists`);
   } finally {
     await bootstrap.end();
   }
@@ -49,6 +66,15 @@ const initializeSchema = async () => {
   });
 
   try {
+    // Check if schema file exists
+    if (!fs.existsSync(schemaPath)) {
+      console.warn(
+        `Schema file not found at ${schemaPath}, skipping schema initialization`,
+      );
+      initialized = true;
+      return;
+    }
+
     const schemaSql = fs
       .readFileSync(schemaPath, "utf8")
       .replace(
@@ -61,8 +87,35 @@ const initializeSchema = async () => {
       )
       .replace(/INSERT INTO /gi, "INSERT IGNORE INTO ");
 
-    await connection.query(schemaSql);
+    // Split into individual statements
+    const statements = schemaSql
+      .split(";")
+      .filter((stmt) => stmt.trim().length > 0);
+
+    for (const statement of statements) {
+      try {
+        await connection.query(statement);
+      } catch (err) {
+        // Ignore errors about duplicate tables/rows
+        if (
+          !err.message.includes("already exists") &&
+          !err.message.includes("Duplicate") &&
+          !err.message.includes("IGNORE")
+        ) {
+          console.warn("SQL Warning:", err.message);
+        }
+      }
+    }
+
+    console.log("Database tables created successfully");
+
+    // Ensure demo student exists with proper password
+    await ensureDemoStudent(connection);
+
+    // Create staff databases if staff accounts exist
     await ensureStaffDatabases(connection);
+  } catch (error) {
+    console.error("Schema initialization error:", error.message);
   } finally {
     await connection.end();
   }
@@ -70,18 +123,66 @@ const initializeSchema = async () => {
   initialized = true;
 };
 
-const ensureStaffDatabases = async (connection) => {
-  const [staffRows] = await connection.query(
-    "SELECT staff_id FROM staff_accounts",
-  );
-
-  for (const staff of staffRows) {
-    const databaseName = buildStaffDatabaseName(staff.staff_id);
-    await createStaffDatabase(databaseName);
-    await connection.query(
-      "INSERT INTO staff_database_registry (staff_id, database_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE database_name = VALUES(database_name)",
-      [staff.staff_id, databaseName],
+const ensureDemoStudent = async (connection) => {
+  try {
+    const [existingStudent] = await connection.query(
+      "SELECT * FROM students WHERE username = ?",
+      ["demo"],
     );
+
+    if (existingStudent.length === 0) {
+      // Import bcrypt and hash password
+      const bcrypt = await import("bcrypt");
+      const hashedPassword = await bcrypt.hash("demo123", 10);
+
+      await connection.query(
+        `INSERT INTO students 
+         (username, password_hash, display_name, department, year_of_study, email, phone, created_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          "demo",
+          hashedPassword,
+          "Demo Student",
+          "Computer Science",
+          2,
+          "demo@student.edu",
+          "1234567890",
+          new Date().toISOString(),
+        ],
+      );
+      console.log("Demo student created: demo / demo123");
+    } else {
+      console.log("Demo student already exists");
+    }
+
+    // Show students
+    const [students] = await connection.query(
+      "SELECT student_id, username, display_name, department, email FROM students",
+    );
+    console.log("Current students:");
+    console.table(students);
+  } catch (error) {
+    console.warn("Demo student creation warning:", error.message);
+  }
+};
+
+const ensureStaffDatabases = async (connection) => {
+  try {
+    const [staffRows] = await connection.query(
+      "SELECT staff_id FROM staff_accounts",
+    );
+
+    for (const staff of staffRows) {
+      const databaseName = buildStaffDatabaseName(staff.staff_id);
+      await createStaffDatabase(databaseName);
+      await connection.query(
+        "INSERT INTO staff_database_registry (staff_id, database_name) VALUES (?, ?) ON DUPLICATE KEY UPDATE database_name = VALUES(database_name)",
+        [staff.staff_id, databaseName],
+      );
+    }
+  } catch (error) {
+    // Staff accounts table might not exist yet, that's fine
+    console.warn("⚠️ Staff database setup warning:", error.message);
   }
 };
 

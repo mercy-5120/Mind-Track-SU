@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Button from "../../components/Button";
 import Input from "../../components/Input";
 import logo from "../../Assets/Logo.png";
 import { loginStudent } from "../../utils/studentSession";
-import "../../styles/globals.css"; // Import your global CSS
+import "../../styles/globals.css";
 
 console.log("[Login] component loaded");
 
@@ -13,15 +13,48 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Load remembered username on component mount
+  useEffect(() => {
+    const remembered = localStorage.getItem("rememberedUsername");
+    if (remembered) {
+      setUsername(remembered);
+      setRememberMe(true);
+    }
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
-      loginStudent(username, password);
+      console.log("[Login] Attempting login for:", username);
+
+      // Call the login function from studentSession
+      const student = await loginStudent(username, password);
+
+      console.log("[Login] Login successful:", student);
+
+      // Store remember me preference if checked
+      if (rememberMe) {
+        localStorage.setItem("rememberedUsername", username);
+      } else {
+        localStorage.removeItem("rememberedUsername");
+      }
+
+      // Navigate to student dashboard
       navigate("/student/dashboard");
     } catch (err) {
-      setError(err.message || "Unable to sign in right now.");
+      console.error("[Login] Login error:", err);
+      setError(
+        err.message ||
+          "Unable to sign in right now. Please check your credentials and try again.",
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,16 +74,17 @@ export default function Login() {
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="username" className="form-label">
-                  Email or Registration Number
+                  Username or Email
                 </label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder="Enter email or registration number"
+                  placeholder="Enter your username or email"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
                   className="form-input"
+                  disabled={loading}
                 />
               </div>
 
@@ -66,6 +100,7 @@ export default function Login() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="form-input"
+                  disabled={loading}
                 />
               </div>
 
@@ -75,6 +110,7 @@ export default function Login() {
                     type="checkbox"
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
+                    disabled={loading}
                   />
                   Remember me
                 </label>
@@ -83,15 +119,66 @@ export default function Login() {
                 </Link>
               </div>
 
-              {error && <p className="error-message">{error}</p>}
+              {error && (
+                <div
+                  className="error-message"
+                  style={{
+                    color: "#b34747",
+                    background: "#fef2f2",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid #fecaca",
+                    fontSize: "14px",
+                    textAlign: "center",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
 
-              <Button type="submit" full className="sign-in-button">
-                Sign In
+              <Button
+                type="submit"
+                full
+                className="sign-in-button"
+                disabled={loading}
+                style={{
+                  padding: "14px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  borderRadius: "10px",
+                  background: loading ? "#6b7280" : "#2a2a72",
+                  cursor: loading ? "default" : "pointer",
+                  opacity: loading ? 0.7 : 1,
+                }}
+              >
+                {loading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
-            <div className="divider">
-              <span>or</span>
+            <div
+              className="divider"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "16px",
+                margin: "20px 0",
+              }}
+            >
+              <hr
+                style={{
+                  flex: 1,
+                  border: "none",
+                  borderTop: "1px solid #e6e8f0",
+                }}
+              />
+              <span style={{ color: "#6b7280", fontSize: "14px" }}>or</span>
+              <hr
+                style={{
+                  flex: 1,
+                  border: "none",
+                  borderTop: "1px solid #e6e8f0",
+                }}
+              />
             </div>
 
             <div className="anonymous-section">
@@ -100,18 +187,64 @@ export default function Login() {
                 full
                 onClick={() => navigate("/assessment-intro")}
                 className="anonymous-button"
+                variant="secondary"
+                disabled={loading}
+                style={{
+                  padding: "14px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  borderRadius: "10px",
+                  background: "#f8fafc",
+                  color: "#2a2a72",
+                  border: "2px solid #2a2a72",
+                  cursor: loading ? "default" : "pointer",
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
+                    e.target.style.background = "#2a2a72";
+                    e.target.style.color = "#fff";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
+                    e.target.style.background = "#f8fafc";
+                    e.target.style.color = "#2a2a72";
+                  }
+                }}
               >
                 Continue Anonymously
               </Button>
-              <p className="anonymous-note">
+              <p
+                className="anonymous-note"
+                style={{
+                  marginTop: "8px",
+                  fontSize: "13px",
+                  color: "#6b7280",
+                  textAlign: "center",
+                }}
+              >
                 Take a quick wellness assessment without creating an account.
               </p>
             </div>
 
-            <div className="footer-links">
-              <p>
+            <div
+              className="footer-links"
+              style={{
+                marginTop: "20px",
+                textAlign: "center",
+              }}
+            >
+              <p style={{ color: "#6b7280" }}>
                 New to MindTrack SU?{" "}
-                <Link to="/create-account" className="link-primary">
+                <Link
+                  to="/create-account"
+                  className="link-primary"
+                  style={{
+                    color: "#2a2a72",
+                    fontWeight: "600",
+                    textDecoration: "none",
+                  }}
+                >
                   Create an account
                 </Link>
               </p>

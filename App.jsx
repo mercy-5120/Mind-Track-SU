@@ -1,49 +1,51 @@
 import React, { useEffect } from "react";
 import { Routes, Route, useLocation, Navigate } from "react-router-dom";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import ErrorBoundary from "./components/ErrorBoundary";
-import LandingPage from "./pages/user/LandingPage";
+import Header from "./src/components/Header";
+import Footer from "./src/components/Footer";
+import ErrorBoundary from "./src/components/ErrorBoundary";
+import AssessmentLayout from "./src/components/AssessmentLayout";
+import StudentLayout from "./src/components/StudentLayout";
+import LandingPage from "./src/pages/user/LandingPage";
 //Student Pages
-import AssessmentIntro from "./pages/student/AssessmentIntro";
-import AssessmentQuestions from "./pages/student/AssessmentQuestions";
-import AssessmentCompletion from "./pages/student/AssessmentCompletion";
-import FeedbackScreen from "./pages/student/FeedbackScreen";
-import ResourceDirectory from "./pages/student/ResourceDirectory";
-import CrisisPrompt from "./pages/student/CrisisPrompt";
+import AssessmentIntro from "./src/pages/student/AssessmentIntro";
+import AssessmentQuestions from "./src/pages/student/AssessmentQuestions";
+import AssessmentCompletion from "./src/pages/student/AssessmentCompletion";
+import FeedbackScreen from "./src/pages/student/FeedbackScreen";
+import ResourceDirectory from "./src/pages/student/ResourceDirectory";
+import CrisisPrompt from "./src/pages/student/CrisisPrompt";
 
-import CreateAccount from "./pages/user/CreateAccount";
-import Login from "./pages/user/Login";
-import ForgotPassword from "./pages/user/ForgotPassword";
-import StudentDashboard from "./pages/student/StudentDashboard";
-import StudentProfile from "./pages/student/StudentProfile";
-import StudentHistory from "./pages/student/StudentHistory";
+import CreateAccount from "./src/pages/user/CreateAccount";
+import Login from "./src/pages/user/Login";
+import ForgotPassword from "./src/pages/user/ForgotPassword";
+import StudentDashboard from "./src/pages/student/StudentDashboard";
+import StudentProfile from "./src/pages/student/StudentProfile";
+import StudentHistory from "./src/pages/student/StudentHistory";
 //STAFF PAGES
-import StaffLogin from "./pages/staff/StaffLogin";
-import SUMCDashboard from "./pages/staff/SUMC/SUMCDashboard";
-import PeerDashboard from "./pages/staff/PeerCounsellors/PeerDashboard";
-import DeanDashboard from "./pages/staff/Dean/DeanDashboard";
-import HighRiskAlerts from "./pages/staff/PeerCounsellors/HighRiskAlerts";
-import Referrals from "./pages/staff/PeerCounsellors/Referrals";
-import Resources from "./pages/staff/SUMC/Resources";
-import ScheduleSessions from "./pages/staff/SUMC/ScheduleSessions";
-import Settings from "./pages/staff/SUMC/Settings";
-import AlertDetails from "./pages/staff/SUMC/AlertDetails";
-import CreateReferral from "./pages/staff/SUMC/CreateReferral";
-import AddResources from "./pages/staff/SUMC/AddResources";
-import FollowUpNotes from "./pages/staff/PeerCounsellors/FollowUpNotes";
-import "./styles/globals.css";
-import PrivacyPolicy from "./pages/user/PrivacyPolicy";
-import TermsandConditions from "./pages/user/TermsandConditions";
+import StaffLogin from "./src/pages/staff/StaffLogin";
+import SUMCDashboard from "./src/pages/staff/SUMC/SUMCDashboard";
+import PeerDashboard from "./src/pages/staff/PeerCounsellors/PeerDashboard";
+import DeanDashboard from "./src/pages/staff/Dean/DeanDashboard";
+import HighRiskAlerts from "./src/pages/staff/PeerCounsellors/HighRiskAlerts";
+import Referrals from "./src/pages/staff/PeerCounsellors/Referrals";
+import Resources from "./src/pages/staff/SUMC/Resources";
+import ScheduleSessions from "./src/pages/staff/SUMC/ScheduleSessions";
+import Settings from "./src/pages/staff/SUMC/Settings";
+import AlertDetails from "./src/pages/staff/SUMC/AlertDetails";
+import CreateReferral from "./src/pages/staff/SUMC/CreateReferral";
+import AddResources from "./src/pages/staff/SUMC/AddResources";
+import FollowUpNotes from "./src/pages/staff/PeerCounsellors/FollowUpNotes";
+import "./src/styles/globals.css";
+import PrivacyPolicy from "./src/pages/user/PrivacyPolicy";
+import TermsandConditions from "./src/pages/user/TermsandConditions";
 
 function App() {
   const location = useLocation();
   const staffRole =
     typeof window !== "undefined" ? sessionStorage.getItem("staffRole") : null;
 
-  // Check if the route is either staff OR student (both should NOT have header/footer)
   const isStaffRoute = location.pathname.startsWith("/staff");
   const isStudentRoute = location.pathname.startsWith("/student");
+
   const isAssessmentRoute =
     location.pathname.startsWith("/assessment") ||
     location.pathname.startsWith("/feedback") ||
@@ -51,7 +53,6 @@ function App() {
     location.pathname.startsWith("/crisis") ||
     location.pathname.startsWith("/resources");
 
-  // Hide header/footer on staff routes, student routes, and assessment routes
   const hideHeaderFooter = isStaffRoute || isStudentRoute || isAssessmentRoute;
 
   const defaultStaffHome =
@@ -80,14 +81,29 @@ function App() {
 
   return (
     <>
-      {/* Only show Header on public routes (not staff, student, or assessment) */}
       {!hideHeaderFooter && <Header />}
 
       <ErrorBoundary>
         <Routes>
+          {/* Public Routes - No Layout */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/staff/login" element={<StaffLogin />} />
-
+          <Route path="/create-account" element={<CreateAccount />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route
+            path="/terms-and-conditions"
+            element={<TermsandConditions />}
+          />
+          {/* Assessment Routes - Using AssessmentLayout (handles both logged in and anonymous) */}
+          <Route path="/assessment-intro" element={<AssessmentIntro />} />
+          <Route path="/assessment" element={<AssessmentQuestions />} />
+          <Route path="/completion" element={<AssessmentCompletion />} />
+          <Route path="/feedback" element={<FeedbackScreen />} />
+          <Route path="/resources" element={<ResourceDirectory />} />
+          <Route path="/crisis" element={<CrisisPrompt />} />
+          {/* Staff Routes */}
           <Route
             path="/staff/dashboard"
             element={<Navigate to={defaultStaffHome} replace />}
@@ -190,7 +206,6 @@ function App() {
               />
             }
           />
-
           <Route path="/staff/sumc/dashboard" element={<SUMCDashboard />} />
           <Route
             path="/staff/sumc/high-risk-alerts"
@@ -222,7 +237,6 @@ function App() {
             path="/staff/sumc/alert-details"
             element={<AlertDetails role="sumc" />}
           />
-
           <Route path="/staff/peer/dashboard" element={<PeerDashboard />} />
           <Route
             path="/staff/peer/high-risk-alerts"
@@ -249,31 +263,37 @@ function App() {
             path="/staff/peer/alert-details"
             element={<AlertDetails role="peer" />}
           />
-
           <Route path="/staff/dean/dashboard" element={<DeanDashboard />} />
-
-          <Route path="/assessment-intro" element={<AssessmentIntro />} />
-          <Route path="/assessment" element={<AssessmentQuestions />} />
-          <Route path="/completion" element={<AssessmentCompletion />} />
-          <Route path="/feedback" element={<FeedbackScreen />} />
-          <Route path="/resources" element={<ResourceDirectory />} />
-          <Route path="/crisis" element={<CrisisPrompt />} />
-          <Route path="/student/dashboard" element={<StudentDashboard />} />
-          <Route path="/student/profile" element={<StudentProfile />} />
-          <Route path="/student/history" element={<StudentHistory />} />
-          <Route path="/create-account" element={<CreateAccount />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          {/* Student Routes - Using StudentLayout (only logged in users) */}
+          // In App.jsx - Student routes
           <Route
-            path="/terms-and-conditions"
-            element={<TermsandConditions />}
+            path="/student/dashboard"
+            element={
+              <StudentLayout>
+                <StudentDashboard />
+              </StudentLayout>
+            }
+          />
+          <Route
+            path="/student/profile"
+            element={
+              <StudentLayout>
+                <StudentProfile />
+              </StudentLayout>
+            }
+          />
+          <Route
+            path="/student/history"
+            element={
+              <StudentLayout>
+                <StudentHistory />
+              </StudentLayout>
+            }
           />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </ErrorBoundary>
 
-      {/* Only show Footer on public routes (not staff, student, or assessment) */}
       {!hideHeaderFooter && <Footer />}
     </>
   );

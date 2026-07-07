@@ -13,6 +13,13 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// Root route
+app.get("/", (req, res) => {
+  res.send(
+    "Backend server is running. Use /api/student/login for student login.",
+  );
+});
+
 const getRequestedStaffId = (req) => {
   const rawStaffId =
     req.query.staffId ??
@@ -21,6 +28,34 @@ const getRequestedStaffId = (req) => {
     req.params.staffId;
   return rawStaffId ? Number(rawStaffId) : null;
 };
+
+// =====================================================
+// HELPER FUNCTIONS
+// =====================================================
+
+const getLevel = (score) => {
+  if (score >= 70) return "Low";
+  if (score >= 40) return "Moderate";
+  return "High";
+};
+
+const getRiskLevel = (score) => {
+  if (score >= 70) return "low";
+  if (score >= 40) return "moderate";
+  return "high";
+};
+
+// Format date for MySQL using Kenyan time (UTC+3)
+const formatMySQLDate = (date) => {
+  const kenyanTime = new Date(
+    date.toLocaleString("en-US", { timeZone: "Africa/Nairobi" }),
+  );
+  return kenyanTime.toISOString().replace("T", " ").slice(0, 19);
+};
+
+// =====================================================
+// STAFF ROUTES
+// =====================================================
 
 app.get("/api/staff/alerts", async (req, res) => {
   try {
@@ -215,10 +250,14 @@ app.post("/api/staff/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
     }
 
-    const staff = await get("SELECT * FROM staff_accounts WHERE email = ?", [email]);
+    const staff = await get("SELECT * FROM staff_accounts WHERE email = ?", [
+      email,
+    ]);
     if (!staff) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -234,39 +273,412 @@ app.post("/api/staff/login", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// =====================================================
+// STUDENT ROUTES
+// =====================================================
+
+// Student Registration
+app.post("/api/student/register", async (req, res) => {
+  try {
+    const {
+      username,
+      password,
+      display_name,
+      department,
+      year_of_study,
+      email,
+      phone,
+    } = req.body;
+
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ message: "Username and password are required." });
+    }
+
+    const existingStudent = await get(
+      "SELECT * FROM students WHERE username = ?",
+      [username],
+    );
+
+    if (existingStudent) {
+      return res.status(409).json({ message: "Username already exists." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    await run(
+      `INSERT INTO students 
+       (username, password_hash, display_name, department, year_of_study, email, phone, created_at) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        username,
+        hashedPassword,
+        display_name || username,
+        department || null,
+        year_of_study ? parseInt(year_of_study) : null,
+        email || null,
+        phone || null,
+        formatMySQLDate(new Date()),
+      ],
+    );
+
+    const newStudent = await get("SELECT * FROM students WHERE username = ?", [
+      username,
+    ]);
+
+    const { password_hash, ...studentData } = newStudent;
+    res.json({
+      success: true,
+      student: studentData,
+    });
+  } catch (error) {
+    console.error("Student registration error:", error);
+    res.status(500).json({ message: "Registration service unavailable." });
+  }
+});
+
+// Student Login
 app.post("/api/student/login", async (req, res) => {
   try {
     const { username, password } = req.body;
-    
+
     if (!username || !password) {
-      return res.status(400).json({ message: "Username and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Username and password are required." });
     }
 
-    // Query using the 'username' column
-    const student = await get(
-      "SELECT * FROM students WHERE username = ?",
-      [username]
-    );
-    
+    const student = await get("SELECT * FROM students WHERE username = ?", [
+      username,
+    ]);
+
     if (!student) {
+      console.log("[Login] Student not found:", username);
       return res.status(401).json({ message: "Invalid username or password." });
     }
 
-    // Verify password
     const isValid = await bcrypt.compare(password, student.password_hash || "");
     if (!isValid) {
+      console.log("[Login] Invalid password for:", username);
       return res.status(401).json({ message: "Invalid username or password." });
     }
 
-    // Return student data (excluding password)
+    await run("UPDATE students SET last_active = ? WHERE student_id = ?", [
+      formatMySQLDate(new Date()),
+      student.student_id,
+    ]);
+
     const { password_hash, ...studentData } = student;
-    res.json({ 
-      success: true, 
-      student: studentData 
+    console.log("[Login] Student logged in:", studentData);
+    res.json({
+      success: true,
+      student: studentData,
     });
-    
   } catch (error) {
-    console.error('Student login error:', error);
+    console.error("[Login] Student login error:", error);
     res.status(500).json({ message: "Login service unavailable." });
   }
+});
+
+// Student Profile Update
+app.put("/api/student/profile", async (req, res) => {
+  try {
+    const {
+      student_id,
+      display_name,
+      username,
+      department,
+      year_of_study,
+      email,
+      phone,
+    } = req.body;
+
+    if (!student_id) {
+      return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    await run(
+      `UPDATE students 
+       SET display_name = ?, username = ?, department = ?, year_of_study = ?, email = ?, phone = ?
+       WHERE student_id = ?`,
+      [
+        display_name,
+        username,
+        department,
+        year_of_study ? parseInt(year_of_study) : null,
+        email,
+        phone,
+        student_id,
+      ],
+    );
+
+    const updatedStudent = await get(
+      "SELECT * FROM students WHERE student_id = ?",
+      [student_id],
+    );
+
+    const { password_hash, ...studentData } = updatedStudent;
+    res.json({
+      success: true,
+      student: studentData,
+    });
+  } catch (error) {
+    console.error("Student profile update error:", error);
+    res.status(500).json({ message: "Profile update service unavailable." });
+  }
+});
+
+// Student Logout
+app.post("/api/student/logout", async (req, res) => {
+  try {
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// =====================================================
+// STUDENT ASSESSMENT ROUTES
+// =====================================================
+
+// Get Student Assessment History
+app.get("/api/student/assessments", async (req, res) => {
+  try {
+    const studentId = req.query.student_id;
+    console.log("[GET /api/student/assessments] Student ID:", studentId);
+
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    const history = await all(
+      "SELECT * FROM assessments WHERE student_id = ? ORDER BY assessment_date DESC",
+      [studentId],
+    );
+
+    console.log(
+      "[GET /api/student/assessments] Found:",
+      history.length,
+      "assessments",
+    );
+
+    const formattedHistory = history.map((item) => {
+      const anxietyScore = item.total_anxiety_score || 0;
+      const depressionScore = item.total_depression_score || 0;
+      const burnoutScore = item.total_burnout_score || 0;
+      const sleepScore = item.total_sleep_score || 0;
+
+      const overallScore = Math.round(
+        (anxietyScore + depressionScore + burnoutScore + sleepScore) / 4,
+      );
+
+      return {
+        id: item.assessment_id,
+        student_id: item.student_id,
+        student_name: item.student_name || "Student",
+        mode: item.mode || "student",
+        taken_at: item.completed_at || item.assessment_date,
+        overallScore: overallScore,
+        categories: [
+          {
+            name: "Anxiety",
+            score: anxietyScore,
+            level: getLevel(anxietyScore),
+          },
+          {
+            name: "Depression",
+            score: depressionScore,
+            level: getLevel(depressionScore),
+          },
+          {
+            name: "Burnout",
+            score: burnoutScore,
+            level: getLevel(burnoutScore),
+          },
+          {
+            name: "Sleep",
+            score: sleepScore,
+            level: getLevel(sleepScore),
+          },
+        ],
+        level: item.overall_risk_level || "low",
+        advice: item.advice || "",
+        recommendations: item.recommendations
+          ? JSON.parse(item.recommendations)
+          : [],
+      };
+    });
+
+    res.json({ history: formattedHistory });
+  } catch (error) {
+    console.error("[GET /api/student/assessments] Error:", error);
+    res.status(500).json({ message: "Failed to fetch history." });
+  }
+});
+
+// Save Assessment Result
+app.post("/api/student/assessments", async (req, res) => {
+  try {
+    const { student_id, result, mode } = req.body;
+
+    console.log("[POST /api/student/assessments] Student ID:", student_id);
+
+    if (!student_id) {
+      return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    const categories = result.categories || [];
+    const anxietyScore =
+      categories.find((c) => c.name === "Anxiety")?.score || 0;
+    const depressionScore =
+      categories.find((c) => c.name === "Depression")?.score || 0;
+    const burnoutScore =
+      categories.find((c) => c.name === "Burnout")?.score || 0;
+    const sleepScore = categories.find((c) => c.name === "Sleep")?.score || 0;
+
+    const overallScore = Math.round(
+      (anxietyScore + depressionScore + burnoutScore + sleepScore) / 4,
+    );
+
+    let riskLevel = "low";
+    if (overallScore >= 70) riskLevel = "low";
+    else if (overallScore >= 40) riskLevel = "moderate";
+    else riskLevel = "high";
+
+    const student = await get(
+      "SELECT display_name, username FROM students WHERE student_id = ?",
+      [student_id],
+    );
+    const studentName = student?.display_name || student?.username || "Student";
+
+    const formattedDate = formatMySQLDate(new Date());
+
+    const insertResult = await run(
+      `INSERT INTO assessments 
+       (student_id, student_name, mode, anonymous_student_id, anonymous_session_token, 
+        assessment_status, assessment_date, completed_at,
+        total_anxiety_score, total_depression_score, total_burnout_score, total_sleep_score,
+        overall_risk_level, crisis_contact_provided) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        student_id,
+        studentName,
+        mode || "student",
+        null,
+        null,
+        "completed",
+        formattedDate,
+        formattedDate,
+        anxietyScore,
+        depressionScore,
+        burnoutScore,
+        sleepScore,
+        riskLevel,
+        0,
+      ],
+    );
+
+    console.log("[POST /api/student/assessments] Insert result:", insertResult);
+
+    res.json({
+      success: true,
+      entry: {
+        id: insertResult.id || insertResult.insertId,
+        ...result,
+        overallScore: overallScore,
+        taken_at: new Date().toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error("[POST /api/student/assessments] Error:", error);
+    res.status(500).json({
+      message: "Failed to save assessment.",
+      error: error.message,
+    });
+  }
+});
+
+// =====================================================
+// CRISIS ALERT ROUTES
+// =====================================================
+
+app.get("/api/student/crisis-alerts", async (req, res) => {
+  try {
+    const studentId = req.query.student_id;
+
+    if (!studentId) {
+      return res.status(400).json({ message: "Student ID is required." });
+    }
+
+    const alerts = await all(
+      "SELECT * FROM crisis_alerts WHERE student_id = ? ORDER BY created_at DESC",
+      [studentId],
+    );
+
+    res.json({ alerts: alerts || [] });
+  } catch (error) {
+    console.error("Get crisis alerts error:", error);
+    res.status(500).json({ message: "Failed to fetch crisis alerts." });
+  }
+});
+
+app.post("/api/student/crisis-alerts", async (req, res) => {
+  try {
+    const { student_id, contact_info } = req.body;
+
+    if (!student_id || !contact_info) {
+      return res
+        .status(400)
+        .json({ message: "Student ID and contact info are required." });
+    }
+
+    const formattedDate = formatMySQLDate(new Date());
+
+    const alert = {
+      alert_id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      created_at: formattedDate,
+      contact_info: contact_info,
+      student_id: student_id,
+      status: "crisis_contacted",
+      category: "crisis",
+      risk_level: "high",
+      alert_status: "new",
+    };
+
+    await run(
+      `INSERT INTO crisis_alerts 
+       (alert_id, created_at, contact_info, student_id, status, category, risk_level, alert_status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        alert.alert_id,
+        alert.created_at,
+        alert.contact_info,
+        alert.student_id,
+        alert.status,
+        alert.category,
+        alert.risk_level,
+        alert.alert_status,
+      ],
+    );
+
+    res.json({ success: true, alert });
+  } catch (error) {
+    console.error("Save crisis alert error:", error);
+    res.status(500).json({ message: "Failed to save crisis alert." });
+  }
+});
+
+// =====================================================
+// START THE SERVER
+// =====================================================
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`Student login: POST http://localhost:${PORT}/api/student/login`);
+  console.log(
+    `Student assessments: GET/POST http://localhost:${PORT}/api/student/assessments`,
+  );
 });
