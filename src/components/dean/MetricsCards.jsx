@@ -3,24 +3,24 @@ import React from "react";
 import {
   FaArrowUp,
   FaArrowDown,
-  FaChartLine,
   FaExclamationTriangle,
-  FaClock,
-  FaFileMedical,
+  FaCheckCircle,
+  FaUserMd,
+  FaCheckDouble,
 } from "react-icons/fa";
 import styles from "../../styles/DeanDashboard.module.css";
 
 export default function MetricsCards({ metrics }) {
   const getIcon = (iconClass) => {
-    if (iconClass.includes("chart-line"))
-      return <FaChartLine size={24} color="#2a2a72" />;
     if (iconClass.includes("exclamation-triangle"))
       return <FaExclamationTriangle size={24} color="#b34747" />;
-    if (iconClass.includes("clock"))
-      return <FaClock size={24} color="#f59e0b" />;
-    if (iconClass.includes("file-medical"))
-      return <FaFileMedical size={24} color="#4a8b6b" />;
-    return <FaChartLine size={24} color="#2a2a72" />;
+    if (iconClass.includes("check-circle"))
+      return <FaCheckCircle size={24} color="#4a8b6b" />;
+    if (iconClass.includes("user-md"))
+      return <FaUserMd size={24} color="#2a2a72" />;
+    if (iconClass.includes("check-double"))
+      return <FaCheckDouble size={24} color="#2f855a" />;
+    return <FaExclamationTriangle size={24} color="#2a2a72" />;
   };
 
   return (

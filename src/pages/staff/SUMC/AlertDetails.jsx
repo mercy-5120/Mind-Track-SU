@@ -16,6 +16,7 @@ import {
   FaShieldAlt,
   FaSpinner,
   FaEye,
+  FaUserGraduate,
 } from "react-icons/fa";
 import Layout from "../../../components/Layout";
 import styles from "../../../styles/Dashboard.module.css";
@@ -48,9 +49,6 @@ export default function AlertDetails() {
         console.log("[AlertDetails] Fetching alerts...");
         const data = await getAlerts();
         console.log("[AlertDetails] Raw data from API:", data);
-        console.log("[AlertDetails] Data type:", typeof data);
-        console.log("[AlertDetails] Is array?", Array.isArray(data));
-        console.log("[AlertDetails] Length:", data?.length);
 
         let alertsArray = [];
         if (Array.isArray(data)) {
@@ -61,16 +59,32 @@ export default function AlertDetails() {
           alertsArray = data.data;
         }
 
-        console.log("[AlertDetails] Processed alerts array:", alertsArray);
-        console.log("[AlertDetails] Number of alerts:", alertsArray.length);
-
-        const crisisAlerts = alertsArray.filter((a) => a.contact_info);
+        // Also check localStorage for anonymous crisis alerts
+        const anonymousAlerts = JSON.parse(
+          localStorage.getItem("anonymousCrisisAlerts") || "[]",
+        );
         console.log(
-          "[AlertDetails] Crisis alerts with contact info:",
-          crisisAlerts,
+          "[AlertDetails] Anonymous alerts from localStorage:",
+          anonymousAlerts,
         );
 
-        setAlerts(alertsArray);
+        // Merge anonymous alerts with API alerts
+        const allAlerts = [...alertsArray, ...anonymousAlerts];
+
+        // Remove duplicates based on alert_id
+        const uniqueAlerts = allAlerts.filter(
+          (alert, index, self) =>
+            index === self.findIndex((a) => a.alert_id === alert.alert_id),
+        );
+
+        console.log("[AlertDetails] Processed alerts:", uniqueAlerts.length);
+        console.log(
+          "[AlertDetails] Crisis alerts with contact info:",
+          uniqueAlerts.filter((a) => a.contact_info || a.category === "crisis")
+            .length,
+        );
+
+        setAlerts(uniqueAlerts);
       } catch (error) {
         console.error("[AlertDetails] Error loading alerts:", error);
         setError("Failed to load alerts. Please try again.");
@@ -86,24 +100,39 @@ export default function AlertDetails() {
     if (!alert || updating) return;
     const nextStatus = action === "resolve" ? "resolved" : "acknowledged";
 
-    console.log(
-      "[AlertDetails] Action:",
-      action,
-      "Alert:",
-      alert.alert_id,
-      "Next status:",
-      nextStatus,
-    );
+    console.log("[AlertDetails] Action:", action, "Alert:", alert.alert_id);
 
     try {
       setUpdating(true);
       setError(null);
       setSuccessMessage(null);
 
-      // Check if it's a crisis alert (has contact_info)
-      if (alert.contact_info) {
+      // Check if it's a crisis alert (has contact_info or category is crisis)
+      if (alert.contact_info || alert.category === "crisis") {
         console.log("[AlertDetails] Updating crisis alert:", alert.alert_id);
-        await updateCrisisAlertStatus(alert.alert_id, nextStatus);
+
+        // Check if it's a local alert (from localStorage)
+        const isLocal = alert.is_anonymous && !alert.student_id;
+
+        if (isLocal) {
+          // Update locally
+          const storedAlerts = JSON.parse(
+            localStorage.getItem("anonymousCrisisAlerts") || "[]",
+          );
+          const updatedAlerts = storedAlerts.map((a) =>
+            a.alert_id === alert.alert_id
+              ? { ...a, alert_status: nextStatus }
+              : a,
+          );
+          localStorage.setItem(
+            "anonymousCrisisAlerts",
+            JSON.stringify(updatedAlerts),
+          );
+          console.log("[AlertDetails] Updated local alert:", alert.alert_id);
+        } else {
+          // Update via API
+          await updateCrisisAlertStatus(alert.alert_id, nextStatus);
+        }
       } else {
         console.log("[AlertDetails] Updating regular alert:", alert.alert_id);
         await updateAlertStatus(alert.alert_id, nextStatus);
@@ -360,7 +389,25 @@ export default function AlertDetails() {
                         }}
                       >
                         <td>#{alert.alert_id}</td>
-                        <td>{alert.student_name || "Anonymous"}</td>
+                        <td>
+                          {alert.student_name ||
+                            alert.student_identifier ||
+                            "Anonymous"}
+                          {alert.is_anonymous && (
+                            <span
+                              style={{
+                                marginLeft: "6px",
+                                fontSize: "10px",
+                                background: "#f3f4f6",
+                                padding: "2px 8px",
+                                borderRadius: "12px",
+                                color: "#6b7280",
+                              }}
+                            >
+                              Anonymous
+                            </span>
+                          )}
+                        </td>
                         <td>
                           <div
                             style={{
@@ -625,7 +672,6 @@ export default function AlertDetails() {
         className={styles.alertsTableSection}
         style={{ maxWidth: "900px", margin: "0 auto" }}
       >
-        {/* Header */}
         <div
           style={{
             display: "flex",
@@ -644,6 +690,7 @@ export default function AlertDetails() {
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
+                flexWrap: "wrap",
               }}
             >
               <FaInfoCircle style={{ color: "#2a2a72" }} />
@@ -651,7 +698,6 @@ export default function AlertDetails() {
               {isCrisis && (
                 <span
                   style={{
-                    marginLeft: "12px",
                     background: "#fef2f2",
                     color: "#b34747",
                     padding: "4px 12px",
@@ -665,6 +711,24 @@ export default function AlertDetails() {
                 >
                   <FaExclamationTriangle size={14} />
                   Crisis Alert
+                </span>
+              )}
+              {selectedAlert.is_anonymous && (
+                <span
+                  style={{
+                    background: "#f3f4f6",
+                    color: "#6b7280",
+                    padding: "4px 12px",
+                    borderRadius: "20px",
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "6px",
+                  }}
+                >
+                  <FaUserSecret size={14} />
+                  Anonymous
                 </span>
               )}
             </h2>
@@ -698,7 +762,6 @@ export default function AlertDetails() {
           </button>
         </div>
 
-        {/* Success/Error Messages */}
         {successMessage && (
           <div
             style={{
@@ -737,7 +800,6 @@ export default function AlertDetails() {
           </div>
         )}
 
-        {/* Info Cards */}
         <div
           style={{
             display: "grid",
@@ -830,6 +892,17 @@ export default function AlertDetails() {
             </p>
             <p style={{ fontWeight: "600", margin: 0, color: "#1f2937" }}>
               {selectedAlert.student_name || "Anonymous"}
+              {selectedAlert.is_anonymous && (
+                <span
+                  style={{
+                    marginLeft: "8px",
+                    fontSize: "12px",
+                    color: "#6b7280",
+                  }}
+                >
+                  (Anonymous)
+                </span>
+              )}
             </p>
           </div>
           <div
@@ -856,7 +929,6 @@ export default function AlertDetails() {
           </div>
         </div>
 
-        {/* Contact Info - Show for Crisis Alerts */}
         {selectedAlert.contact_info && (
           <div
             style={{
@@ -888,7 +960,6 @@ export default function AlertDetails() {
           </div>
         )}
 
-        {/* Description */}
         <div
           style={{
             padding: "16px",
@@ -906,12 +977,11 @@ export default function AlertDetails() {
           </p>
           <p style={{ margin: 0, lineHeight: "1.6", color: "#1f2937" }}>
             {isCrisis
-              ? `Student ${selectedAlert.student_name || "Anonymous"} requested immediate crisis support.`
+              ? `Student ${selectedAlert.student_name || "Anonymous"} requested immediate crisis support.${selectedAlert.is_anonymous ? " (Anonymous submission)" : ""}`
               : `${selectedAlert.student_name || "Anonymous student"} requires follow-up for this alert.`}
           </p>
         </div>
 
-        {/* Assigned Staff */}
         <div
           style={{
             padding: "16px",
@@ -924,7 +994,7 @@ export default function AlertDetails() {
           <p
             style={{ color: "#6b7280", marginBottom: "8px", fontSize: "13px" }}
           >
-            <FaUserSecret style={{ marginRight: "6px" }} size={14} />
+            <FaUserGraduate style={{ marginRight: "6px" }} size={14} />
             Assigned Staff
           </p>
           <p style={{ margin: 0, color: "#1f2937" }}>
@@ -932,7 +1002,6 @@ export default function AlertDetails() {
           </p>
         </div>
 
-        {/* Actions */}
         <div
           style={{
             padding: "20px",
