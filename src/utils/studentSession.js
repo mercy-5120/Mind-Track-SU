@@ -347,42 +347,111 @@ export const getLatestAssessment = async (student) => {
 };
 
 // =====================================================
-// CRISIS ALERT FUNCTIONS
+// CRISIS ALERT FUNCTIONS (UPDATED FOR ANONYMOUS STUDENTS)
 // =====================================================
 
 export const saveCrisisAlert = async (student, contactInfo) => {
   try {
     const studentId =
       student?.student_id || sessionStorage.getItem("studentId");
+    const isAnonymous = !studentId;
 
     console.log("[saveCrisisAlert] Saving crisis alert:", {
       studentId,
-      contactInfo: contactInfo,
+      contactInfo,
+      isAnonymous,
     });
 
-    // If no student ID, save locally (anonymous)
-    if (!studentId) {
-      console.log("[saveCrisisAlert] No student ID, saving locally");
+    // Determine if the student is anonymous
+    const isStudentAnonymous = isAnonymous || student?.is_anonymous === true;
+
+    // If anonymous, save locally AND try to save to database
+    if (isStudentAnonymous) {
+      console.log("[saveCrisisAlert] Anonymous student - saving locally");
+
+      // Save to localStorage for persistence
       const crisisAlerts = JSON.parse(
-        sessionStorage.getItem("anonymousCrisisAlerts") || "[]",
+        localStorage.getItem("anonymousCrisisAlerts") || "[]",
       );
+
       const alert = {
-        alert_id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        alert_id: `CRISIS-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         created_at: new Date().toISOString(),
         contact_info: contactInfo,
         student_id: null,
+        student_name: "Anonymous Student",
         student_identifier: `Anonymous ••••• ${contactInfo.slice(-4)}`,
         status: "crisis_contacted",
         category: "crisis",
         risk_level: "high",
         alert_status: "new",
+        is_anonymous: true,
       };
+
       crisisAlerts.push(alert);
+      localStorage.setItem(
+        "anonymousCrisisAlerts",
+        JSON.stringify(crisisAlerts),
+      );
+
+      // Also save to sessionStorage for current session
       sessionStorage.setItem(
         "anonymousCrisisAlerts",
         JSON.stringify(crisisAlerts),
       );
+
       console.log("[saveCrisisAlert] Crisis alert saved locally:", alert);
+
+      // Try to save to database as well (without student_id)
+      try {
+        console.log(
+          "[saveCrisisAlert] Attempting to save to database anonymously...",
+        );
+        const response = await fetch(`${API_BASE}/crisis-alerts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            student_id: null,
+            contact_info: contactInfo,
+            is_anonymous: true,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(
+            "[saveCrisisAlert] Crisis alert saved to database:",
+            data,
+          );
+          // Update local alert with database ID if available
+          if (data.alert && data.alert.alert_id) {
+            alert.alert_id = data.alert.alert_id;
+            // Update localStorage
+            const updatedAlerts = JSON.parse(
+              localStorage.getItem("anonymousCrisisAlerts") || "[]",
+            );
+            const index = updatedAlerts.findIndex(
+              (a) => a.created_at === alert.created_at,
+            );
+            if (index !== -1) {
+              updatedAlerts[index] = alert;
+              localStorage.setItem(
+                "anonymousCrisisAlerts",
+                JSON.stringify(updatedAlerts),
+              );
+            }
+          }
+        } else {
+          console.warn(
+            "[saveCrisisAlert] Database save failed for anonymous alert",
+          );
+        }
+      } catch (dbError) {
+        console.warn("[saveCrisisAlert] Could not save to database:", dbError);
+      }
+
       return alert;
     }
 
@@ -397,6 +466,7 @@ export const saveCrisisAlert = async (student, contactInfo) => {
       body: JSON.stringify({
         student_id: studentId,
         contact_info: contactInfo,
+        is_anonymous: false,
       }),
     });
 
@@ -421,9 +491,18 @@ export const getCrisisAlerts = async (student) => {
 
     // If no student ID, return anonymous crisis alerts
     if (!studentId) {
-      const crisisAlerts = JSON.parse(
-        sessionStorage.getItem("anonymousCrisisAlerts") || "[]",
+      // Check localStorage first
+      let crisisAlerts = JSON.parse(
+        localStorage.getItem("anonymousCrisisAlerts") || "[]",
       );
+
+      // If empty, check sessionStorage
+      if (crisisAlerts.length === 0) {
+        crisisAlerts = JSON.parse(
+          sessionStorage.getItem("anonymousCrisisAlerts") || "[]",
+        );
+      }
+
       console.log(
         "[getCrisisAlerts] Returning anonymous crisis alerts:",
         crisisAlerts,
@@ -431,6 +510,7 @@ export const getCrisisAlerts = async (student) => {
       return crisisAlerts;
     }
 
+    // Get from database for logged-in students
     const response = await fetch(
       `${API_BASE}/crisis-alerts?student_id=${studentId}`,
       {

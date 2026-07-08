@@ -69,7 +69,8 @@ app.get("/api/staff/alerts", async (req, res) => {
         a.created_at,
         s.name AS assigned_staff_name, 
         s.role AS assigned_staff_role,
-        c.contact_info
+        c.contact_info,
+        c.is_anonymous
       FROM staff_alerts a
       LEFT JOIN staff_accounts s ON a.assigned_staff_id = s.staff_id
       LEFT JOIN crisis_alerts c ON a.alert_id = c.alert_id
@@ -92,7 +93,7 @@ app.get("/api/staff/alerts/:id", async (req, res) => {
     const alert = await get(
       `
       SELECT a.*, s.name AS assigned_staff_name, s.role AS assigned_staff_role,
-             c.contact_info
+             c.contact_info, c.is_anonymous
       FROM staff_alerts a
       LEFT JOIN staff_accounts s ON a.assigned_staff_id = s.staff_id
       LEFT JOIN crisis_alerts c ON a.alert_id = c.alert_id
@@ -199,7 +200,6 @@ app.put("/api/staff/referrals/:id", async (req, res) => {
       status,
     );
 
-    // Check if referral exists
     const existingReferral = await get(
       "SELECT * FROM referrals WHERE referral_id = ?",
       [referralId],
@@ -209,7 +209,6 @@ app.put("/api/staff/referrals/:id", async (req, res) => {
       return res.status(404).json({ message: "Referral not found" });
     }
 
-    // Update the referral
     await run(
       "UPDATE referrals SET referral_status = ?, notes = ? WHERE referral_id = ?",
       [status, notes || existingReferral.notes, referralId],
@@ -348,6 +347,7 @@ app.get("/api/staff/crisis-alerts", async (req, res) => {
         c.category,
         c.risk_level,
         c.alert_status,
+        c.is_anonymous,
         s.display_name AS student_name
       FROM crisis_alerts c
       LEFT JOIN students s ON c.student_id = s.student_id
@@ -727,7 +727,7 @@ app.post("/api/student/assessments", async (req, res) => {
 });
 
 // =====================================================
-// STUDENT CRISIS ALERT ROUTES
+// STUDENT CRISIS ALERT ROUTES (UPDATED)
 // =====================================================
 
 // Get Crisis Alerts (Student)
@@ -751,60 +751,67 @@ app.get("/api/student/crisis-alerts", async (req, res) => {
   }
 });
 
-// Save Crisis Alert (Student)
+// Save Crisis Alert (Student) - Updated to handle anonymous
 app.post("/api/student/crisis-alerts", async (req, res) => {
   try {
-    const { student_id, contact_info } = req.body;
+    const { student_id, contact_info, is_anonymous } = req.body;
 
     console.log("[Crisis Alert] Received request:", {
       student_id,
       contact_info,
+      is_anonymous,
     });
 
-    if (!student_id || !contact_info) {
-      return res
-        .status(400)
-        .json({ message: "Student ID and contact info are required." });
+    if (!contact_info) {
+      return res.status(400).json({ message: "Contact info is required." });
     }
 
     const formattedDate = formatMySQLDate(new Date());
 
-    // Get student name
+    // Get student name if student_id exists
     let studentName = "Anonymous Student";
-    if (student_id) {
+    let studentIdentifier = `Anonymous ••••• ${contact_info.slice(-4)}`;
+    let actualStudentId = student_id || null;
+
+    if (student_id && !is_anonymous) {
       const student = await get(
         "SELECT display_name, username FROM students WHERE student_id = ?",
         [student_id],
       );
-      studentName =
-        student?.display_name || student?.username || "Anonymous Student";
+      if (student) {
+        studentName =
+          student.display_name || student.username || "Anonymous Student";
+        studentIdentifier = `Student ••••• ${contact_info.slice(-4)}`;
+        actualStudentId = student_id;
+      }
     }
 
-    const alertId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    // Generate unique alert ID if not provided
+    const alertId = `CRISIS-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
     // Insert into crisis_alerts table
     await run(
       `INSERT INTO crisis_alerts 
-       (alert_id, created_at, contact_info, student_id, status, category, risk_level, alert_status) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       (alert_id, created_at, contact_info, student_id, status, category, risk_level, alert_status, is_anonymous) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         alertId,
         formattedDate,
         contact_info,
-        student_id,
+        actualStudentId,
         "crisis_contacted",
         "crisis",
         "high",
         "new",
+        is_anonymous ? 1 : 0,
       ],
     );
 
-    // Insert into staff_alerts table
-    const studentIdentifier = `••••• ${contact_info.slice(-4)}`;
+    // Insert into staff_alerts table for staff visibility
     await run(
       `INSERT INTO staff_alerts 
-       (alert_id, category, risk_level, alert_status, student_name, student_identifier, created_at) 
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (alert_id, category, risk_level, alert_status, student_name, student_identifier, created_at, assigned_staff_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         alertId,
         "crisis",
@@ -813,10 +820,20 @@ app.post("/api/student/crisis-alerts", async (req, res) => {
         studentName,
         studentIdentifier,
         formattedDate,
+        null,
       ],
     );
 
-    console.log("[Crisis Alert] Crisis alert saved successfully");
+    console.log(
+      "[Crisis Alert] Crisis alert saved successfully with ID:",
+      alertId,
+    );
+    console.log(
+      "[Crisis Alert] Student:",
+      studentName,
+      "Anonymous:",
+      is_anonymous,
+    );
 
     res.json({
       success: true,
@@ -824,11 +841,13 @@ app.post("/api/student/crisis-alerts", async (req, res) => {
         alert_id: alertId,
         created_at: formattedDate,
         contact_info: contact_info,
-        student_id: student_id,
+        student_id: actualStudentId,
         status: "crisis_contacted",
         category: "crisis",
         risk_level: "high",
         alert_status: "new",
+        is_anonymous: is_anonymous || false,
+        student_name: studentName,
       },
     });
   } catch (error) {
@@ -838,6 +857,38 @@ app.post("/api/student/crisis-alerts", async (req, res) => {
       message: "Failed to save crisis alert.",
       error: error.message,
     });
+  }
+});
+
+// Update Crisis Alert Status (Student)
+app.put("/api/student/crisis-alerts/:id/status", async (req, res) => {
+  try {
+    const { status } = req.body;
+    const alertId = req.params.id;
+
+    console.log(
+      "[PUT /api/student/crisis-alerts/:id/status] Updating:",
+      alertId,
+      "to:",
+      status,
+    );
+
+    // Update crisis_alerts table
+    await run("UPDATE crisis_alerts SET alert_status = ? WHERE alert_id = ?", [
+      status,
+      alertId,
+    ]);
+
+    // Also update staff_alerts table
+    await run("UPDATE staff_alerts SET alert_status = ? WHERE alert_id = ?", [
+      status,
+      alertId,
+    ]);
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error("[PUT /api/student/crisis-alerts/:id/status] Error:", error);
+    res.status(500).json({ message: error.message });
   }
 });
 
@@ -853,11 +904,15 @@ app.listen(PORT, () => {
     `Student assessments: GET/POST http://localhost:${PORT}/api/student/assessments`,
   );
   console.log(
+    `Student crisis alerts: POST http://localhost:${PORT}/api/student/crisis-alerts`,
+  );
+  console.log(
     `Staff crisis alerts: GET/PUT http://localhost:${PORT}/api/staff/crisis-alerts`,
   );
   console.log(
     `Staff referrals: GET/PUT http://localhost:${PORT}/api/staff/referrals`,
   );
+  console.log(`Staff alerts: GET http://localhost:${PORT}/api/staff/alerts`);
 });
 
 export default app;

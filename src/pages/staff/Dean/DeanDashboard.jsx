@@ -59,7 +59,6 @@ export default function DeanDashboard() {
   const [departmentsData, setDepartmentsData] = useState(defaultDepartments);
   const [crisisAlerts, setCrisisAlerts] = useState([]);
 
-  // Process alerts based on time range view
   const getFilteredTrendData = (alertsData, viewType) => {
     if (!alertsData || alertsData.length === 0) return fallbackTrend;
 
@@ -209,71 +208,120 @@ export default function DeanDashboard() {
           getResources(),
         ]);
 
-        setAlerts(alertsData || []);
+        // Get anonymous crisis alerts from localStorage
+        const anonymousAlerts = JSON.parse(
+          localStorage.getItem("anonymousCrisisAlerts") || "[]",
+        );
+        console.log(
+          "[DeanDashboard] Anonymous crisis alerts:",
+          anonymousAlerts,
+        );
+
+        // Combine API alerts with anonymous alerts
+        const allAlertsData = [...(alertsData || []), ...anonymousAlerts];
+
+        // Remove duplicates
+        const uniqueAlerts = allAlertsData.filter(
+          (alert, index, self) =>
+            index === self.findIndex((a) => a.alert_id === alert.alert_id),
+        );
+
+        setAlerts(uniqueAlerts);
         setReferrals(referralsData || []);
         setResources(resourcesData || []);
 
         const storedCrisisAlerts = JSON.parse(
           sessionStorage.getItem("crisisAlerts") || "[]",
         );
-        setCrisisAlerts(storedCrisisAlerts);
+        setCrisisAlerts([...storedCrisisAlerts, ...anonymousAlerts]);
 
-        const totalAlerts = (alertsData || []).length;
-        const highRiskAlerts = (alertsData || []).filter(
-          (item) => item.risk_level === "high",
+        // Filter for SUMC and Peer Counsellor data only
+        const sumcAndPeerAlerts = uniqueAlerts.filter(
+          (item) =>
+            item.assigned_staff_role === "sumc_counsellor" ||
+            item.assigned_staff_role === "peer_counsellor" ||
+            item.assigned_staff_id === 1 ||
+            item.assigned_staff_id === 2 ||
+            item.category === "crisis", // Include crisis alerts
+        );
+
+        const sumcAndPeerReferrals = (referralsData || []).filter(
+          (item) =>
+            item.referred_to === "sumc_counsellor" ||
+            item.referred_to === "peer_counsellor",
+        );
+
+        // Calculate metrics from filtered data
+        const totalAlerts = sumcAndPeerAlerts.length;
+        const resolvedAlerts = sumcAndPeerAlerts.filter(
+          (item) =>
+            item.alert_status === "resolved" || item.alert_status === "closed",
         ).length;
-        const moderateRiskAlerts = (alertsData || []).filter(
-          (item) => item.risk_level === "moderate",
+        const totalReferrals = sumcAndPeerReferrals.length;
+        const resolvedReferrals = sumcAndPeerReferrals.filter(
+          (item) =>
+            item.referral_status === "completed" ||
+            item.referral_status === "resolved",
         ).length;
-        const lowRiskAlerts = (alertsData || []).filter(
-          (item) => item.risk_level === "low",
-        ).length;
-        const pendingAlerts = (alertsData || []).filter((item) =>
-          ["new", "pending"].includes(item.alert_status),
-        ).length;
-        const activeCases = (alertsData || []).filter(
-          (item) => item.alert_status !== "resolved",
-        ).length;
+
+        const alertResolutionRate =
+          totalAlerts > 0
+            ? Math.round((resolvedAlerts / totalAlerts) * 100)
+            : 0;
+        const referralResolutionRate =
+          totalReferrals > 0
+            ? Math.round((resolvedReferrals / totalReferrals) * 100)
+            : 0;
 
         setMetrics([
           {
             label: "Total Alerts",
             value: `${totalAlerts}`,
-            delta: totalAlerts
-              ? `+${Math.round((highRiskAlerts / totalAlerts) * 100)}%`
-              : "0%",
+            delta: totalAlerts > 0 ? `${alertResolutionRate}% resolved` : "0%",
             trend: "up",
-            iconClass: "fas fa-chart-line",
-          },
-          {
-            label: "High-Risk Alerts",
-            value: `${highRiskAlerts}`,
-            delta: totalAlerts
-              ? `+${Math.round((highRiskAlerts / (totalAlerts || 1)) * 100)}%`
-              : "0%",
-            trend: highRiskAlerts > 0 ? "up" : "down",
             iconClass: "fas fa-exclamation-triangle",
           },
           {
-            label: "Moderate Risk",
-            value: `${moderateRiskAlerts}`,
-            delta: moderateRiskAlerts ? "+2.4%" : "0%",
-            trend: moderateRiskAlerts > 0 ? "up" : "down",
-            iconClass: "fas fa-clock",
+            label: "Resolved Alerts",
+            value: `${resolvedAlerts}`,
+            delta:
+              resolvedAlerts > 0
+                ? `${Math.round((resolvedAlerts / (totalAlerts || 1)) * 100)}%`
+                : "0%",
+            trend: resolvedAlerts > 0 ? "up" : "down",
+            iconClass: "fas fa-check-circle",
           },
           {
-            label: "Active Cases",
-            value: `${activeCases}`,
-            delta: activeCases ? "+1.6%" : "0%",
-            trend: activeCases > 0 ? "up" : "down",
-            iconClass: "fas fa-file-medical",
+            label: "Total Referrals",
+            value: `${totalReferrals}`,
+            delta:
+              totalReferrals > 0 ? `${referralResolutionRate}% resolved` : "0%",
+            trend: totalReferrals > 0 ? "up" : "down",
+            iconClass: "fas fa-user-md",
+          },
+          {
+            label: "Resolved Referrals",
+            value: `${resolvedReferrals}`,
+            delta:
+              resolvedReferrals > 0
+                ? `${Math.round((resolvedReferrals / (totalReferrals || 1)) * 100)}%`
+                : "0%",
+            trend: resolvedReferrals > 0 ? "up" : "down",
+            iconClass: "fas fa-check-double",
           },
         ]);
 
-        const categories = ["anxiety", "depression", "burnout", "sleep"];
+        // Use filtered alerts for category data
+        const categories = [
+          "anxiety",
+          "depression",
+          "burnout",
+          "sleep",
+          "crisis",
+        ];
         const categoryDataArray = categories.map((category) => ({
           category: category.charAt(0).toUpperCase() + category.slice(1),
-          value: (alertsData || []).filter((item) => item.category === category)
+          value: sumcAndPeerAlerts.filter((item) => item.category === category)
             .length,
         }));
         setCategoryData(
@@ -282,8 +330,9 @@ export default function DeanDashboard() {
             : fallbackCategoryData,
         );
 
+        // Use filtered alerts for department stats
         const deptStats = departments.map((dept) => {
-          const deptAlerts = (alertsData || []).filter(
+          const deptAlerts = sumcAndPeerAlerts.filter(
             (a) => a.department === dept.name,
           );
           const total = deptAlerts.length;
@@ -300,7 +349,7 @@ export default function DeanDashboard() {
         });
         setDepartmentsData(deptStats);
 
-        const trendData = getFilteredTrendData(alertsData, view);
+        const trendData = getFilteredTrendData(sumcAndPeerAlerts, view);
         setWellnessTrend(trendData);
       } catch (loadError) {
         console.error("[DeanDashboard] Error loading data:", loadError);
@@ -322,7 +371,16 @@ export default function DeanDashboard() {
   // Update wellness trend when view changes
   useEffect(() => {
     if (alerts.length > 0) {
-      const trendData = getFilteredTrendData(alerts, view);
+      // Filter for SUMC and Peer Counsellor data
+      const sumcAndPeerAlerts = alerts.filter(
+        (item) =>
+          item.assigned_staff_role === "sumc_counsellor" ||
+          item.assigned_staff_role === "peer_counsellor" ||
+          item.assigned_staff_id === 1 ||
+          item.assigned_staff_id === 2 ||
+          item.category === "crisis",
+      );
+      const trendData = getFilteredTrendData(sumcAndPeerAlerts, view);
       setWellnessTrend(trendData);
     }
   }, [view, alerts]);
@@ -333,7 +391,17 @@ export default function DeanDashboard() {
   }, [selectedDepartment, departmentsData]);
 
   const demographicFilteredAlerts = useMemo(() => {
-    return (alerts || []).filter((alert) => {
+    // Filter for SUMC and Peer Counsellor data only
+    const sumcAndPeerAlerts = (alerts || []).filter(
+      (item) =>
+        item.assigned_staff_role === "sumc_counsellor" ||
+        item.assigned_staff_role === "peer_counsellor" ||
+        item.assigned_staff_id === 1 ||
+        item.assigned_staff_id === 2 ||
+        item.category === "crisis",
+    );
+
+    return sumcAndPeerAlerts.filter((alert) => {
       const matchesDepartment =
         selectedDepartment === "All" || alert.department === selectedDepartment;
       const matchesYear =
@@ -445,8 +513,19 @@ export default function DeanDashboard() {
 
         <ReportGenerator
           reportData={metrics}
-          alerts={alerts}
-          referrals={referrals}
+          alerts={alerts.filter(
+            (item) =>
+              item.assigned_staff_role === "sumc_counsellor" ||
+              item.assigned_staff_role === "peer_counsellor" ||
+              item.assigned_staff_id === 1 ||
+              item.assigned_staff_id === 2 ||
+              item.category === "crisis",
+          )}
+          referrals={referrals.filter(
+            (item) =>
+              item.referred_to === "sumc_counsellor" ||
+              item.referred_to === "peer_counsellor",
+          )}
           resources={resources}
           crisisAlerts={crisisAlerts}
         />
